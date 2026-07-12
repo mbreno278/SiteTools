@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiteTools - Ferramentas online para o seu dia a dia.</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header__column">
+            <div class="header__logo">
+                <!-- <img src="./assets/images/logo.png" alt="SiteTools Logo"> -->
+                <div class="header__title">
+                    <h1 class="page__title">SiteTools</h1>
+                    <p class="page__subtitle">Ferramentas online para o seu dia a dia.</p>
+                </div>
+            </div>
+        </div>
+        <div class="header__column">
+            <form class="form__search" action="tools.php" method="post">
+                <label for="search">Buscar</label>
+                <input type="text" id="search" name="search" placeholder="Buscar por ferramentas..." required>
+                <button type="submit"><span class="material-symbols-outlined">search</span></button>
+            </form>
+        </div>
+        <div class="header__column">
+            <button class="button button-mode-light"><span class="material-symbols-outlined">dark_mode</span></button>
+        </div>
+    </header>
+    <main class="main grid grid__layout">
+        <aside class="sidebar">
+            <nav class="group__menu" aria-label="Menu de navegação primário">
+                <ul>
+                    <li><a class="menu__item" href="index.php"><span class="menu__icon material-symbols-outlined">home</span> Início</a></li>
+                    <li><a class="menu__item" href="contact.php"><span class="menu__icon material-symbols-outlined">image</span> Editor de Imagem</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">repeat</span> Conversores</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">download</span> Downloads</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">handyman</span> Utilitários</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">cached</span> Geradores</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">text_fields</span> Ferramentas de Texto</a></li>
+                </ul>
+            </nav>
+            <nav class="group__menu" aria-label="Menu de navegação segundário">
+                <ul>
+                    <li><a class="menu__item" href="about.php"><span class="menu__icon material-symbols-outlined">info</span> Sobre</a></li>
+                    <li><a class="menu__item" href="contact.php"><span class="menu__icon material-symbols-outlined">email</span> Contato</a></li>
+                    <li><a class="menu__item" href="version.php"><span class="menu__icon material-symbols-outlined">update</span> Versão</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <div class="main__content">
+            Main
+        </div>
+    </main>
+    <footer class="footer">Footer</footer>
+</body>
+</html>
