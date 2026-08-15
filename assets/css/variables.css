@@ -1,6 +1,6 @@
 
 :root {
-    --color-primary: #4A3EFA;
+    --color-primary: #6945E4;
     --color-secondary: #4B3FF7;
 
     --color-white: #fff;
@@ -10,7 +10,8 @@
 
     --color-text-link: #4F4498;
     --color-text-link-hover: #4A3EFA;
-    --color-text: #EEF0F0;
+    --color-text: #0F172A;
+    --color-text-secondary: #64748B;
     --color-text-input: #ccc;
 
     --color-dark-text: #5B606F;
@@ -20,11 +21,18 @@
     --color-dark-bg-element: #151C2E;
     --color-dark-icon: #ccc;
 
-    --color-border: #1C2030;
-
+    --color-bg: #ffffff;
+    --color-bg-input: #F4F4F4;
+    --color-border: #E5E7EB;
     --color-light-bg: #F4F4F4;
-
     --color-grey: #ccc;
+
+    --color-border-cards: #E5E7EB;
+    --color-border-input: #D1D5DB;
+    --color-border-button-secondary: #D1D5DB;
+    --color-border-divider: #F1F5F9;
+
+    --surface: #F8FAFC;
 
     /* Border radius */
     --border-radius-sm: 4px;
@@ -48,4 +56,5 @@
     --border-size-sm: 2px;
     --border-size-md: 4px;
     --border-size-lg: 8px;
+
 }

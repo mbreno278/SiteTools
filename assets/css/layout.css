@@ -1,6 +1,22 @@
 
+@import url('./variables.css');
+
+
 .flx {
     display: flex;
+}
+
+.flx-space-between {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flx-nowrap {
+    flex-wrap: nowrap;
+}
+
+.flx-wrap {
+    flex-wrap: wrap;
 }
 
 .flx-1 {
@@ -16,18 +32,47 @@
     gap: var(--spacing-lg);
 }
 
+.grid__content {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
 .sidebar {
     height: 100%;
+    border-top: var(--border-size-xs) solid var(--color-border);
     border-right: var(--border-size-xs) solid var(--color-border);
     padding: var(--spacing-md);
 }
-
-.main {}
 
 .main__content {
     padding: var(--spacing-lg) 0;
     height: 100%;
     overflow-y: auto;
+}
+
+/* Section */
+
+.section {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md);
+}
+
+.section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.section__header__logo {
+    width: 25px;
+    height: 25px;
+    margin-right: var(--spacing-sm);
+}
+
+.section__header__title {
+    font-size: var(--font-size-md);
 }
 
 .footer {

@@ -24,7 +24,7 @@
 body {
   font-family: 'Arial', sans-serif;
   line-height: 1.6;
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   color: var(--color-text);
 }
 
@@ -33,8 +33,22 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    gap: var(--spacing-md);
     padding: var(--spacing-lg);
-    border-bottom: var(--border-size-xs) solid var(--color-border);
+    background-color: var(--surface);
+}
+
+.header__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.header__logo > .page__logo {
+    width: 65px;
+    height: 65px;
+    object-fit: cover;
 }
 
 .header__title > .page__title {
@@ -53,9 +67,9 @@ body {
     align-items: center;
     flex-wrap: nowrap;
     width: 400px;
-    background-color: var(--color-dark-bg-input);
+    background-color: var(--color-white);
     border: var(--border-size-sm) solid var(--color-border);
-    border-radius: var(--spacing-xs);
+    border-radius: var(--spacing-sm);
 }
 
 .form__search label {
@@ -71,7 +85,9 @@ body {
     padding: var(--spacing-md);
     border: none;
     background-color: transparent;
-    color: var(--color-text-input);
+    color: var(--color-text);
+    border-top-left-radius: var(--border-radius-sm);
+    border-bottom-left-radius: var(--border-radius-sm);
 }
 
 .form__search button {
@@ -88,11 +104,19 @@ body {
 }
 
 .button-mode-light {
-    padding: var(--font-size-sm);
+    padding: var(--spacing-sm);
     background-color: transparent;
     border: none;
     color: var(--color-dark-icon);
+    border-radius: 50%;
     cursor: pointer;
+    transition: background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.button-mode-light:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
 }
 
 .button-mode-light:focus,
@@ -100,6 +124,8 @@ body {
     outline: var(--border-size-sm) solid var(--color-white);
 
 }
+
+/* Sidebar */
 
 .group__menu {
     display: block;
@@ -115,7 +141,10 @@ body {
 }
 
 .group__menu ul {
+    display: flex;
+    flex-direction: column;
     list-style: none;
+    gap: var(--spacing-sm);
 }
 
 .group__menu .menu__item {
@@ -136,7 +165,19 @@ body {
     margin-right: var(--spacing-md);
 }
 
+.group__menu .menu__item.menu__item--active {
+    background-color: var(--surface);
+    color: var(--color-primary);
+}
+
 .group__menu .menu__item:hover {
-    background-color: var(--color-dark-bg-element);
-    color: var(--color-text);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+
+/* Footer */
+
+.footer {
+    background-color: var(--surface);
 }
