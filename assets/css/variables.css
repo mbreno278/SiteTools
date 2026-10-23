@@ -1,60 +1,170 @@
 
+/* =========================================================
+   S I T E T O O L S
+   Design Tokens — Tema Claro
+   ========================================================= */
+
 :root {
+    color-scheme: light;
+
+    /* =====================================================
+       1. BRAND / CORES PRINCIPAIS
+       ===================================================== */
+
     --color-primary: #6945E4;
+    --color-primary-hover: #5634CD;
+    --color-primary-soft: #F0EBFF;
     --color-secondary: #4B3FF7;
 
-    --color-white: #fff;
-    --color-black: #000;
+    /* =====================================================
+       2. BACKGROUNDS / SUPERFÍCIES
+       ===================================================== */
 
-    --color-dark-selected: #161B2C;
+    --color-bg: #F8FAFC;
 
-    --color-text-link: #4F4498;
-    --color-text-link-hover: #4A3EFA;
+    --color-surface: #FFFFFF;
+    --surface: var(--color-surface);
+
+    --surface-secondary: #F1F5F9;
+
+    /* Compatibilidade */
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+    --color-light-bg: var(--surface-secondary);
+    --color-bg-input: var(--color-bg);
+
+    /* =====================================================
+       3. TEXTOS E LINKS
+       ===================================================== */
+
     --color-text: #0F172A;
     --color-text-secondary: #64748B;
-    --color-text-input: #ccc;
+    --color-text-muted: #94A3B8;
+    --color-text-inverse: #FFFFFF;
 
-    --color-dark-text: #5B606F;
+    --color-text-link: var(--color-primary);
+    --color-text-link-hover: var(--color-primary-hover);
 
-    --color-dark-bg-input: #121727;
-    --color-dark-bg: #0B101F;
-    --color-dark-bg-element: #151C2E;
-    --color-dark-icon: #ccc;
+    /* Compatibilidade com classes antigas */
+    --color-dark-text: #475569;
+    --color-dark-icon: var(--color-text-secondary);
+    --color-text-input: var(--color-text-secondary);
 
-    --color-bg: #ffffff;
-    --color-bg-input: #F4F4F4;
-    --color-border: #E5E7EB;
-    --color-light-bg: #F4F4F4;
-    --color-grey: #ccc;
+    /* =====================================================
+       4. BORDAS E DIVISORES
+       ===================================================== */
 
-    --color-border-cards: #E5E7EB;
-    --color-border-input: #D1D5DB;
-    --color-border-button-secondary: #D1D5DB;
-    --color-border-divider: #F1F5F9;
+    --color-border: #E2E8F0;
+    --color-border-strong: #CBD5E1;
 
-    --surface: #F8FAFC;
+    --color-border-cards: var(--color-border);
+    --color-border-input: var(--color-border-strong);
+    --color-border-button-secondary: var(--color-border-strong);
+    --color-border-divider: var(--surface-secondary);
 
-    /* Border radius */
-    --border-radius-sm: 4px;
-    --border-radius-md: 8px;
-    --border-radius-lg: 16px;
+    --color-grey: var(--color-border-strong);
 
-    /* Font sizes */
+    /* =====================================================
+       5. STATUS
+       ===================================================== */
+
+    --color-success: #15803D;
+    --color-danger: #DC2626;
+
+    /* =====================================================
+       6. TIPOGRAFIA
+       ===================================================== */
+
+    --font-family: "Roboto", Arial, sans-serif;
+
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-md: 1rem;
     --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+    --font-size-2xl: 2rem;
 
-    /* Spacing */
+    --line-height-normal: 1.6;
+    --line-height-tight: 1.25;
+
+    /* =====================================================
+       7. ESPAÇAMENTOS
+       ===================================================== */
+
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
-    --spacing-lg: 32px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
 
-    /* Border sizes */
+    /* =====================================================
+       8. BORDAS ARREDONDADAS
+       ===================================================== */
+
+    --border-radius-sm: 6px;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+    --border-radius-xl: 20px;
+    --border-radius-full: 999px;
+
+    /* =====================================================
+       9. ESPESSURA DAS BORDAS
+       ===================================================== */
+
     --border-size-xs: 1px;
     --border-size-sm: 2px;
     --border-size-md: 4px;
     --border-size-lg: 8px;
 
+    /* =====================================================
+       10. SOMBRAS
+       ===================================================== */
+
+    --shadow-sm: 0 1px 3px rgb(15 23 42 / 5%);
+    --shadow-md: 0 4px 12px rgb(15 23 42 / 6%);
+    --shadow-lg: 0 12px 28px rgb(15 23 42 / 9%);
+
+    /* =====================================================
+       11. LAYOUT
+       ===================================================== */
+
+    --container-max-width: 1600px;
+    --sidebar-width: 270px;
+    --header-height: 88px;
+
+    /* =====================================================
+       12. ANIMAÇÕES E TRANSIÇÕES
+       ===================================================== */
+
+    --transition-fast: 160ms ease;
+    --transition-normal: 240ms ease;
+
+    /* =====================================================
+       13. FERRAMENTAS — TOKENS COMPATÍVEIS
+       ===================================================== */
+
+    --tool-bg: var(--color-bg);
+    --tool-surface: var(--color-surface);
+    --tool-surface-muted: var(--surface-secondary);
+
+    --tool-border: var(--color-border);
+
+    --tool-text: var(--color-text);
+    --tool-text-muted: var(--color-text-secondary);
+
+    --tool-primary: #5938FF;
+    --tool-primary-hover: #4625E8;
+
+    --tool-radius: 12px;
+    --tool-shadow: 0 8px 28px rgb(15 23 42 / 4%);
+
+    /* =====================================================
+       14. COMPATIBILIDADE COM O TEMA ESCURO ANTIGO
+       ===================================================== */
+
+    --color-dark-selected: #161B2C;
+    --color-dark-bg-input: #121727;
+    --color-dark-bg: #0B101F;
+    --color-dark-bg-element: #151C2E;
 }

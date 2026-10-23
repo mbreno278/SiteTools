@@ -1,14 +1,171 @@
 
-@import url('./variables.css');
+/* =========================================================
+   S I T E T O O L S
+   Layout, Grid, Sections, Flexbox e Footer
+   ========================================================= */
 
+
+/* =========================================================
+   1. MAIN LAYOUT
+   ========================================================= */
+
+.main {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    align-items: start;
+
+    width: 100%;
+    max-width: var(--container-max-width);
+    min-height: calc(100vh - var(--header-height));
+    margin-inline: auto;
+}
+
+
+/* =========================================================
+   2. GRID SYSTEM
+   ========================================================= */
+
+.grid {
+    display: grid;
+    min-width: 0;
+}
+
+.grid__layout {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    gap: 0;
+}
+
+.grid__content {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+
+/* =========================================================
+   3. MAIN CONTENT
+   ========================================================= */
+
+.main__content {
+    min-width: 0;
+    padding: var(--spacing-xl);
+}
+
+
+/* =========================================================
+   4. SECTIONS
+   ========================================================= */
+
+.section {
+    width: 100%;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.section:last-of-type {
+    margin-bottom: 0;
+}
+
+
+/* Section header */
+
+.section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    min-width: 0;
+    margin-bottom: var(--spacing-lg);
+}
+
+.section__header__column {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+}
+
+.section__header__logo {
+    flex-shrink: 0;
+
+    width: 28px;
+    height: 28px;
+
+    object-fit: contain;
+}
+
+.section__header__title {
+    min-width: 0;
+
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.025em;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Section content */
+
+.section__content {
+    width: 100%;
+    min-width: 0;
+}
+
+
+/* =========================================================
+   5. BENEFITS SECTION
+   ========================================================= */
+
+.sec {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+
+    margin-top: var(--spacing-2xl);
+}
+
+
+/* Benefit item */
+
+.boxinfo {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+
+    min-width: 0;
+}
+
+.boxinfo > .flx-col {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.boxinfo > .flx-col:first-child {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   6. FLEX UTILITIES
+   ========================================================= */
 
 .flx {
     display: flex;
 }
 
+.flx-col {
+    display: flex;
+    flex-direction: column;
+}
+
 .flx-space-between {
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .flx-nowrap {
@@ -23,62 +180,156 @@
     flex: 1;
 }
 
-.grid {
-    display: grid;
+.flx-2 {
+    flex: 2;
 }
 
-.grid__layout {
-    grid-template-columns: 300px 1fr;
-    gap: var(--spacing-lg);
+.flx-3 {
+    flex: 3;
 }
 
-.grid__content {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
-}
 
-.sidebar {
-    height: 100%;
-    border-top: var(--border-size-xs) solid var(--color-border);
-    border-right: var(--border-size-xs) solid var(--color-border);
-    padding: var(--spacing-md);
-}
+/* =========================================================
+   7. FOOTER LAYOUT
+   ========================================================= */
 
-.main__content {
-    padding: var(--spacing-lg) 0;
-    height: 100%;
-    overflow-y: auto;
-}
-
-/* Section */
-
-.section {
-    display: block;
-    width: 100%;
-    padding: var(--spacing-md);
-}
-
-.section__header {
+.footer .content {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-xl);
+
+    width: 100%;
+    max-width: var(--container-max-width);
+    margin-inline: auto;
 }
 
-.section__header__logo {
-    width: 25px;
-    height: 25px;
-    margin-right: var(--spacing-sm);
-}
 
-.section__header__title {
-    font-size: var(--font-size-md);
-}
+/* =========================================================
+   8. NAVIGATION
+   ========================================================= */
 
-.footer {
+.navbar ul {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: var(--spacing-lg);
-    border-top: var(--border-size-xs) solid var(--color-border);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.navbar a {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+
+    transition: color var(--transition-fast);
+}
+
+.navbar a:hover {
+    color: var(--color-primary);
+}
+
+.navbar a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+    border-radius: var(--border-radius-sm);
+}
+
+
+/* Social navigation */
+
+.navbar-social ul {
+    gap: var(--spacing-sm);
+}
+
+
+/* =========================================================
+   9. RESPONSIVE — DESKTOP / TABLET
+   ========================================================= */
+
+@media (max-width: 1400px) {
+    .grid__content,
+    .sec {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid__content {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 1000px) {
+    .main,
+    .grid__layout {
+        grid-template-columns: 230px minmax(0, 1fr);
+    }
+
+    .main__content {
+        padding: var(--spacing-lg);
+    }
+
+    .grid__content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   10. RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+    .main,
+    .grid__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .main__content {
+        padding: var(--spacing-md);
+    }
+
+    .section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .section__header {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .section__header__title {
+        font-size: var(--font-size-md);
+    }
+
+    .grid__content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing-sm);
+    }
+
+    .sec {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .footer .content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-lg);
+    }
+}
+
+
+/* =========================================================
+   11. RESPONSIVE — SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+    .grid__content {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
