@@ -70,6 +70,10 @@ $allowedHandlers = [
     'word-counter' => 'word-counter',
     'image-resizer' => 'image-resizer',
     'pdf-merge' => 'pdf-merge',
+    'image-compressor' => 'image-compressor',
+    'image-converter' => 'image-converter',
+    'image-cropper' => 'image-cropper',
+    'pdf-to-word' => 'pdf-to-word'
 ];
 
 $handler = $allowedHandlers[$tool['handler'] ?? ''] ?? 'not-found';
@@ -127,6 +131,52 @@ $categoryLabel = $categoryLabels[$category]
 
     <script src="./assets/js/tool-page.js" defer></script>
 
+    <?php if ($handler === 'image-resizer'): ?>
+        <link
+            rel="stylesheet"
+            href="./assets/css/image-resizer.css">
+        <script
+            src="./assets/js/image-resizer.js"
+            defer></script>
+    <?php endif; ?>
+
+    <?php if ($handler === 'image-compressor'): ?>
+        <link
+            rel="stylesheet"
+            href="./assets/css/image-compressor.css"
+        >
+        <script
+            src="./assets/js/image-compressor.js"
+            defer
+        ></script>
+    <?php endif; ?>
+
+    <?php if ($handler === 'image-converter'): ?>
+        <link
+            rel="stylesheet"
+            href="./assets/css/image-converter.css"
+        >
+        <script
+            src="./assets/js/image-converter.js"
+            defer
+        ></script>
+    <?php endif; ?>
+
+    <?php if ($handler === 'image-cropper'): ?>
+        <link
+            rel="stylesheet"
+            href="./assets/css/image-cropper.css"
+        >
+        <script
+            src="./assets/js/image-cropper.js"
+            defer
+        ></script>
+    <?php endif; ?>
+
+    <?php if ($handler == 'pdf-to-word'): ?>
+        <link rel="stylesheet" href="assets/css/pdf-to-word.css">
+        <script src="assets/js/pdf-to-word.js" defer></script>
+    <?php endif; ?>
     <script>
         try {
             const theme = localStorage.getItem("sitetools-theme");
@@ -242,275 +292,21 @@ $categoryLabel = $categoryLabels[$category]
                         aria-label="Área da ferramenta"
                     >
 
-                        <?php if ($handler === 'word-counter'): ?>
-
-                            <div class="workspace__header">
-
-                                <div>
-                                    <h2>Digite ou cole seu texto</h2>
-                                    <p>
-                                        A contagem é atualizada automaticamente
-                                        no seu navegador.
-                                    </p>
-                                </div>
-
-                                <button
-                                    class="button button--secondary button--compact"
-                                    type="button"
-                                    data-clear-text
-                                >
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >delete</span>
-                                    Limpar
-                                </button>
-
-                            </div>
-
-                            <label
-                                class="sr-only"
-                                for="word-counter-input"
-                            >
-                                Texto para contar
-                            </label>
-
-                            <textarea
-                                id="word-counter-input"
-                                class="text-workspace"
-                                placeholder="Comece a digitar ou cole seu texto aqui..."
-                                spellcheck="true"
-                            ></textarea>
-
-                            <div class="stats-grid" aria-live="polite">
-
-                                <div class="stat-card">
-                                    <span>Palavras</span>
-                                    <strong id="stat-words">0</strong>
-                                </div>
-
-                                <div class="stat-card">
-                                    <span>Caracteres</span>
-                                    <strong id="stat-chars">0</strong>
-                                </div>
-
-                                <div class="stat-card">
-                                    <span>Sem espaços</span>
-                                    <strong id="stat-chars-no-spaces">0</strong>
-                                </div>
-
-                                <div class="stat-card">
-                                    <span>Linhas</span>
-                                    <strong id="stat-lines">0</strong>
-                                </div>
-
-                            </div>
-
-                            <div class="workspace__footer">
-
-                                <span class="privacy-note">
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >lock</span>
-                                    Seu texto é processado localmente no navegador.
-                                </span>
-
-                                <button
-                                    class="button button--primary"
-                                    type="button"
-                                    data-copy-text
-                                >
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >content_copy</span>
-                                    Copiar texto
-                                </button>
-
-                            </div>
-
-                        <?php elseif ($handler === 'image-resizer'): ?>
-
-                            <div class="workspace__header">
-                                <div>
-                                    <h2>Redimensione sua imagem</h2>
-                                    <p>
-                                        Escolha uma imagem e defina as dimensões desejadas.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <form
-                                class="tool-form"
-                                id="image-resizer-form"
-                                enctype="multipart/form-data"
-                            >
-
-                                <label class="upload-zone" for="image-file">
-
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >cloud_upload</span>
-
-                                    <strong>Escolher uma imagem</strong>
-
-                                    <span>PNG, JPG ou WebP · até 10 MB</span>
-
-                                    <input
-                                        id="image-file"
-                                        name="file"
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/webp"
-                                        required
-                                    >
-
-                                </label>
-
-                                <div class="file-preview" id="image-preview" hidden>
-
-                                    <img
-                                        id="image-preview-img"
-                                        alt="Pré-visualização da imagem selecionada"
-                                    >
-
-                                    <span id="image-file-name"></span>
-
-                                </div>
-
-                                <div class="form-row">
-
-                                    <div class="field">
-                                        <label for="image-width">
-                                            Largura máxima (px)
-                                        </label>
-
-                                        <input
-                                            id="image-width"
-                                            name="width"
-                                            type="number"
-                                            min="1"
-                                            max="5000"
-                                            value="1200"
-                                            required
-                                        >
-                                    </div>
-
-                                    <div class="field">
-                                        <label for="image-height">
-                                            Altura máxima (px)
-                                        </label>
-
-                                        <input
-                                            id="image-height"
-                                            name="height"
-                                            type="number"
-                                            min="1"
-                                            max="5000"
-                                            value="1200"
-                                            required
-                                        >
-                                    </div>
-
-                                </div>
-
-                                <p class="form-help">
-                                    A proporção original será preservada.
-                                    O processamento depende da API Python.
-                                </p>
-
-                                <button
-                                    class="button button--primary"
-                                    type="submit"
-                                >
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >photo_size_select_large</span>
-                                    Redimensionar imagem
-                                </button>
-
-                                <p
-                                    class="form-status"
-                                    id="image-status"
-                                    role="status"
-                                    aria-live="polite"
-                                ></p>
-
-                            </form>
-
-                        <?php elseif ($handler === 'pdf-merge'): ?>
-
-                            <div class="workspace__header">
-                                <div>
-                                    <h2>Una seus arquivos PDF</h2>
-                                    <p>
-                                        Selecione dois ou mais PDFs.
-                                        A ordem selecionada será usada na união.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <form
-                                class="tool-form"
-                                id="pdf-merge-form"
-                                enctype="multipart/form-data"
-                            >
-
-                                <label class="upload-zone" for="pdf-files">
-
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >picture_as_pdf</span>
-
-                                    <strong>Selecionar arquivos PDF</strong>
-
-                                    <span>Selecione pelo menos dois arquivos</span>
-
-                                    <input
-                                        id="pdf-files"
-                                        name="files[]"
-                                        type="file"
-                                        accept="application/pdf,.pdf"
-                                        multiple
-                                        required
-                                    >
-
-                                </label>
-
-                                <ol
-                                    class="selected-files"
-                                    id="pdf-file-list"
-                                ></ol>
-
-                                <p class="form-help">
-                                    Os arquivos devem ser validados pelo backend
-                                    antes do processamento.
-                                </p>
-
-                                <button
-                                    class="button button--primary"
-                                    type="submit"
-                                >
-                                    <span
-                                        class="material-symbols-outlined"
-                                        aria-hidden="true"
-                                    >merge</span>
-                                    Unir PDFs
-                                </button>
-
-                                <p
-                                    class="form-status"
-                                    id="pdf-status"
-                                    role="status"
-                                    aria-live="polite"
-                                ></p>
-
-                            </form>
-
-                        <?php endif; ?>
+                        <?php if ($handler === 'word-counter'):
+                            include __DIR__ . '/content/word-counter.php';
+                        elseif ($handler === 'image-resizer'):
+                            include __DIR__ . '/content/image-resizer.php';
+                        elseif ($handler === 'image-compressor'):
+                            include __DIR__ . '/content/image-compressor.php';
+                        elseif ($handler === 'pdf-merge'):
+                            include __DIR__ . '/content/pdf-merge.php';
+                        elseif ($handler === 'image-converter'):
+                            include __DIR__ . '/content/image-converter.php';
+                        elseif ($handler === 'image-cropper'):
+                            include __DIR__ . '/content/image-cropper.php';
+                        elseif ($handler == 'pdf-to-word'):
+                            include __DIR__ . '/content/pdf-to-word.php';
+                        endif; ?>
 
                     </section>
 

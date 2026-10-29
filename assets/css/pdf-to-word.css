@@ -1,0 +1,124 @@
+
+.pdf-word-tool {
+    width: min(100% - 32px, 720px);
+    margin: 40px auto;
+    padding: 32px;
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.pdf-word-tool__header {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.pdf-word-tool__icon {
+    display: inline-grid;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+    place-items: center;
+    background: #f1edff;
+    border-radius: 16px;
+    font-size: 28px;
+}
+
+.pdf-word-tool__header h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.pdf-word-tool__header p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.pdf-word-tool__dropzone {
+    display: flex;
+    min-height: 180px;
+    padding: 24px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 2px dashed #c4b5fd;
+    border-radius: 16px;
+    background: #faf9ff;
+    text-align: center;
+    cursor: pointer;
+}
+
+.pdf-word-tool__dropzone > span:first-child {
+    font-size: 28px;
+    color: #6d28d9;
+}
+
+.pdf-word-tool__dropzone small {
+    color: #64748b;
+}
+
+#pdf-word-file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+#pdf-word-file:focus-visible + * {
+    outline: 2px solid #6d28d9;
+}
+
+#pdf-word-filename,
+#pdf-word-status {
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+#pdf-word-filename {
+    color: #475569;
+    font-size: 14px;
+}
+
+#pdf-word-status {
+    color: #334155;
+    font-size: 14px;
+}
+
+#pdf-word-submit {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 12px;
+    background: #6d28d9;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#pdf-word-submit:hover {
+    background: #5b21b6;
+}
+
+#pdf-word-submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+@media (max-width: 600px) {
+    .pdf-word-tool {
+        width: auto;
+        margin: 20px 12px;
+        padding: 20px;
+    }
+
+    .pdf-word-tool__header h2 {
+        font-size: 24px;
+    }
+}
