@@ -175,19 +175,19 @@ $sections = [
             [
                 'title' => 'Contador de palavras',
                 'description' => 'Conte palavras, caracteres e outros elementos do seu texto.',
-                'url' => 'page.php?slug=contagem-palavras',
+                'url' => 'page.php?slug=contador-de-palavras',
                 'image' => './assets/img/icon-t.png',
             ],
             [
-                'title' => 'Maiúsculas e minúsculas',
+                'title' => 'Formatar Texto',
                 'description' => 'Converta seu texto para maiúsculas, minúsculas e outros formatos.',
-                'url' => 'page.php?slug=text-case',
+                'url' => 'page.php?slug=formatar-texto',
                 'image' => './assets/img/icon-text.png',
             ],
             [
                 'title' => 'Remover espaços',
                 'description' => 'Remova espaços desnecessários e organize seu texto.',
-                'url' => 'page.php?slug=remove-spaces',
+                'url' => 'page.php?slug=remover-espacos',
                 'image' => './assets/img/icon-remove-space.png',
             ],
             [
@@ -336,7 +336,7 @@ $benefits = [
                 <div class="hero__visual">
 
                     <img
-                        src="./assets/img/hero-tools.png"
+                        src="./assets/img/image-hero.png"
                         alt="Ilustração de ferramentas online"
                         width="560"
                         height="420"
