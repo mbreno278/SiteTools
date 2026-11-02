@@ -1,7 +1,8 @@
-
 <?php
 
-//declare(strict_types=1);
+/**
+ * Configurações dos conversores do SiteTools.
+ */
 
 return [
     'libreoffice' => 'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
