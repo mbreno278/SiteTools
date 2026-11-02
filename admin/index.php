@@ -39,6 +39,7 @@ if (!isset($allowedPages[$page])) {
     <link rel="stylesheet" href="<?= e(admin_url('assets/css/admin.css')) ?>">
     <link rel="stylesheet" href="<?= e(admin_url('assets/css/components.css')) ?>">
     <link rel="stylesheet" href="<?= e(admin_url('assets/css/responsive.css')) ?>">
+    <link rel="stylesheet" href="<?= e(admin_url('assets/css/dashboard-extra.css')) ?>">
 </head>
 <body>
 <div class="admin-shell">

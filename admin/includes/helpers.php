@@ -64,3 +64,16 @@ function record_admin_activity(string $action, string $description = ''): void
         error_log('[SiteTools admin activity] ' . $exception->getMessage());
     }
 }
+
+function db(): PDO
+{
+    global $pdo;
+
+    if (!isset($pdo) || !($pdo instanceof PDO)) {
+        throw new RuntimeException(
+            'Conexão com o banco de dados indisponível.'
+        );
+    }
+
+    return $pdo;
+}
