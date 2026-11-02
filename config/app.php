@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 define('APP_NAME', 'SiteTools');
-define('APP_ENV', 'local'); // local | production
-define('BASE_URL', '/SiteTools'); // Ex.: '' em domínio na raiz
+define('APP_ENV', 'production'); // local | production
+define('BASE_URL', '/projetos/SiteTools'); // Ex.: '' em domínio na raiz
 define('ADMIN_SESSION_NAME', 'sitetools_admin');
 define('TIMEZONE', 'America/Sao_Paulo');
 

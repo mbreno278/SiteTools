@@ -30,7 +30,7 @@ foreach ($required as $name) {
         $value = match ($name) {
             'DB_HOST' => 'localhost',
             'DB_NAME' => 'webtools__sitetools',
-            'DB_USER' => 'sitetools_app',
+            'DB_USER' => 'root',
             'DB_PASSWORD' => '',
             default => '',
         };
