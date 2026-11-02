@@ -8,7 +8,7 @@
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 const PDF_MAX_SIZE = 20 * 1024 * 1024;
 
-function respondError(string $message, int $status = 400): never
+function respondError(string $message, int $status = 400): void
 {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
