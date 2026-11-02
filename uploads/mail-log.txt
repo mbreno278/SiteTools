@@ -1,0 +1,18 @@
+[2026-11-02 20:23:57] TO:mbreno278@gmail.com | Redefinir senha — SiteTools
+Olá, Matheus Breno!
+
+Para redefinir sua senha, acesse:
+http://localhost/projetos/SiteTools/redefinir-senha.php?token=287b6174f70e2d91a41896f796abec2a9dbd3b7ac583ed6d1bb1b1fd8c7eb85b
+
+O link expira em 1 hora. Se você não pediu isso, ignore este e-mail.
+
+---
+[2026-11-02 20:29:17] TO:mbreno289@gmail.com | Confirme seu e-mail — SiteTools
+Olá, Breno Sousa!
+
+Clique no link para confirmar seu e-mail:
+http://localhost/projetos/SiteTools/verificar-email.php?token=15f197b53f06e46c4fefc695245871015022f0c479be6a65d2db1ef600d08065
+
+O link expira em 1 hora.
+
+---

@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="./assets/css/tools-page.css">
 
     <link rel="stylesheet" href="./assets/css/auth.css">
+    <link rel="stylesheet" href="./assets/css/auth-extra.css">
+    
+    <script src="./assets/js/csrf.js" defer></script>
     <script src="./assets/js/auth.js" defer></script>
 
     <script>

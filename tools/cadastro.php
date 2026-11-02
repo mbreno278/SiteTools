@@ -19,26 +19,21 @@ $password2 = (string) ($_POST['password_confirm'] ?? '');
 if ($name === '' || mb_strlen($name) < 2) {
     auth_json(['error' => 'Informe seu nome (mínimo 2 caracteres).'], 422);
 }
-
 if (mb_strlen($name) > 120) {
     auth_json(['error' => 'Nome muito longo.'], 422);
 }
-
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     auth_json(['error' => 'Informe um e-mail válido.'], 422);
 }
-
 if (strlen($password) < 8) {
     auth_json(['error' => 'A senha deve ter pelo menos 8 caracteres.'], 422);
 }
-
 if ($password !== $password2) {
     auth_json(['error' => 'As senhas não coincidem.'], 422);
 }
 
 $pdo = auth_pdo();
 
-// E-mail já existe?
 $check = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
 $check->execute(['email' => $email]);
 if ($check->fetch()) {
@@ -46,9 +41,12 @@ if ($check->fetch()) {
 }
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
+$token = auth_random_token();
+$expires = date('Y-m-d H:i:s', time() + AUTH_TOKEN_TTL);
 
 $stmt = $pdo->prepare(
-    'INSERT INTO users (name, email, password_hash) VALUES (:name, :email, :hash)'
+    'INSERT INTO users (name, email, password_hash, verify_token, verify_token_expires_at)
+     VALUES (:name, :email, :hash, :token, :exp)'
 );
 
 try {
@@ -56,19 +54,31 @@ try {
         'name'  => $name,
         'email' => $email,
         'hash'  => $hash,
+        'token' => $token,
+        'exp'   => $expires,
     ]);
-} catch (PDOException $e) {
+} catch (PDOException) {
     auth_json(['error' => 'Não foi possível criar a conta. Tente novamente.'], 500);
 }
 
 $id = (int) $pdo->lastInsertId();
-auth_login($id, $name, $email);
+
+$link = auth_app_base_url() . '/verificar-email.php?token=' . urlencode($token);
+auth_send_mail(
+    $email,
+    'Confirme seu e-mail — SiteTools',
+    "Olá, {$name}!\n\nClique no link para confirmar seu e-mail:\n{$link}\n\nO link expira em 1 hora.\n"
+);
+
+auth_login($id, $name, $email, false);
 
 auth_json([
-    'ok'   => true,
-    'user' => [
-        'id'    => $id,
-        'name'  => $name,
-        'email' => $email,
+    'ok'      => true,
+    'message' => 'Conta criada. Verifique seu e-mail para confirmar o cadastro.',
+    'user'    => [
+        'id'             => $id,
+        'name'           => $name,
+        'email'          => $email,
+        'email_verified' => false,
     ],
 ]);

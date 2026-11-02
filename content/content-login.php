@@ -1,12 +1,16 @@
 <?php
 /**
- * Modais de Login e Cadastro — incluir no final do body (index.php e page.php)
- * Requer: config/auth.php (ou csrf.php) já carregado para csrf_field()
+ * Modais: Login, Cadastro e Recuperar senha
  */
 if (!function_exists('csrf_field')) {
     require_once __DIR__ . '/../config/csrf.php';
 }
-$user = function_exists('auth_user') ? auth_user() : null;
+if (!function_exists('auth_user')) {
+    $authFile = __DIR__ . '/../config/auth.php';
+    if (is_file($authFile)) {
+        require_once $authFile;
+    }
+}
 ?>
 
 <!-- Modal Login -->
@@ -32,6 +36,10 @@ $user = function_exists('auth_user') ? auth_user() : null;
                 <label for="login-password">Senha</label>
                 <input type="password" id="login-password" name="password" autocomplete="current-password" required placeholder="Sua senha" minlength="8">
             </div>
+
+            <p class="auth-modal__forgot">
+                <button type="button" class="auth-modal__link" data-auth-open="forgot">Esqueci a senha</button>
+            </p>
 
             <p class="auth-modal__error" id="login-error" role="alert" hidden></p>
 
@@ -91,6 +99,39 @@ $user = function_exists('auth_user') ? auth_user() : null;
         <p class="auth-modal__switch">
             Já tem conta?
             <button type="button" class="auth-modal__link" data-auth-open="login">Entrar</button>
+        </p>
+    </div>
+</div>
+
+<!-- Modal Esqueci a senha -->
+<div class="auth-modal" id="auth-modal-forgot" hidden aria-hidden="true">
+    <div class="auth-modal__backdrop" data-auth-close></div>
+    <div class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-forgot-title">
+        <button type="button" class="auth-modal__close" data-auth-close aria-label="Fechar">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+
+        <h2 id="auth-forgot-title" class="auth-modal__title">Recuperar senha</h2>
+        <p class="auth-modal__subtitle">Enviaremos um link para o seu e-mail</p>
+
+        <form class="auth-modal__form" id="auth-forgot-form" method="post" action="tools/recuperar-senha.php" novalidate>
+            <?= csrf_field() ?>
+
+            <div class="auth-modal__field">
+                <label for="forgot-email">E-mail</label>
+                <input type="email" id="forgot-email" name="email" autocomplete="email" required placeholder="seu@email.com">
+            </div>
+
+            <p class="auth-modal__error" id="forgot-error" role="alert" hidden></p>
+            <p class="auth-modal__success" id="forgot-success" hidden></p>
+
+            <button type="submit" class="button button--primary auth-modal__submit" id="forgot-submit">
+                Enviar link
+            </button>
+        </form>
+
+        <p class="auth-modal__switch">
+            <button type="button" class="auth-modal__link" data-auth-open="login">Voltar ao login</button>
         </p>
     </div>
 </div>

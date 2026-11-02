@@ -189,6 +189,12 @@ $categoryLabel = $categoryLabels[$category]
     <script src="./assets/js/csrf.js" defer></script>
     <script src="./assets/js/tool-page.js" defer></script>
 
+    <link rel="stylesheet" href="./assets/css/auth.css">
+    <link rel="stylesheet" href="./assets/css/auth-extra.css">
+    
+    <script src="./assets/js/csrf.js" defer></script>
+    <script src="./assets/js/auth.js" defer></script>
+
     <?php if ($handler === 'image-resizer'): ?>
         <link
             rel="stylesheet"
