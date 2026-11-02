@@ -1,7 +1,7 @@
 
 <?php
 
-declare(strict_types=1);
+//declare(strict_types=1);
 
 return [
     'libreoffice' => 'C:\\Program Files\\LibreOffice\\program\\soffice.exe',

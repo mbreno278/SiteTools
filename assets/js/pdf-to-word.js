@@ -1,87 +1,123 @@
-
 "use strict";
 
-const form = document.querySelector("#pdf-word-form");
-const fileInput = document.querySelector("#pdf-word-file");
-const fileName = document.querySelector("#pdf-word-filename");
-const submitButton = document.querySelector("#pdf-word-submit");
-const status = document.querySelector("#pdf-word-status");
+(() => {
+    const dropzone = document.getElementById("pw-dropzone");
+    const fileInput = document.getElementById("pw-file");
+    const workspace = document.getElementById("pw-workspace");
+    const loading = document.getElementById("pw-loading");
+    const errorEl = document.getElementById("pw-error");
+    const filename = document.getElementById("pw-filename");
+    const filesize = document.getElementById("pw-filesize");
+    const removeBtn = document.getElementById("pw-remove");
+    const submitBtn = document.getElementById("pw-submit");
 
-const MAX_SIZE = 20 * 1024 * 1024;
+    let file = null;
+    const MAX = 20 * 1024 * 1024;
 
-fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-
-    fileName.textContent = file
-        ? `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
-        : "Nenhum arquivo selecionado.";
-});
-
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const file = fileInput.files[0];
-
-    if (!file) {
-        status.textContent = "Selecione um arquivo PDF.";
-        return;
+    function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.hidden = false;
+    }
+    function clearError() {
+        errorEl.textContent = "";
+        errorEl.hidden = true;
+    }
+    function fmtSize(n) {
+        return n >= 1048576 ? (n / 1048576).toFixed(2) + " MB" : (n / 1024).toFixed(0) + " KB";
     }
 
-    if (
-        !file.name.toLowerCase().endsWith(".pdf") ||
-        file.size > MAX_SIZE ||
-        file.size === 0
-    ) {
-        status.textContent =
-            "Selecione um PDF válido de até 20 MB.";
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("pdf", file);
-
-    submitButton.disabled = true;
-    status.textContent = "Convertendo PDF para Word...";
-
-    try {
-        const response = await fetch("tools/pdf-to-word.php", {
-            method: "POST",
-            body: formData,
-            credentials: "same-origin"
-        });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(
-                error.error || "Não foi possível converter o arquivo."
-            );
+    function setFile(f) {
+        clearError();
+        if (!f || (!f.name.toLowerCase().endsWith(".pdf") && f.type !== "application/pdf")) {
+            showError("Selecione um arquivo PDF válido.");
+            return;
         }
-
-        const blob = await response.blob();
-
-        if (blob.size === 0) {
-            throw new Error("O conversor retornou um arquivo vazio.");
+        if (f.size > MAX) {
+            showError("O PDF deve ter no máximo 20 MB.");
+            return;
         }
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        const originalName = file.name.replace(/\.pdf$/i, "");
-        const safeName = originalName.replace(/[^a-zA-Z0-9_-]+/g, "_");
-
-        link.href = url;
-        link.download = `${safeName || "documento"}.docx`;
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-        status.textContent = "Conversão concluída. Download iniciado.";
-    } catch (error) {
-        status.textContent = error.message;
-    } finally {
-        submitButton.disabled = false;
+        if (f.size === 0) {
+            showError("O arquivo está vazio.");
+            return;
+        }
+        file = f;
+        filename.textContent = f.name;
+        filesize.textContent = fmtSize(f.size);
+        dropzone.hidden = true;
+        workspace.hidden = false;
+        loading.hidden = true;
     }
-});
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("is-dragging");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("is-dragging"));
+    dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("is-dragging");
+        if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files[0]) setFile(fileInput.files[0]);
+    });
+
+    removeBtn.addEventListener("click", () => {
+        file = null;
+        fileInput.value = "";
+        workspace.hidden = true;
+        dropzone.hidden = false;
+        clearError();
+    });
+
+    submitBtn.addEventListener("click", async () => {
+        if (!file) return;
+        clearError();
+        workspace.hidden = true;
+        loading.hidden = false;
+
+        const fd = new FormData();
+        fd.append("pdf", file);
+
+        try {
+            const res = await fetch("tools/pdf-to-word.php", {
+                method: "POST",
+                body: fd,
+                credentials: "same-origin"
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || "Não foi possível converter o arquivo.");
+            }
+
+            const blob = await res.blob();
+            if (!blob || blob.size < 100) {
+                throw new Error("O conversor retornou um arquivo vazio.");
+            }
+
+            const ctype = res.headers.get("Content-Type") || "";
+            if (ctype.includes("json")) {
+                const text = await blob.text();
+                const data = JSON.parse(text);
+                throw new Error(data.error || "Falha na conversão.");
+            }
+
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = file.name.replace(/\.pdf$/i, "") + ".docx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+
+            workspace.hidden = false;
+            loading.hidden = true;
+        } catch (e) {
+            loading.hidden = true;
+            workspace.hidden = false;
+            showError(e.message || "Erro na conversão.");
+        }
+    });
+})();

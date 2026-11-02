@@ -1,35 +1,43 @@
+<div class="pdf-word" id="pdf-word">
 
-<section class="pdf-word-tool" aria-labelledby="pdf-word-title">
-    <div class="pdf-word-tool__header">
-        <span class="pdf-word-tool__icon" aria-hidden="true">📄</span>
-        <h2 id="pdf-word-title">PDF para Word</h2>
-        <p>Converta seus arquivos PDF em documentos Word editáveis.</p>
+    <div class="pdf-word__dropzone" id="pw-dropzone">
+        <input type="file" id="pw-file" accept="application/pdf,.pdf" hidden>
+        <span class="material-symbols-outlined pdf-word__icon" aria-hidden="true">picture_as_pdf</span>
+        <strong>Solte o PDF aqui</strong>
+        <span>ou clique para selecionar</span>
+        <small>PDF · Máximo 20 MB · Texto selecionável funciona melhor</small>
     </div>
 
-    <form id="pdf-word-form">
-        <label class="pdf-word-tool__dropzone" for="pdf-word-file">
-            <span aria-hidden="true">⬆</span>
-            <strong>Selecione um arquivo PDF</strong>
-            <span>ou clique aqui para procurar no computador</span>
-            <small>PDF · Máximo de 20 MB</small>
-        </label>
+    <div class="pdf-word__error" id="pw-error" role="alert" hidden></div>
 
-        <input
-            type="file"
-            id="pdf-word-file"
-            name="pdf"
-            accept=".pdf,application/pdf"
-            required
-        >
+    <div class="pdf-word__workspace" id="pw-workspace" hidden>
+        <div class="pdf-word__file-card">
+            <span class="material-symbols-outlined" aria-hidden="true">description</span>
+            <div>
+                <strong id="pw-filename">—</strong>
+                <span id="pw-filesize">—</span>
+            </div>
+            <button type="button" class="pdf-word__icon-btn" id="pw-remove" aria-label="Remover">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+        </div>
 
-        <p id="pdf-word-filename" aria-live="polite">
-            Nenhum arquivo selecionado.
-        </p>
-
-        <button type="submit" id="pdf-word-submit">
+        <button type="button" class="button button--primary pdf-word__action" id="pw-submit">
+            <span class="material-symbols-outlined" aria-hidden="true">description</span>
             Converter para Word
         </button>
+    </div>
 
-        <p id="pdf-word-status" role="status" aria-live="polite"></p>
-    </form>
-</section>
+    <div class="pdf-word__loading" id="pw-loading" hidden>
+        <span class="pdf-word__spinner"></span>
+        <strong>Convertendo PDF para Word...</strong>
+        <span>PDFs grandes podem levar até 1–2 minutos. Não feche a página.</span>
+    </div>
+
+    <p class="pdf-word__hint">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        Funciona melhor com PDFs de texto. PDFs só de imagem (escaneados) podem gerar documento quase vazio.
+        Requer LibreOffice instalado no servidor.
+    </p>
+
+</div>
