@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 require __DIR__ . '/pdf-common.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -30,30 +33,15 @@ if (!copy($tmpPath, $input)) {
     pdfRespondError('Falha ao preparar o arquivo.', 500);
 }
 
-// Conta páginas
-$probe = pdfRun([
-    $gs,
-    '-q',
-    '-dNODISPLAY',
-    '-c',
-    '(' . str_replace('\\', '/', $input) . ') (r) file runpdfbegin pdfpagecount = quit',
-], 60);
-
-$pageCount = (int) trim($probe['stdout']);
-if ($pageCount < 1) {
-    // Fallback alternativo
-    $probe2 = pdfRun([$gs, '-q', '-dNODISPLAY', '-dNOSAFER', '-c', '<< /Name  /GetPageCount >> setpagedevice', $input], 30);
-    $pageCount = max(1, (int) preg_replace('/\D/', '', $probe['stderr'] . $probe['stdout']));
-}
-
-if ($pageCount < 1) {
-    $pageCount = 50; // tenta até 50 se não conseguir contar
-}
-
+// Separação segura com -dSAFER (sem -dNOSAFER e sem -c PostScript arbitrário)
 $pagesToExtract = [];
 
 if ($mode === 'range' && $range !== '') {
-    // Parse: 1-3,5,7-9
+    // Parse: 1-3,5,7-9 — apenas números (sem path injection)
+    if (!preg_match('/^[0-9,\s\-]+$/', $range)) {
+        pdfCleanup($dir);
+        pdfRespondError('Intervalo inválido. Use apenas números, vírgulas e hífens (ex: 1-3,5).');
+    }
     foreach (explode(',', $range) as $part) {
         $part = trim($part);
         if (preg_match('/^(\d+)\s*-\s*(\d+)$/', $part, $m)) {
@@ -62,43 +50,77 @@ if ($mode === 'range' && $range !== '') {
             if ($a > $b) {
                 [$a, $b] = [$b, $a];
             }
+            // Limite de páginas por requisição
+            if ($b - $a > 100) {
+                pdfCleanup($dir);
+                pdfRespondError('Intervalo muito grande (máximo 100 páginas por vez).');
+            }
             for ($p = $a; $p <= $b; $p++) {
-                $pagesToExtract[] = $p;
+                if ($p >= 1) {
+                    $pagesToExtract[] = $p;
+                }
             }
         } elseif (preg_match('/^\d+$/', $part)) {
-            $pagesToExtract[] = (int) $part;
+            $p = (int) $part;
+            if ($p >= 1) {
+                $pagesToExtract[] = $p;
+            }
         }
     }
-    $pagesToExtract = array_values(array_unique(array_filter($pagesToExtract, static fn($p) => $p >= 1)));
+    $pagesToExtract = array_values(array_unique($pagesToExtract));
+    sort($pagesToExtract);
 } else {
-    // Uma página por arquivo
-    for ($p = 1; $p <= min($pageCount, 100); $p++) {
-        $pagesToExtract[] = $p;
+    // Extrai todas as páginas de uma vez (Ghostscript gera page_001.pdf, ...)
+    $pattern = $dir . DIRECTORY_SEPARATOR . 'page_%03d.pdf';
+    $cmd = array_merge(
+        [$gs, '-sDEVICE=pdfwrite'],
+        pdfGsSafeArgs(),
+        ['-sOutputFile=' . $pattern, $input]
+    );
+    pdfRun($cmd, 180);
+
+    $generated = glob($dir . DIRECTORY_SEPARATOR . 'page_*.pdf') ?: [];
+    sort($generated);
+    $pagesToExtract = [];
+    foreach ($generated as $i => $f) {
+        if (is_file($f) && filesize($f) > 50) {
+            $pagesToExtract[] = $i + 1;
+        }
     }
 }
 
-if (empty($pagesToExtract)) {
+if (empty($pagesToExtract) && $mode === 'range') {
     pdfCleanup($dir);
     pdfRespondError('Informe um intervalo de páginas válido (ex: 1-3 ou 1,3,5).');
 }
 
 $outFiles = [];
-foreach ($pagesToExtract as $p) {
-    $out = $dir . DIRECTORY_SEPARATOR . sprintf('page_%03d.pdf', $p);
-    $cmd = [
-        $gs,
-        '-sDEVICE=pdfwrite',
-        '-dNOPAUSE',
-        '-dQUIET',
-        '-dBATCH',
-        '-dFirstPage=' . $p,
-        '-dLastPage=' . $p,
-        '-sOutputFile=' . $out,
-        $input,
-    ];
-    $result = pdfRun($cmd, 60);
-    if ($result['exit'] === 0 && is_file($out) && filesize($out) > 50) {
-        $outFiles[] = $out;
+
+if ($mode === 'range') {
+    foreach ($pagesToExtract as $p) {
+        $out = $dir . DIRECTORY_SEPARATOR . sprintf('page_%03d.pdf', $p);
+        $cmd = array_merge(
+            [$gs, '-sDEVICE=pdfwrite'],
+            pdfGsSafeArgs(),
+            [
+                '-dFirstPage=' . $p,
+                '-dLastPage=' . $p,
+                '-sOutputFile=' . $out,
+                $input,
+            ]
+        );
+        $result = pdfRun($cmd, 60);
+        if ($result['exit'] === 0 && is_file($out) && filesize($out) > 50) {
+            $outFiles[] = $out;
+        }
+    }
+} else {
+    $generated = glob($dir . DIRECTORY_SEPARATOR . 'page_*.pdf') ?: [];
+    sort($generated);
+    foreach ($generated as $f) {
+        if (is_file($f) && filesize($f) > 50) {
+            $outFiles[] = $f;
+        }
     }
 }
 

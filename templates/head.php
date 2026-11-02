@@ -23,6 +23,9 @@
     <link rel="stylesheet" href="./assets/css/modo.css">
     <link rel="stylesheet" href="./assets/css/tools-page.css">
 
+    <link rel="stylesheet" href="./assets/css/auth.css">
+    <script src="./assets/js/auth.js" defer></script>
+
     <script>
         try {
             const theme = localStorage.getItem("sitetools-theme");

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 require __DIR__ . '/pdf-common.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,10 +16,7 @@ if (!isset($_FILES['pdf'])) {
     pdfRespondError('Selecione um arquivo PDF.');
 }
 
-$password = (string) ($_POST['password'] ?? '');
-if ($password === '') {
-    pdfRespondError('Informe a senha do PDF.');
-}
+$password = pdfSanitizePassword((string) ($_POST['password'] ?? ''));
 
 $tmpPath = pdfValidateUpload($_FILES['pdf']);
 $dir = pdfTmpDir();

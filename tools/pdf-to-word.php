@@ -1,5 +1,8 @@
 <?php
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 /**
  * SiteTools — Conversor PDF para Word (DOCX)
  * Requer LibreOffice com o filtro de importação writer_pdf_import.

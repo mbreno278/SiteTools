@@ -3,6 +3,8 @@
 
 //declare(strict_types=1);
 
+require_once __DIR__ . '/config/auth.php';
+
 /* ========================================
    FUNÇÕES AUXILIARES
 ======================================== */
@@ -473,5 +475,6 @@ $benefits = [
     <!-- Rodapé -->
     <?php require __DIR__ . '/templates/footer.php'; ?>
 
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 /**
  * SiteTools — Download de Áudio do YouTube
  * Backend em PHP usando yt-dlp (extrai e converte áudio corretamente).

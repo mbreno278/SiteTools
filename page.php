@@ -1,6 +1,9 @@
 
 <?php
 
+require_once __DIR__ . '/config/csrf.php';
+require_once __DIR__ . '/config/auth.php';
+
 try {
     require __DIR__ . '/config/database.php';
 } catch (Throwable $e) {
@@ -124,6 +127,7 @@ $allowedHandlers = [
     'formatar-texto' => 'formatar-texto',
     'remover-espacos' => 'remover-espacos',
     'gerador-lorem' => 'gerador-lorem',
+    'word-to-pdf' => 'word-to-pdf',
 ];
 
 $handler = $allowedHandlers[$tool['handler'] ?? ''] ?? 'not-found';
@@ -147,11 +151,13 @@ $category = $tool['category'] ?? '';
 
 $categoryLabel = $categoryLabels[$category]
     ?? ucfirst($category);
+    
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <?= csrf_meta() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title><?= e($metaTitle) ?></title>
@@ -180,6 +186,7 @@ $categoryLabel = $categoryLabels[$category]
     <link rel="stylesheet" href="./assets/css/modo.css">
     <link rel="stylesheet" href="./assets/css/page.css">
 
+    <script src="./assets/js/csrf.js" defer></script>
     <script src="./assets/js/tool-page.js" defer></script>
 
     <?php if ($handler === 'image-resizer'): ?>
@@ -281,6 +288,11 @@ $categoryLabel = $categoryLabels[$category]
    <?php if ($handler === 'gerador-lorem'): ?>
        <link rel="stylesheet" href="./assets/css/gerador-lorem.css">
        <script src="./assets/js/gerador-lorem.js" defer></script>
+   <?php endif; ?>
+
+   <?php if ($handler === 'word-to-pdf'): ?>
+       <link rel="stylesheet" href="./assets/css/word-to-pdf.css">
+       <script src="./assets/js/word-to-pdf.js" defer></script>
    <?php endif; ?>
 
     <script>
@@ -431,6 +443,8 @@ $categoryLabel = $categoryLabels[$category]
                             include __DIR__ . '/content/remover-espacos.php';
                         elseif ($handler === 'gerador-lorem'):
                             include __DIR__ . '/content/gerador-lorem.php';
+                        elseif ($handler === 'word-to-pdf'):
+                            include __DIR__ . '/content/word-to-pdf.php';
                         endif; ?>
 
                     </section>
@@ -501,6 +515,7 @@ $categoryLabel = $categoryLabels[$category]
 
     <!-- Rodapé compartilhado -->
     <?php include __DIR__ . '/templates/footer.php'; ?>
-
+    
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

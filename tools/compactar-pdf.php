@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 require __DIR__ . '/pdf-common.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,6 +42,7 @@ $cmd = [
     '-sDEVICE=pdfwrite',
     '-dCompatibilityLevel=1.4',
     '-dPDFSETTINGS=/' . $quality,
+    '-dSAFER',
     '-dNOPAUSE',
     '-dQUIET',
     '-dBATCH',

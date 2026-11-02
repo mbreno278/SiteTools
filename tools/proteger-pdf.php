@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/_csrf_guard.php';
+
+
 require __DIR__ . '/pdf-common.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,12 +16,9 @@ if (!isset($_FILES['pdf'])) {
     pdfRespondError('Selecione um arquivo PDF.');
 }
 
-$password = (string) ($_POST['password'] ?? '');
+$password = pdfSanitizePassword((string) ($_POST['password'] ?? ''));
 if (strlen($password) < 3) {
     pdfRespondError('A senha deve ter pelo menos 3 caracteres.');
-}
-if (strlen($password) > 64) {
-    pdfRespondError('Senha muito longa.');
 }
 
 $tmpPath = pdfValidateUpload($_FILES['pdf']);
@@ -64,6 +64,7 @@ if (!$ok && $gs !== null) {
     $cmd = [
         $gs,
         '-sDEVICE=pdfwrite',
+        '-dSAFER',
         '-dNOPAUSE',
         '-dQUIET',
         '-dBATCH',
