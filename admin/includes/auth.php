@@ -35,9 +35,25 @@ function admin_force_logout(): void
 
 function require_admin(): void
 {
-    if (!admin_logged_in()) {
-        redirect(admin_url('login.php'));
+    if (admin_logged_in()) {
+        return;
     }
+
+    // APIs e fetch devem receber JSON, não redirect HTML
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $isApi = str_contains($uri, '/api/')
+        || str_contains($uri, '/api\\')
+        || (isset($_SERVER['HTTP_ACCEPT']) && str_contains((string) $_SERVER['HTTP_ACCEPT'], 'application/json'))
+        || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strcasecmp((string) $_SERVER['HTTP_X_REQUESTED_WITH'], 'XMLHttpRequest') === 0);
+
+    if ($isApi) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Sessão expirada. Faça login novamente.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    redirect(admin_url('login.php'));
 }
 
 function current_admin(): array

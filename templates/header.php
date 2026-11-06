@@ -77,9 +77,11 @@ $authUser = function_exists('auth_user') ? auth_user() : null;
 
         <?php if ($authUser): ?>
             <div class="header__user" id="header-user">
-                <span class="header__user-name" title="<?= htmlspecialchars($authUser['email'], ENT_QUOTES, 'UTF-8') ?>">
+                <a class="button" href="./account/">
+                    <span class="header__user-name" title="<?= htmlspecialchars($authUser['email'], ENT_QUOTES, 'UTF-8') ?>">
                     <?= htmlspecialchars($authUser['name'], ENT_QUOTES, 'UTF-8') ?>
-                </span>
+                    </span>
+                </a>
                 <form method="post" action="./tools/logout.php" class="header__logout-form" id="auth-logout-form">
                     <?php if (function_exists('csrf_field')) { echo csrf_field(); } ?>
                     <button type="submit" class="button header__btn-logout" id="auth-logout-btn">

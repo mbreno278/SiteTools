@@ -33,8 +33,16 @@ function csrf_field(): string
 function verify_csrf(): void
 {
     $submitted = $_POST['_csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!is_string($submitted) || !hash_equals(csrf_token(), $submitted)) {
+    if (!is_string($submitted) || $submitted === '' || !hash_equals(csrf_token(), $submitted)) {
         http_response_code(419);
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $wantsJson = str_contains($uri, '/api/')
+            || (isset($_SERVER['HTTP_ACCEPT']) && str_contains((string) $_SERVER['HTTP_ACCEPT'], 'application/json'));
+        if ($wantsJson) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Token de segurança inválido. Atualize a página e tente novamente.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
         exit('Token de segurança inválido. Atualize a página e tente novamente.');
     }
 }

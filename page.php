@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/config/csrf.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/tool-access.php';
 
 try {
     require __DIR__ . '/config/database.php';
@@ -41,15 +42,24 @@ if ($slug !== '' && isset($pdo) && $pdo instanceof PDO) {
     try {
         $stmt = $pdo->prepare(
             'SELECT id, name, slug, description, category, icon,
-                    handler, meta_title, meta_description
+                    handler, meta_title, meta_description,
+                    COALESCE(access_type, \'free\') AS access_type,
+                    COALESCE(is_active, 1) AS is_active,
+                    COALESCE(status, \'active\') AS status
              FROM tools
-             WHERE slug = :slug AND is_active = 1
+             WHERE slug = :slug
              LIMIT 1'
         );
 
         $stmt->execute(['slug' => $slug]);
 
         $tool = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if (is_array($tool) && !array_key_exists('is_active', $tool)) {
+            $tool['is_active'] = 1;
+        }
+        if (is_array($tool) && !array_key_exists('status', $tool)) {
+            $tool['status'] = 'active';
+        }
     } catch (Throwable $e) {
         $tool = null;
     }
@@ -151,7 +161,76 @@ $category = $tool['category'] ?? '';
 
 $categoryLabel = $categoryLabels[$category]
     ?? ucfirst($category);
-    
+
+/* Acesso / status da ferramenta */
+$toolAccess = [
+    'allowed' => true,
+    'mode' => 'free',
+    'status' => 'active',
+    'reason' => 'public',
+    'label' => 'Gratuito',
+];
+$toolAccessAllowed = true;
+
+// Desativada no admin → bloqueio total
+if (
+    is_array($tool)
+    && ($handler ?? '') !== 'not-found'
+    && array_key_exists('is_active', $tool)
+    && (int) $tool['is_active'] !== 1
+) {
+    $toolAccess = [
+        'allowed' => false,
+        'mode' => 'unavailable',
+        'status' => 'unavailable',
+        'reason' => 'unavailable',
+        'label' => 'Indisponível',
+        'tool_slug' => (string) ($tool['slug'] ?? ''),
+    ];
+    $toolAccessAllowed = false;
+}
+
+// Status operacional
+if (
+    $toolAccessAllowed
+    && is_array($tool)
+    && ($handler ?? '') !== 'not-found'
+) {
+    $st = strtolower((string) ($tool['status'] ?? 'active'));
+    if ($st === 'development' || $st === 'unavailable') {
+        $toolAccess = [
+            'allowed' => false,
+            'mode' => $st,
+            'status' => $st,
+            'reason' => $st,
+            'label' => $st === 'development' ? 'Em desenvolvimento' : 'Indisponível',
+            'tool_slug' => (string) ($tool['slug'] ?? ''),
+        ];
+        $toolAccessAllowed = false;
+    }
+}
+
+// free / login / paid
+if ($handler !== 'not-found' && $toolAccessAllowed && isset($pdo) && $pdo instanceof PDO && is_array($tool)) {
+    try {
+        if (!function_exists('tool_access_check')) {
+            require_once __DIR__ . '/config/tool-access.php';
+        }
+        if (empty($tool['access_type'])) {
+            $tool['access_type'] = 'free';
+        }
+        $toolAccess = tool_access_check($pdo, $tool);
+        $toolAccessAllowed = !empty($toolAccess['allowed']);
+    } catch (Throwable $e) {
+        // Em falha de regra, NÃO libera ferramenta já marcada inativa
+        if (array_key_exists('is_active', $tool) && (int) $tool['is_active'] !== 1) {
+            $toolAccessAllowed = false;
+        } else {
+            $toolAccessAllowed = true;
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -185,6 +264,7 @@ $categoryLabel = $categoryLabels[$category]
     <link rel="stylesheet" href="./assets/css/components.css">
     <link rel="stylesheet" href="./assets/css/modo.css">
     <link rel="stylesheet" href="./assets/css/page.css">
+    <link rel="stylesheet" href="./assets/css/tool-access.css">
 
     <script src="./assets/js/csrf.js" defer></script>
     <script src="./assets/js/tool-page.js" defer></script>
@@ -368,6 +448,11 @@ $categoryLabel = $categoryLabels[$category]
                         >search_off</span>
 
                         <h1><?= e($tool['name']) ?></h1>
+                            <?php if (!empty($toolAccess['mode'])): ?>
+                                <div class="tool-heading__badges" style="margin-top:8px;">
+                                    <?= function_exists('tool_access_badge_html') ? tool_access_badge_html((string)($toolAccess['mode'] ?? 'free')) : '' ?>
+                                </div>
+                            <?php endif; ?>
 
                         <p><?= e($tool['description']) ?></p>
 
@@ -401,6 +486,11 @@ $categoryLabel = $categoryLabels[$category]
                             <?php endif; ?>
 
                             <h1><?= e($tool['name']) ?></h1>
+                            <?php if (!empty($toolAccess['mode'])): ?>
+                                <div class="tool-heading__badges" style="margin-top:8px;">
+                                    <?= function_exists('tool_access_badge_html') ? tool_access_badge_html((string)($toolAccess['mode'] ?? 'free')) : '' ?>
+                                </div>
+                            <?php endif; ?>
 
                             <p class="tool-heading__description">
                                 <?= e($tool['description']) ?>
@@ -416,6 +506,9 @@ $categoryLabel = $categoryLabels[$category]
                         aria-label="Área da ferramenta"
                     >
 
+                        <?php if (!$toolAccessAllowed): ?>
+                            <?= function_exists('tool_access_block_html') ? tool_access_block_html($toolAccess) : '<p>Ferramenta indisponível.</p>' ?>
+                        <?php else: ?>
                         <?php if ($handler === 'word-counter'):
                             include __DIR__ . '/content/word-counter.php';
                         elseif ($handler === 'image-resizer'):
@@ -452,6 +545,7 @@ $categoryLabel = $categoryLabels[$category]
                         elseif ($handler === 'word-to-pdf'):
                             include __DIR__ . '/content/word-to-pdf.php';
                         endif; ?>
+                        <?php endif; /* tool access */ ?>
 
                     </section>
 

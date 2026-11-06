@@ -1,26 +1,31 @@
 <?php
 $currentPage = $_GET['page'] ?? 'dashboard';
+
+/**
+ * Ícones = nomes oficiais do Google Material Symbols (underscore).
+ * Nomes estilo Lucide (layout-dashboard, folder-tree) aparecem como texto.
+ */
 $groups = [
     'GERENCIAMENTO' => [
-        ['dashboard', 'Visão geral', 'layout-dashboard'],
-        ['tools', 'Ferramentas', 'wrench'],
-        ['categories', 'Categorias', 'folder-tree'],
-        ['users', 'Usuários', 'users'],
+        ['dashboard', 'Visão geral', 'dashboard'],
+        ['tools', 'Ferramentas', 'build'],
+        ['categories', 'Categorias', 'folder'],
+        ['users', 'Usuários', 'group'],
     ],
     'MONITORAMENTO' => [
-        ['analytics', 'Estatísticas', 'chart-no-axes-combined'],
-        ['files', 'Arquivos', 'files'],
-        ['logs', 'Logs e atividades', 'scroll-text'],
+        ['analytics', 'Estatísticas', 'bar_chart'],
+        ['files', 'Arquivos', 'folder_open'],
+        ['logs', 'Logs e atividades', 'history'],
     ],
     'NEGÓCIOS' => [
-        ['advertisements', 'Publicidade', 'megaphone'],
-        ['support', 'Suporte', 'messages-square'],
-        ['seo', 'SEO e conteúdo', 'search'],
+        ['advertisements', 'Publicidade', 'campaign'],
+        ['support', 'Suporte', 'support_agent'],
+        ['seo', 'SEO e conteúdo', 'travel_explore'],
     ],
     'SISTEMA' => [
-        ['security', 'Segurança', 'shield-check'],
+        ['security', 'Segurança', 'shield'],
         ['settings', 'Configurações', 'settings'],
-        ['maintenance', 'Manutenção', 'server'],
+        ['maintenance', 'Manutenção', 'dns'],
     ],
 ];
 ?>
@@ -37,7 +42,7 @@ $groups = [
                 <?php foreach ($items as [$slug, $label, $icon]): ?>
                     <a class="nav-link <?= $currentPage === $slug ? 'active' : '' ?>"
                        href="<?= e(admin_url('index.php?page=' . $slug)) ?>">
-                        <span class="material-symbols-rounded"><?= e($icon) ?></span>
+                        <span class="material-symbols-rounded" aria-hidden="true"><?= e($icon) ?></span>
                         <span><?= e($label) ?></span>
                     </a>
                 <?php endforeach; ?>
@@ -47,8 +52,9 @@ $groups = [
 
     <div class="sidebar-bottom">
         <div class="sidebar-status"><span class="status-dot"></span> Sistema administrativo</div>
-        <a class="nav-link" href="<?= e(BASE_URL . '/') ?>" target="_blank" rel="noopener">
-            <span class="material-symbols-rounded">open_in_new</span><span>Ver site</span>
+        <a class="nav-link" href="<?= e(rtrim((string) BASE_URL, '/') . '/') ?>" target="_blank" rel="noopener">
+            <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
+            <span>Ver site</span>
         </a>
     </div>
 </aside>

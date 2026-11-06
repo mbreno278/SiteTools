@@ -1,67 +1,371 @@
 <?php
+
 declare(strict_types=1);
+
+/**
+ * SiteTools — controle de acesso (modelo v2)
+ *
+ * Operacional (tools.status):
+ *   active | development | unavailable
+ *
+ * Comercial (tools.access_type OU tool_access_rules.access_mode):
+ *   free | login | paid | temporary
+ *
+ * guest_allowed: se 1, visitante pode usar quando mode=free
+ */
 
 require_once __DIR__ . '/auth.php';
 
+function tool_access_labels(): array
+{
+    return [
+        'free'         => 'Gratuito',
+        'login'        => 'Requer login',
+        'paid'         => 'Pago',
+        'temporary'    => 'Acesso temporário',
+        'development'  => 'Em desenvolvimento',
+        'unavailable'  => 'Indisponível',
+        'active'       => 'Ativa',
+    ];
+}
+
+function tool_access_normalize_mode(?string $mode): string
+{
+    $mode = strtolower(trim((string) $mode));
+    $allowed = ['free', 'login', 'paid', 'temporary'];
+    return in_array($mode, $allowed, true) ? $mode : 'free';
+}
+
+function tool_access_normalize_status(?string $status): string
+{
+    $status = strtolower(trim((string) $status));
+    $allowed = ['active', 'development', 'unavailable'];
+    return in_array($status, $allowed, true) ? $status : 'active';
+}
+
 /**
- * Ferramentas sem regra cadastrada permanecem públicas.
- * Somente regras access_mode=temporary exigem uma concessão válida.
+ * Resolve status operacional + modo comercial.
+ *
+ * @return array{status:string,mode:string,guest_allowed:bool}
+ */
+function tool_access_resolve(PDO $pdo, array $tool): array
+{
+    $status = tool_access_normalize_status(
+        (string) ($tool['status'] ?? 'active')
+    );
+
+    // Compat: access_type legado development/unavailable
+    $legacy = strtolower((string) ($tool['access_type'] ?? ''));
+    if (in_array($legacy, ['development', 'unavailable'], true)) {
+        $status = $legacy;
+    }
+
+    $mode = tool_access_normalize_mode(
+        (string) ($tool['access_type'] ?? 'free')
+    );
+    if (in_array($legacy, ['development', 'unavailable'], true)) {
+        $mode = 'free'; // status já bloqueia
+    }
+
+    $guestAllowed = ($mode === 'free');
+    $toolId = (int) ($tool['id'] ?? 0);
+
+    if ($toolId > 0) {
+        try {
+            $stmt = $pdo->prepare(
+                'SELECT access_mode, guest_allowed
+                 FROM tool_access_rules WHERE tool_id = :id LIMIT 1'
+            );
+            $stmt->execute(['id' => $toolId]);
+            $rule = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($rule) {
+                $mode = tool_access_normalize_mode((string) $rule['access_mode']);
+                $guestAllowed = (int) ($rule['guest_allowed'] ?? 0) === 1;
+            }
+        } catch (Throwable) {
+            // regras opcionais
+        }
+    }
+
+    return [
+        'status' => $status,
+        'mode' => $mode,
+        'guest_allowed' => $guestAllowed,
+    ];
+}
+
+function tool_user_has_grant(PDO $pdo, int $userId, int $toolId): bool
+{
+    if ($userId <= 0 || $toolId <= 0) {
+        return false;
+    }
+
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT id FROM user_tool_access
+             WHERE user_id = :uid
+               AND tool_id = :tid
+               AND status = 'active'
+               AND (revoked_at IS NULL)
+               AND starts_at <= NOW()
+               AND (expires_at IS NULL OR expires_at > NOW())
+             LIMIT 1"
+        );
+        $stmt->execute(['uid' => $userId, 'tid' => $toolId]);
+        return (bool) $stmt->fetchColumn();
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/**
+ * @return array{allowed:bool,mode:string,status:string,reason:string,label:string,tool_slug?:string}
  */
 function tool_access_check(PDO $pdo, array $tool): array
 {
-    $toolId = (int) ($tool['id'] ?? 0);
-    $slug = (string) ($tool['slug'] ?? '');
-
-    if ($toolId <= 0) {
-        return ['allowed' => true, 'reason' => 'unregistered'];
-    }
-
-    $stmt = $pdo->prepare(
-        'SELECT access_mode, guest_allowed
-         FROM tool_access_rules
-         WHERE tool_id = :tool_id LIMIT 1'
-    );
-    $stmt->execute(['tool_id' => $toolId]);
-    $rule = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$rule || $rule['access_mode'] === 'free') {
-        return ['allowed' => true, 'reason' => 'public'];
-    }
-
-    $user = auth_user();
-
-    if (!$user) {
+    // Ferramenta desativada no painel = nunca libera
+    if (array_key_exists('is_active', $tool) && (int) $tool['is_active'] !== 1) {
         return [
             'allowed' => false,
-            'reason' => 'login_required',
+            'mode' => 'unavailable',
+            'status' => 'unavailable',
+            'reason' => 'unavailable',
+            'label' => 'Indisponível',
+            'tool_slug' => (string) ($tool['slug'] ?? ''),
+        ];
+    }
+
+    $resolved = tool_access_resolve($pdo, $tool);
+    $status = $resolved['status'];
+    $mode = $resolved['mode'];
+    $guestAllowed = $resolved['guest_allowed'];
+    $labels = tool_access_labels();
+    $slug = (string) ($tool['slug'] ?? '');
+
+    if ($status === 'unavailable') {
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'unavailable',
+            'label' => $labels['unavailable'],
             'tool_slug' => $slug,
         ];
     }
 
-    $access = $pdo->prepare(
-        "SELECT id
-         FROM user_tool_access
-         WHERE user_id = :user_id
-           AND tool_id = :tool_id
-           AND access_type IN ('free','temporary')
-           AND status = 'active'
-           AND starts_at <= NOW()
-           AND (expires_at IS NULL OR expires_at > NOW())
-         ORDER BY expires_at IS NULL DESC, expires_at DESC
-         LIMIT 1"
-    );
-    $access->execute([
-        'user_id' => (int) $user['id'],
-        'tool_id' => $toolId,
-    ]);
+    if ($status === 'development') {
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'development',
+            'label' => $labels['development'],
+            'tool_slug' => $slug,
+        ];
+    }
 
-    if ($access->fetchColumn()) {
-        return ['allowed' => true, 'reason' => 'access_active'];
+    // is_active = 0
+    if (isset($tool['is_active']) && (int) $tool['is_active'] !== 1) {
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => 'unavailable',
+            'reason' => 'unavailable',
+            'label' => $labels['unavailable'],
+            'tool_slug' => $slug,
+        ];
+    }
+
+    $user = function_exists('auth_user') ? auth_user() : null;
+    $userId = (int) ($user['id'] ?? 0);
+
+    if ($mode === 'free') {
+        if ($guestAllowed || $userId > 0) {
+            return [
+                'allowed' => true,
+                'mode' => $mode,
+                'status' => $status,
+                'reason' => $userId > 0 ? 'logged_in' : 'public',
+                'label' => $labels['free'],
+                'tool_slug' => $slug,
+            ];
+        }
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'login_required',
+            'label' => $labels['login'],
+            'tool_slug' => $slug,
+        ];
+    }
+
+    if ($mode === 'login') {
+        if ($userId > 0) {
+            return [
+                'allowed' => true,
+                'mode' => $mode,
+                'status' => $status,
+                'reason' => 'logged_in',
+                'label' => $labels['login'],
+                'tool_slug' => $slug,
+            ];
+        }
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'login_required',
+            'label' => $labels['login'],
+            'tool_slug' => $slug,
+        ];
+    }
+
+    // paid | temporary
+    if ($userId <= 0) {
+        return [
+            'allowed' => false,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'login_required',
+            'label' => $labels[$mode] ?? $labels['paid'],
+            'tool_slug' => $slug,
+        ];
+    }
+
+    $toolId = (int) ($tool['id'] ?? 0);
+    if (tool_user_has_grant($pdo, $userId, $toolId)) {
+        return [
+            'allowed' => true,
+            'mode' => $mode,
+            'status' => $status,
+            'reason' => 'paid_active',
+            'label' => $labels[$mode] ?? $labels['paid'],
+            'tool_slug' => $slug,
+        ];
     }
 
     return [
         'allowed' => false,
-        'reason' => 'access_required',
+        'mode' => $mode,
+        'status' => $status,
+        'reason' => 'payment_required',
+        'label' => $labels[$mode] ?? $labels['paid'],
         'tool_slug' => $slug,
     ];
+}
+
+function tool_access_badge_html(string $modeOrStatus): string
+{
+    $key = strtolower(trim($modeOrStatus));
+    $labels = tool_access_labels();
+    $label = htmlspecialchars($labels[$key] ?? $key, ENT_QUOTES, 'UTF-8');
+    $class = 'tool-badge tool-badge--' . preg_replace('/[^a-z]/', '', $key);
+    return '<span class="' . $class . '">' . $label . '</span>';
+}
+
+function tool_access_block_html(array $check): string
+{
+    $reason = $check['reason'] ?? '';
+    $title = 'Ferramenta indisponível';
+    $message = 'Esta ferramenta não está disponível no momento.';
+    $action = '';
+
+    if ($reason === 'development') {
+        $title = 'Em desenvolvimento';
+        $message = 'Estamos trabalhando nesta ferramenta. Em breve estará disponível.';
+    } elseif ($reason === 'unavailable') {
+        $title = 'Indisponível';
+        $message = 'Esta ferramenta está temporariamente fora do ar.';
+    } elseif ($reason === 'login_required') {
+        $title = 'Login necessário';
+        $message = 'Faça login para usar esta ferramenta.';
+        $action = '<button type="button" class="button button--primary" data-auth-open="login">Fazer login</button>';
+    } elseif ($reason === 'payment_required') {
+        $title = 'Ferramenta paga';
+        $message = 'Esta é uma ferramenta premium. Adquira o acesso para continuar.';
+        $action = '<a class="button button--primary" href="./account/">Minha conta</a>';
+    }
+
+    return '<div class="tool-access-lock" role="status">'
+        . '<span class="material-symbols-outlined tool-access-lock__icon" aria-hidden="true">lock</span>'
+        . '<h2 class="tool-access-lock__title">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h2>'
+        . '<p class="tool-access-lock__text">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>'
+        . '<p class="tool-access-lock__badge">' . tool_access_badge_html((string) ($check['mode'] ?? $check['status'] ?? 'unavailable')) . '</p>'
+        . ($action !== '' ? '<div class="tool-access-lock__actions">' . $action . '</div>' : '')
+        . '</div>';
+}
+
+function tool_access_deny_json(array $check): never
+{
+    $messages = [
+        'unavailable' => 'Esta ferramenta está indisponível.',
+        'development' => 'Esta ferramenta está em desenvolvimento.',
+        'login_required' => 'Faça login para usar esta ferramenta.',
+        'payment_required' => 'Esta ferramenta é paga. Adquira o acesso para continuar.',
+    ];
+    $reason = (string) ($check['reason'] ?? 'denied');
+    $status = match ($reason) {
+        'login_required' => 401,
+        'payment_required' => 402,
+        'development', 'unavailable' => 503,
+        default => 403,
+    };
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'error' => $messages[$reason] ?? 'Acesso negado.',
+        'reason' => $reason,
+        'mode' => $check['mode'] ?? null,
+        'status' => $check['status'] ?? null,
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function tool_access_require(PDO $pdo, string $slug): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT id, name, slug, access_type, status, is_active, handler
+         FROM tools WHERE slug = :slug LIMIT 1'
+    );
+    $stmt->execute(['slug' => $slug]);
+    $tool = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$tool) {
+        return ['allowed' => true, 'mode' => 'free', 'status' => 'active', 'reason' => 'unregistered', 'label' => 'Gratuito'];
+    }
+
+    $check = tool_access_check($pdo, $tool);
+    if (!$check['allowed']) {
+        tool_access_deny_json($check);
+    }
+    return $check;
+}
+
+/**
+ * @return list<array>
+ */
+function tool_list_by_access(PDO $pdo, ?string $mode = null, bool $onlyActive = true): array
+{
+    $sql = 'SELECT id, name, slug, description, category, category_id, icon, handler,
+                   access_type, status, is_active, is_featured, sort_order
+            FROM tools WHERE 1=1';
+    $params = [];
+
+    if ($onlyActive) {
+        $sql .= " AND is_active = 1 AND (status = 'active' OR status IS NULL OR status = '')";
+    }
+    if ($mode !== null) {
+        $sql .= ' AND access_type = :mode';
+        $params['mode'] = tool_access_normalize_mode($mode);
+    }
+    $sql .= ' ORDER BY sort_order ASC, name ASC';
+
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable) {
+        return [];
+    }
 }
