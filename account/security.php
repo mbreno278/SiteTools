@@ -1,132 +1,73 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/_bootstrap.php';
 
 $uid = (int) $currentUser['id'];
+$message = '';
+$error = '';
 
-// Dados básicos de segurança
-$memberSince = null;
-$lastLogin = null;
-$emailVerified = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
+    $current = (string) ($_POST['current_password'] ?? '');
+    $new = (string) ($_POST['new_password'] ?? '');
+    $confirm = (string) ($_POST['confirm_password'] ?? '');
 
-try {
-    $stmt = $pdo->prepare('SELECT created_at, last_login_at, email_verified_at FROM users WHERE id = :id LIMIT 1');
-    $stmt->execute(['id' => $uid]);
-    $info = $stmt->fetch();
-    if ($info) {
-        $memberSince = $info['created_at'] ?? null;
-        $lastLogin = $info['last_login_at'] ?? null;
-        $emailVerified = $info['email_verified_at'] ?? null;
+    if (strlen($new) < 8) {
+        $error = 'A nova senha deve ter no mínimo 8 caracteres.';
+    } elseif ($new !== $confirm) {
+        $error = 'A confirmação da senha não confere.';
+    } else {
+        try {
+            $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = :id LIMIT 1');
+            $stmt->execute(['id' => $uid]);
+            $hash = (string) ($stmt->fetchColumn() ?: '');
+            if ($hash === '' || !password_verify($current, $hash)) {
+                $error = 'Senha atual incorreta.';
+            } else {
+                $pdo->prepare(
+                    'UPDATE users SET password_hash = :hash, updated_at = NOW() WHERE id = :id'
+                )->execute([
+                    'hash' => password_hash($new, PASSWORD_DEFAULT),
+                    'id' => $uid,
+                ]);
+                $message = 'Senha alterada com sucesso.';
+            }
+        } catch (Throwable $e) {
+            error_log('[account/security] ' . $e->getMessage());
+            $error = 'Não foi possível alterar a senha.';
+        }
     }
-} catch (Throwable $e) {
-    // colunas opcionais
 }
 
+$csrf = function_exists('csrf_token') ? csrf_token() : '';
+
 account_page_start('Segurança');
-account_header('Segurança', 'Acompanhe o status da sua conta e recomendações de segurança.');
+account_header('Segurança', 'Altere sua senha e proteja a conta.');
 ?>
-
 <section class="ua-panel">
-    <div class="ua-panel-head">
-        <h2>Status da conta</h2>
-    </div>
+    <?php if ($message): ?><p class="ua-note" style="background:#ecfdf5;color:#065f46"><?= user_area_e($message) ?></p><?php endif; ?>
+    <?php if ($error): ?><p class="ua-note" style="background:#fff1f2;color:#9f1239"><?= user_area_e($error) ?></p><?php endif; ?>
 
-    <div class="ua-security-grid">
-        <div class="ua-security-item">
-            <div class="ua-security-icon <?= $emailVerified ? 'is-ok' : 'is-warn' ?>">
-                <span class="material-symbols-outlined"><?= $emailVerified ? 'verified' : 'mark_email_unread' ?></span>
-            </div>
-            <div>
-                <strong>E-mail verificado</strong>
-                <small>
-                    <?= $emailVerified
-                        ? 'Verificado em ' . user_area_e(date('d/m/Y', strtotime($emailVerified)))
-                        : 'Seu e-mail ainda não foi verificado.' ?>
-                </small>
-            </div>
-            <?php if (!$emailVerified): ?>
-                <a class="ua-button ua-button--light" href="../verificar-email.php">Verificar agora</a>
-            <?php else: ?>
-                <span class="ua-status">OK</span>
-            <?php endif; ?>
+    <form method="post" style="max-width:420px;display:grid;gap:14px">
+        <input type="hidden" name="_csrf" value="<?= user_area_e($csrf) ?>">
+        <div class="ua-field">
+            <label for="current_password">Senha atual</label>
+            <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
         </div>
-
-        <div class="ua-security-item">
-            <div class="ua-security-icon is-ok">
-                <span class="material-symbols-outlined">lock</span>
-            </div>
-            <div>
-                <strong>Senha</strong>
-                <small>Recomendamos alterar a senha periodicamente.</small>
-            </div>
-            <a class="ua-button ua-button--light" href="profile.php">Alterar senha</a>
+        <div class="ua-field">
+            <label for="new_password">Nova senha</label>
+            <input type="password" id="new_password" name="new_password" required minlength="8" autocomplete="new-password">
         </div>
-
-        <div class="ua-security-item">
-            <div class="ua-security-icon is-ok">
-                <span class="material-symbols-outlined">schedule</span>
-            </div>
-            <div>
-                <strong>Último acesso</strong>
-                <small>
-                    <?= $lastLogin
-                        ? user_area_e(date('d/m/Y H:i', strtotime($lastLogin)))
-                        : 'Informação não disponível' ?>
-                </small>
-            </div>
+        <div class="ua-field">
+            <label for="confirm_password">Confirmar nova senha</label>
+            <input type="password" id="confirm_password" name="confirm_password" required minlength="8" autocomplete="new-password">
         </div>
+        <button type="submit" class="ua-button">Atualizar senha</button>
+    </form>
 
-        <div class="ua-security-item">
-            <div class="ua-security-icon is-ok">
-                <span class="material-symbols-outlined">calendar_month</span>
-            </div>
-            <div>
-                <strong>Conta criada em</strong>
-                <small>
-                    <?= $memberSince
-                        ? user_area_e(date('d/m/Y', strtotime($memberSince)))
-                        : 'Informação não disponível' ?>
-                </small>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="ua-panel">
-    <div class="ua-panel-head">
-        <h2>Recomendações</h2>
-    </div>
-    <ul class="ua-tips">
-        <li>
-            <span class="material-symbols-outlined">password</span>
-            Use uma senha forte e exclusiva para o SiteTools.
-        </li>
-        <li>
-            <span class="material-symbols-outlined">logout</span>
-            Sempre saia da conta em dispositivos compartilhados.
-        </li>
-        <li>
-            <span class="material-symbols-outlined">visibility_off</span>
-            Não compartilhe links de redefinição de senha ou códigos de verificação.
-        </li>
-        <li>
-            <span class="material-symbols-outlined">mail</span>
-            Mantenha seu e-mail atualizado e verificado para recuperar o acesso quando necessário.
-        </li>
-    </ul>
-</section>
-
-<section class="ua-panel">
-    <div class="ua-panel-head">
-        <h2>Sessão atual</h2>
-    </div>
-    <p class="ua-note">
-        Você está autenticado nesta sessão. Se notar atividade suspeita, altere sua senha imediatamente
-        e entre em contato com o suporte.
+    <p class="ua-note" style="margin-top:18px">
+        O logout da conta é feito pelo ícone no topo (requisição POST com proteção CSRF).
+        Use senha forte e exclusiva para o SiteTools.
     </p>
-    <div class="ua-form-actions">
-        <a class="ua-button ua-button--danger" href="../tools/logout.php">Encerrar sessão</a>
-        <a class="ua-button ua-button--light" href="../contact.php?assunto=seguranca">Reportar problema</a>
-    </div>
 </section>
-
 <?php account_footer(); ?>
