@@ -2,6 +2,10 @@
 
 require __DIR__ . '/_csrf_guard.php';
 
+require __DIR__ . '/_tool_access_guard.php';
+tool_access_guard_for('pdf-to-word');
+
+
 
 /**
  * SiteTools — Conversor PDF para Word (DOCX)

@@ -35,7 +35,7 @@ if ($user) {
     $pdo->prepare(
         'UPDATE users SET reset_token = :token, reset_token_expires_at = :exp WHERE id = :id'
     )->execute([
-        'token' => $token,
+        'token' => auth_hash_token($token),
         'exp'   => $expires,
         'id'    => (int) $user['id'],
     ]);

@@ -113,7 +113,9 @@ function tool_user_has_grant(PDO $pdo, int $userId, int $toolId): bool
         );
         $stmt->execute(['uid' => $userId, 'tid' => $toolId]);
         return (bool) $stmt->fetchColumn();
-    } catch (Throwable) {
+    } catch (Throwable $e) {
+        // Fail-closed: erro ao consultar grant = sem acesso
+        error_log('[tool_user_has_grant] ' . $e->getMessage());
         return false;
     }
 }
@@ -332,7 +334,14 @@ function tool_access_require(PDO $pdo, string $slug): array
     $tool = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tool) {
-        return ['allowed' => true, 'mode' => 'free', 'status' => 'active', 'reason' => 'unregistered', 'label' => 'Gratuito'];
+        // Fail-closed: slug desconhecido no banco não processa no endpoint
+        tool_access_deny_json([
+            'allowed' => false,
+            'mode' => 'unavailable',
+            'status' => 'unavailable',
+            'reason' => 'unavailable',
+            'label' => 'Indisponível',
+        ]);
     }
 
     $check = tool_access_check($pdo, $tool);

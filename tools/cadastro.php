@@ -54,7 +54,7 @@ try {
         'name'  => $name,
         'email' => $email,
         'hash'  => $hash,
-        'token' => $token,
+        'token' => auth_hash_token($token),
         'exp'   => $expires,
     ]);
 } catch (PDOException) {

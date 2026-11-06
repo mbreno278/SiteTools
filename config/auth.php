@@ -175,6 +175,13 @@ function auth_login(int $id, string $name, string $email, bool $emailVerified = 
     } catch (Throwable) {
         // tabela pode ainda não existir
     }
+
+    try {
+        $pdo = auth_pdo();
+        $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id')
+            ->execute(['id' => $id]);
+    } catch (Throwable) {
+    }
 }
 
 function auth_logout(): void
@@ -257,30 +264,38 @@ function auth_random_token(): string
  * Em ambiente local sem SMTP, grava o link em arquivo de log.
  * Em produção, substitua por envio real de e-mail.
  */
+function auth_hash_token(string $token): string
+{
+    return hash('sha256', $token);
+}
+
 function auth_send_mail(string $to, string $subject, string $body): bool
 {
     $from = getenv('MAIL_FROM') ?: 'noreply@sitetools.local';
+    $appEnv = strtolower(trim((string) (getenv('APP_ENV') ?: 'production')));
+    $isLocal = in_array($appEnv, ['local', 'development', 'dev'], true);
 
-    // Tenta mail() do PHP
     $headers = "From: {$from}\r\nContent-Type: text/plain; charset=UTF-8\r\n";
     $sent = @mail($to, $subject, $body, $headers);
 
-    // Sempre registra em log local (útil no Wamp)
-    $logDir = dirname(__DIR__) . '/uploads';
-    if (!is_dir($logDir)) {
-        @mkdir($logDir, 0755, true);
+    // Log apenas em ambiente local; mascara tokens longos hex
+    if ($isLocal) {
+        $logDir = dirname(__DIR__) . '/storage/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0750, true);
+        }
+        $safeBody = preg_replace('/[a-f0-9]{32,}/i', '[token-redacted]', $body) ?? $body;
+        $entry = sprintf(
+            "[%s] TO:%s | %s\n%s\n---\n",
+            date('Y-m-d H:i:s'),
+            $to,
+            $subject,
+            $safeBody
+        );
+        @file_put_contents($logDir . '/mail-log.txt', $entry, FILE_APPEND | LOCK_EX);
     }
-    $logFile = $logDir . '/mail-log.txt';
-    $entry = sprintf(
-        "[%s] TO:%s | %s\n%s\n---\n",
-        date('Y-m-d H:i:s'),
-        $to,
-        $subject,
-        $body
-    );
-    @file_put_contents($logFile, $entry, FILE_APPEND | LOCK_EX);
 
-    return $sent || true; // no Wamp consideramos ok se logou
+    return $sent || $isLocal;
 }
 
 function auth_app_base_url(): string

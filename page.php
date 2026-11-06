@@ -222,12 +222,17 @@ if ($handler !== 'not-found' && $toolAccessAllowed && isset($pdo) && $pdo instan
         $toolAccess = tool_access_check($pdo, $tool);
         $toolAccessAllowed = !empty($toolAccess['allowed']);
     } catch (Throwable $e) {
-        // Em falha de regra, NÃO libera ferramenta já marcada inativa
-        if (array_key_exists('is_active', $tool) && (int) $tool['is_active'] !== 1) {
-            $toolAccessAllowed = false;
-        } else {
-            $toolAccessAllowed = true;
-        }
+        // Fail-closed: erro ao resolver autorização = acesso negado
+        error_log('[page.php tool-access] ' . $e->getMessage());
+        $toolAccess = [
+            'allowed' => false,
+            'mode' => 'unavailable',
+            'status' => 'unavailable',
+            'reason' => 'authorization_error',
+            'label' => 'Indisponível',
+            'tool_slug' => (string) ($tool['slug'] ?? ''),
+        ];
+        $toolAccessAllowed = false;
     }
 }
 

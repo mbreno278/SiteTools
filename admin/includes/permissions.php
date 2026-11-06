@@ -4,24 +4,50 @@ declare(strict_types=1);
 require_once __DIR__ . '/auth.php';
 
 /**
- * Base inicial de permissões por função.
- * Em uma próxima etapa, esta checagem poderá consultar roles/permissions no banco.
+ * Permissões por funcionalidade do painel administrativo.
+ * super_admin tem acesso total.
  */
+function admin_permission_map(): array
+{
+    return [
+        'admin' => [
+            'dashboard.view',
+            'tools.view', 'tools.edit',
+            'categories.view', 'categories.edit',
+            'users.view',
+            'analytics.view',
+            'files.view', 'files.manage',
+            'logs.view',
+            'support.view', 'support.manage',
+            'settings.view',
+            'seo.view',
+            'advertisements.view',
+            'security.view',
+        ],
+        'editor' => [
+            'dashboard.view',
+            'tools.view', 'tools.edit',
+            'categories.view', 'categories.edit',
+            'seo.view',
+        ],
+        'support' => [
+            'dashboard.view',
+            'support.view', 'support.manage',
+            'users.view',
+        ],
+    ];
+}
+
 function can(string $permission): bool
 {
-    $role = current_admin()['role'] ?? '';
+    $role = (string) (current_admin()['role'] ?? '');
 
     if ($role === 'super_admin') {
         return true;
     }
 
-    $rolePermissions = [
-        'admin' => ['dashboard.view', 'tools.view', 'categories.view', 'analytics.view', 'files.view', 'logs.view'],
-        'editor' => ['dashboard.view', 'tools.view', 'categories.view'],
-        'support' => ['dashboard.view', 'support.view'],
-    ];
-
-    return in_array($permission, $rolePermissions[$role] ?? [], true);
+    $map = admin_permission_map();
+    return in_array($permission, $map[$role] ?? [], true);
 }
 
 function require_permission(string $permission): void
@@ -29,7 +55,19 @@ function require_permission(string $permission): void
     require_admin();
 
     if (!can($permission)) {
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $isApi = str_contains($uri, '/api/')
+            || (isset($_SERVER['HTTP_ACCEPT']) && str_contains((string) $_SERVER['HTTP_ACCEPT'], 'application/json'));
+
+        if ($isApi) {
+            http_response_code(403);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Permissão negada.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         http_response_code(403);
+        header('Content-Type: text/plain; charset=utf-8');
         exit('Você não tem permissão para acessar este recurso.');
     }
 }

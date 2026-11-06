@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 require __DIR__ . '/_csrf_guard.php';
 
+require __DIR__ . '/_tool_access_guard.php';
+tool_access_guard_for('compactar-pdf');
+
+
 
 require __DIR__ . '/pdf-common.php';
 

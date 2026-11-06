@@ -35,7 +35,7 @@ $stmt = $pdo->prepare(
        AND reset_token_expires_at >= NOW()
      LIMIT 1'
 );
-$stmt->execute(['token' => $token]);
+$stmt->execute(['token' => auth_hash_token($token)]);
 $user = $stmt->fetch();
 
 if (!$user) {
