@@ -226,7 +226,7 @@ final class DocumentConverterService
 
     private function fileUri(string $path): string
     {
-        $normalized = str_replace('\\\\', '/', $path);
+        $normalized = str_replace(chr(92), '/', $path);
         return 'file:///' . ltrim($normalized, '/');
     }
 
