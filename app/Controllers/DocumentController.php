@@ -28,4 +28,12 @@ final class DocumentController
     {
         return $this->documents->wordToPdf($temporaryPath, $originalName, $maxBytes);
     }
+
+    /**
+     * @param array{name:array, tmp_name:array, error:array, size:array} $uploads
+     */
+    public function mergePdfs(array $uploads, int $maxFiles = 20, int $maxBytesPerFile = 31457280): array
+    {
+        return $this->pdf->merge($uploads, $maxFiles, $maxBytesPerFile);
+    }
 }
