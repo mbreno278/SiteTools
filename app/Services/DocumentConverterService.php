@@ -124,6 +124,8 @@ final class DocumentConverterService
 
     /**
      * PDF → DOCX via LibreOffice.
+     * Mantém o filtro de importação PDF do Writer e a segunda estratégia
+     * de exportação usada pelo endpoint legado.
      *
      * @return array{path:string,mime:string,bytes:int,workspace:TempWorkspace}
      */
@@ -138,39 +140,90 @@ final class DocumentConverterService
 
         $workspace = new TempWorkspace();
         $input = $workspace->randomFile('pdf');
+
         if (!@move_uploaded_file($uploadTmp, $input) && !@copy($uploadTmp, $input)) {
             $workspace->cleanup();
             throw new AppException('Falha ao receber o arquivo.', 500, 'upload_store_failed');
         }
 
         $outDir = $workspace->path();
-        $cmd = [
+        $baseCommand = [
             $soffice,
             '--headless',
             '--nologo',
-            '--nofirststartwizard',
+            '--nodefault',
+            '--nolockcheck',
             '--norestore',
-            '--convert-to', 'docx',
-            '--outdir', $outDir,
-            $input,
+            '--nofirststartwizard',
+            '-env:UserInstallation=' . $this->fileUri($workspace->join('lo-profile')),
+            '--infilter=writer_pdf_import',
         ];
 
-        $result = $this->runner->run($cmd, $outDir, $this->timeoutSeconds);
-        if ($result['timed_out']) {
-            $workspace->cleanup();
-            throw new AppException('A conversão excedeu o tempo limite.', 504, 'timeout');
-        }
+        $commands = [
+            array_merge($baseCommand, [
+                '--convert-to', 'docx',
+                '--outdir', $outDir,
+                $input,
+            ]),
+            array_merge($baseCommand, [
+                '--convert-to', 'docx:Office Open XML Text',
+                '--outdir', $outDir,
+                $input,
+            ]),
+        ];
 
-        $base = pathinfo($input, PATHINFO_FILENAME);
         $docx = $outDir . DIRECTORY_SEPARATOR . $base . '.docx';
-        if (!is_file($docx)) {
-            $found = glob($outDir . DIRECTORY_SEPARATOR . '*.docx') ?: [];
-            $docx = $found[0] ?? '';
+        $lastResult = ['exit' => -1, 'stdout' => '', 'stderr' => '', 'timed_out' => false];
+        $validationReason = null;
+        $valid = false;
+        $conversionStartedAt = hrtime(true);
+
+        foreach ($commands as $command) {
+            if (is_file($docx)) {
+                @unlink($docx);
+            }
+
+            // O limite de tempo vale para a conversão inteira, não para cada tentativa.
+            $elapsedSeconds = (int) ((hrtime(true) - $conversionStartedAt) / 1_000_000_000);
+            $remainingSeconds = $this->timeoutSeconds - $elapsedSeconds;
+
+            if ($remainingSeconds <= 0) {
+                $workspace->cleanup();
+                throw new AppException('A conversão excedeu o tempo limite.', 504, 'timeout');
+            }
+
+            $lastResult = $this->runner->run($command, $outDir, $remainingSeconds);
+
+            if ($lastResult['timed_out']) {
+                $workspace->cleanup();
+                throw new AppException('A conversão excedeu o tempo limite.', 504, 'timeout');
+            }
+
+            if (is_file($docx) && filesize($docx) > 100 && $this->validateDocx($docx, $validationReason)) {
+                $valid = true;
+                break;
+            }
         }
 
-        if ($docx === '' || !is_file($docx)) {
+        if (!$valid) {
+            $detail = trim(($lastResult['stderr'] ?? '') . ' ' . ($lastResult['stdout'] ?? ''));
+            error_log(
+                '[pdf-to-word] DOCX inválido: '
+                . ($validationReason ?? 'arquivo DOCX não encontrado.')
+                . ' Processo: '
+                . $detail
+            );
             $workspace->cleanup();
-            throw new AppException('Não foi possível converter o PDF.', 500, 'conversion_failed');
+
+            if ($validationReason !== null) {
+                throw new ValidationException($validationReason);
+            }
+
+            throw new AppException(
+                'Não foi possível converter este PDF. Verifique se ele está protegido por senha e se o LibreOffice consegue abri-lo.',
+                500,
+                'conversion_failed'
+            );
         }
 
         return [
@@ -181,33 +234,178 @@ final class DocumentConverterService
         ];
     }
 
-    private function assertUpload(string $tmp, string $originalName, int $maxBytes, array $exts): void
+    private function fileUri(string $path): string
     {
-        if ($tmp === '' || !is_file($tmp)) {
-            throw new ValidationException('Arquivo de upload inválido.');
-        }
-        $size = (int) filesize($tmp);
-        if ($size <= 0 || $size > $maxBytes) {
-            throw new ValidationException('Tamanho de arquivo não permitido.');
-        }
-        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        if (!in_array($ext, $exts, true)) {
-            throw new ValidationException('Extensão não permitida.');
+        $normalized = str_replace(chr(92), '/', $path);
+        return 'file:///' . ltrim($normalized, '/');
+    }
+
+    /**
+     * Confere a estrutura interna do DOCX e a presença de texto ou conteúdo visual.
+     */
+    private function validateDocx(string $path, ?string &$reason = null): bool
+    {
+        $reason = null;
+
+        if (!class_exists(\\ZipArchive::class)) {
+            $reason = 'A extensão PHP ZIP não está habilitada no servidor.';
+            return false;
         }
 
-        if (function_exists('upload_validate')) {
-            // validação extra se upload-security estiver carregado
+        $zip = new \\ZipArchive();
+        if ($zip->open($path) !== true) {
+            $reason = 'O arquivo gerado não é um pacote DOCX válido.';
+            return false;
+        }
+
+        foreach (['[Content_Types].xml', '_rels/.rels', 'word/document.xml'] as $entry) {
+            if ($zip->locateName($entry) === false) {
+                $zip->close();
+                $reason = 'O documento Word está incompleto.';
+                return false;
+            }
+        }
+
+        $xml = $zip->getFromName('word/document.xml');
+        if (!is_string($xml) || $xml === '') {
+            $zip->close();
+            $reason = 'O documento Word não possui conteúdo XML.';
+            return false;
+        }
+
+        $hasText = false;
+        $hasVisual = false;
+
+        if (class_exists(\\DOMDocument::class)) {
+            $previous = libxml_use_internal_errors(true);
+            $document = new \\DOMDocument();
+            $loaded = $document->loadXML($xml, LIBXML_NONET | LIBXML_NOBLANKS);
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+
+            if (!$loaded) {
+                $zip->close();
+                $reason = 'O XML principal do documento Word está inválido.';
+                return false;
+            }
+
+            $namespace = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+            foreach ($document->getElementsByTagNameNS($namespace, 't') as $node) {
+                if (trim($node->textContent) !== '') {
+                    $hasText = true;
+                    break;
+                }
+            }
+
+            $xpath = new \\DOMXPath($document);
+            $visualNodes = $xpath->query('//*[local-name()="drawing" or local-name()="pict" or local-name()="object"]');
+            $hasVisual = $visualNodes !== false && $visualNodes->length > 0;
+        } else {
+            $hasText = preg_match('/<w:t(?:\\s[^>]*)?>\\s*[^<\\s][\\s\\S]*?<\\/w:t>/', $xml) === 1;
+            $hasVisual = preg_match('/<(?:wp:)?(?:inline|anchor)|<w:pict|<w:object/', $xml) === 1;
+        }
+
+        if (!$hasVisual) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $entry = $zip->getNameIndex($i);
+                if (is_string($entry) && str_starts_with($entry, 'word/media/') && !str_ends_with($entry, '/')) {
+                    $hasVisual = true;
+                    break;
+                }
+            }
+        }
+
+        $zip->close();
+
+        if (!$hasText && !$hasVisual) {
+            $reason = 'O DOCX foi criado, mas não contém texto nem imagens. O PDF pode ser digitalizado ou o LibreOffice não conseguiu extrair seu conteúdo.';
+            return false;
+        }
+
+        return true;
+    }
+
+    private function assertUpload(string $tmp, string $originalName, int $maxBytes, array $exts): void
+    {
+        if ($tmp === '' || !is_file($tmp) || !is_readable($tmp)) {
+            throw new ValidationException('Arquivo de upload inválido.');
+        }
+
+        $size = filesize($tmp);
+        if ($size === false || $size <= 0 || $size > $maxBytes) {
+            throw new ValidationException('Tamanho de arquivo não permitido.');
+        }
+
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $exts, true)) {
+            throw new ValidationException('Formato de arquivo não permitido.');
         }
 
         if ($ext === 'pdf') {
-            $fh = fopen($tmp, 'rb');
-            $sig = $fh ? (fread($fh, 5) ?: '') : '';
-            if ($fh) {
-                fclose($fh);
+            $handle = fopen($tmp, 'rb');
+            $signature = $handle ? (fread($handle, 5) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
             }
-            if (!str_starts_with($sig, '%PDF')) {
+
+            if ($signature !== '%PDF-') {
                 throw new ValidationException('Arquivo PDF inválido.');
             }
+
+            return;
+        }
+
+        if ($ext === 'docx') {
+            $this->assertDocxPackage($tmp);
+            return;
+        }
+
+        if ($ext === 'doc') {
+            $handle = fopen($tmp, 'rb');
+            $signature = $handle ? (fread($handle, 8) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+
+            // DOC legado é um documento OLE Compound File.
+            if ($signature !== "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1") {
+                throw new ValidationException('O arquivo não possui uma estrutura válida de documento Word (.doc).');
+            }
+        }
+    }
+
+    /**
+     * Valida o pacote ZIP mínimo de um DOCX antes de iniciar o LibreOffice.
+     */
+    private function assertDocxPackage(string $path): void
+    {
+        if (!class_exists(\\ZipArchive::class)) {
+            throw new AppException('A extensão PHP ZIP não está habilitada no servidor.', 503, 'zip_extension_missing');
+        }
+
+        $zip = new \\ZipArchive();
+        if ($zip->open($path) !== true) {
+            throw new ValidationException('O arquivo DOCX não é um pacote Word válido.');
+        }
+
+        $requiredEntries = [
+            '[Content_Types].xml',
+            '_rels/.rels',
+            'word/document.xml',
+        ];
+
+        foreach ($requiredEntries as $entry) {
+            if ($zip->locateName($entry) === false) {
+                $zip->close();
+                throw new ValidationException('O arquivo DOCX está incompleto ou corrompido.');
+            }
+        }
+
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if (!is_string($documentXml) || $documentXml === '' || stripos($documentXml, '<w:document') === false) {
+            throw new ValidationException('O conteúdo interno do arquivo DOCX é inválido.');
         }
     }
 }
