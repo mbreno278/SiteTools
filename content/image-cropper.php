@@ -1,6 +1,6 @@
 <?php
-    require_once __DIR__ . '/config/functions.php';
-
+    require_once __DIR__ . '/../config/functions.php';
+    
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
@@ -8,12 +8,13 @@
     $user_id = $_SESSION['user_id'] ?? null;
 
     $tools_id = (int) $tool['id'];
+    
 ?>
 <div
     class="image-cropper"
     id="image-cropper"
     data-tool-id="<?= $tools_id ?>"
-    data-history-url="<?= e(BASE_URL . '/config/save-tool-usage.php') ?>">
+    data-history-url="http://localhost/projetos/SiteTools/api/save-tool-usage.php">
 
     <div class="image-cropper__dropzone" id="crop-dropzone">
         <input

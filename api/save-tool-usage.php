@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/database.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../config/csrf.php';
+require_once __DIR__ . '/../config/auth.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/functions.php';
 
 // Somente POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
