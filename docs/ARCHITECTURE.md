@@ -2,89 +2,113 @@
 
 ## Visão geral
 
-O SiteTools combina:
+O SiteTools está em migração gradual de endpoints PHP procedurais para uma camada organizada em `app/`. A migração preserva os contratos HTTP existentes e mantém compatibilidade com PHP 8.2+, Composer opcional e WAMP.
 
-1. **Camada legada procedural** em `config/`, `tools/`, `content/` e páginas PHP na raiz — responsável por grande parte do runtime atual.
-2. **Camada orientada a serviços** em `app/` (PSR-4 `App\`) — Services, Repositories, Middleware, Exceptions e Helpers, usada progressivamente pelos endpoints.
+O bootstrap da camada é `app/bootstrap.php`; ele registra o autoloader PSR-4 e carrega as configurações compartilhadas necessárias aos serviços.
 
-O bootstrap da camada nova está em `app/bootstrap.php` e pode ser incluído por endpoints legados.
-
-## Estrutura de pastas
+## Estrutura da camada de aplicação
 
 ```
-SiteTools/
-├── account/           # Área do usuário autenticado
-├── admin/             # Painel administrativo (sessão própria)
-├── api/               # Endpoints JSON auxiliares
-├── app/               # Camada App\ (Services, Repos, Middleware…)
-├── assets/            # CSS/JS/imagens estáticos
-├── config/            # Auth, CSRF, DB, tool-access, upload-security…
-├── content/           # Conteúdo/páginas de ferramentas
-├── handlers/          # Handlers auxiliares
-├── includes/          # Includes compartilhados de front
-├── storage/           # logs, temp, queue, user-files, backups
-├── templates/         # Layout (header, footer, tool-page…)
-├── tools/             # Scripts de processamento das ferramentas
-├── uploads/           # Uploads públicos/temporários (quando aplicável)
-├── tests/             # Testes automatizados
-├── index.php          # Home
-├── page.php           # Roteamento de páginas/ferramentas
-└── .env.example
+app/
+├── Controllers/
+│   ├── ImageController.php
+│   ├── DocumentController.php
+│   └── ToolProcessController.php
+├── Services/
+│   ├── ImageService.php
+│   ├── ImageProcessingService.php
+│   ├── PdfService.php
+│   ├── DocumentConverterService.php
+│   ├── FileStorageService.php
+│   └── ...
+├── Repositories/
+│   ├── ToolRepository.php
+│   └── UserRepository.php
+├── Middleware/
+│   ├── AuthMiddleware.php
+│   ├── CsrfMiddleware.php
+│   ├── ToolAccessMiddleware.php
+│   └── ...
+├── Exceptions/
+│   ├── AppException.php
+│   ├── AuthorizationException.php
+│   └── ValidationException.php
+├── Helpers/
+└── bootstrap.php
 ```
 
-### `app/`
+### Controllers
 
-| Pasta | Papel |
-|-------|--------|
-| `Controllers/` | Orquestração de requests (ex.: `ToolProcessController`) |
-| `Services/` | Regras de negócio (acesso, limites, arquivos, conversão) |
-| `Repositories/` | Acesso a dados via PDO |
-| `Middleware/` | CSRF, tool access |
-| `Exceptions/` | `AppException`, `AuthorizationException`, `ValidationException` |
-| `Helpers/` | Autoloader, Response, Logger, ErrorHandler |
-| `Services/Process/` | Workspace temporário, runner de processos, fila simples |
+Controllers coordenam o fluxo de uma operação. Não devem conter algoritmos de conversão, manipulação GD ou SQL diretamente.
 
-### `config/`
+- `ImageController`: direciona resize, compress, convert e crop para `ImageService`.
+- `DocumentController`: coordena PDF → Word e Word → PDF.
+- `ToolProcessController`: infraestrutura compartilhada para endpoints de ferramentas.
 
-Funções e constantes compartilhadas:
+Os controllers de imagem e documentos recebem dados já extraídos da requisição. A autenticação, autorização, CSRF, limites e resposta HTTP continuam sendo responsabilidade do endpoint/middleware que integra o fluxo.
 
-- `auth.php` — sessão, login, lockout, tokens
-- `csrf.php` — token e verificação
-- `tool-access.php` — modos free/login/paid/temporary + grants
-- `upload-security.php` — validação de upload e path seguro
-- `database.php` / `env.php` — conexão e ambiente
-- `user-area.php`, `functions.php`, `converters.php`
+### Services
 
-## Fluxo de uma requisição típica de ferramenta
+Services concentram regras de negócio e processamento.
+
+- `ImageService`: fachada estável sobre o processador GD existente.
+- `ImageProcessingService`: implementação de resize, compress, convert e crop.
+- `PdfService`: valida a entrada PDF e delega conversão.
+- `DocumentConverterService`: executa conversões com LibreOffice headless.
+- `FileStorageService`: fachada sobre as funções de validação e armazenamento privado existentes.
+
+Não duplicar algoritmos ou regras já presentes nos serviços existentes.
+
+### Repositories
+
+Repositories encapsulam consultas PDO:
+
+- `ToolRepository`: consulta ferramentas e regras relacionadas.
+- `UserRepository`: consulta e atualiza dados de usuários.
+
+### Middleware
+
+- `AuthMiddleware`: exige uma sessão válida através de `auth_user()`.
+- `CsrfMiddleware`: valida requisições mutáveis através de `csrf_verify()`.
+- `ToolAccessMiddleware`: verifica autorização e cotas de uso.
+
+O middleware administrativo deve continuar separado da autenticação de usuários comuns, pois o projeto utiliza sessões e tabelas administrativas próprias.
+
+### Exceptions
+
+Use `AppException` e subclasses para erros esperados da aplicação. Mensagens destinadas ao usuário devem ser seguras; detalhes técnicos devem permanecer nos logs.
+
+## Fluxo recomendado
 
 ```
-Browser
-  → page.php / tools/*.php
-    → config (auth, csrf, tool-access, upload-security)
-    → (opcional) app/bootstrap.php
-    → ToolAccessService / tool_access_check
-    → UsageLimitService (cotas)
-    → FileStorageService / upload_validate
-    → DocumentConverterService / ImageProcessingService / ProcessRunner
-    → resposta HTML ou JSON
+Requisição HTTP
+  → endpoint / roteador
+  → app/bootstrap.php
+  → Middleware (CSRF, autenticação, acesso à ferramenta)
+  → Controller
+  → Service
+  → Repository (quando houver acesso a dados)
+  → resposta HTTP existente
 ```
 
-## Separação de responsabilidades
+## Compatibilidade e migração
 
-- **Autenticação**: `config/auth.php` + sessão PHP + tabela `user_sessions`
-- **Autorização de ferramenta**: `tool_access_check` / `ToolAccessService` (status operacional + modo comercial + grant)
-- **Limites**: `UsageLimitService` + `tool_usage_limits` / `tool_usage_counters`
-- **Arquivos**: `upload-security.php` + `FileStorageService` + `storage/user-files`
-- **Admin**: sessão e tabelas distintas (`admin_users`, `ADMIN_SESSION_NAME`)
+A estrutura nova não exige a migração simultânea de todos os endpoints. Os arquivos em `tools/` podem continuar funcionando como adaptadores legados enquanto são migrados individualmente.
 
-## Princípios adotados
+Antes de substituir um endpoint existente:
 
-- Validação no servidor (nunca confiar só no cliente)
-- Consultas preparadas (PDO)
-- Fail-closed em grants e acesso pago
-- Exceções de aplicação com código HTTP e `errorCode` estáveis
-- Pouca abstração: services finos sobre o legado, sem over-engineering
+1. comparar o contrato de entrada e saída usado pelo JavaScript;
+2. preservar os nomes dos campos multipart e cabeçalhos de download;
+3. manter CSRF, controle de acesso e cotas;
+4. validar permissões e propriedade dos arquivos;
+5. executar testes locais no WAMP;
+6. só então remover lógica duplicada.
 
-## Evolução
+## Princípios
 
-Novos fluxos devem preferir `App\Services` + Repositories. Endpoints legados podem continuar chamando funções de `config/` até migração gradual.
+- Validação sempre no servidor.
+- Consultas SQL preparadas.
+- Menor privilégio e isolamento de arquivos por usuário.
+- Nenhum detalhe interno de exceção enviado ao cliente.
+- Services pequenos e coesos.
+- Migração incremental, sem reescrita total do sistema.
