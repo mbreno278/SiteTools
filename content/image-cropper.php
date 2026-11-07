@@ -1,4 +1,11 @@
-
+<?php
+    $_COOKIE['user_id'] = 1; // Replace with the actual user ID
+    $user_id = $_COOKIE['user_id'];
+    $tools_id = $tool['id']; // Replace with the actual tool ID
+    $status =  'processing'; // Replace with the actual status
+    $processing_time = 500; // Replace with the actual processing time in milliseconds
+    $file_size = 1024; // Replace with the actual file size in bytes
+?>
 <div class="image-cropper" id="image-cropper">
 
     <div class="image-cropper__dropzone" id="crop-dropzone">

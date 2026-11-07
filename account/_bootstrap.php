@@ -49,7 +49,7 @@ function account_header(string $title, string $subtitle = ''): void
             <div class="ua-side-label">CONTA</div>
             <a class="ua-nav<?= account_active('index.php') ?>" href="index.php"><span class="material-symbols-outlined">dashboard</span>Painel</a>
             <a class="ua-nav<?= account_active('tools.php') ?>" href="tools.php"><span class="material-symbols-outlined">handyman</span>Minhas ferramentas</a>
-            <a class="ua-nav<?= account_active('subscriptions.php') ?>" href="subscriptions.php"><span class="material-symbols-outlined">key</span>Meus acessos</a>
+            <a class="ua-nav<?= account_active('subscriptions.php') ?>" href="subscriptions.php"><span class="material-symbols-outlined">key</span>Assinaturas</a>
             <a class="ua-nav<?= account_active('history.php') ?>" href="history.php"><span class="material-symbols-outlined">history</span>Histórico</a>
             <a class="ua-nav<?= account_active('files.php') ?>" href="files.php"><span class="material-symbols-outlined">folder_open</span>Meus arquivos</a>
             <a class="ua-nav<?= account_active('favorites.php') ?>" href="favorites.php"><span class="material-symbols-outlined">favorite</span>Favoritos</a>

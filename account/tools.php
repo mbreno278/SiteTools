@@ -84,7 +84,9 @@ account_header('Minhas ferramentas', 'Ferramentas do catálogo, uso e favoritos.
             };
             ?>
             <div class="ua-list-row">
-                <div class="ua-tool-icon"><span class="material-symbols-outlined"><?= user_area_e((string) ($r['icon'] ?: 'build')) ?></span></div>
+                <div class="ua-tool-icon">
+                    <span class="material-symbols-outlined"><?= user_area_e((string) ($r['icon'] ?: 'build')) ?></span>
+                </div>
                 <div class="ua-row-content">
                     <strong><?= user_area_e((string) $r['name']) ?></strong>
                     <small>
@@ -103,7 +105,7 @@ account_header('Minhas ferramentas', 'Ferramentas do catálogo, uso e favoritos.
                     class="ua-button ua-button--light"
                     data-favorite-toggle="<?= (int) $r['id'] ?>"
                     data-active="<?= (int) $r['is_fav'] > 0 ? '1' : '0' ?>"
-                ><?= (int) $r['is_fav'] > 0 ? '★ Favorito' : '☆ Favoritar' ?></button>
+                ><?= (int) $r['is_fav'] > 0 ? '★ Favorito' : '☆ Favorito' ?></button>
                 <a class="ua-button" href="../page.php?slug=<?= rawurlencode((string) $r['slug']) ?>">Abrir</a>
             </div>
         <?php endforeach; endif; ?>

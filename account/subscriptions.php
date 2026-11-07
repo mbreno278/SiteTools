@@ -59,8 +59,8 @@ try {
     error_log('[account/subscriptions] ' . $e->getMessage());
 }
 
-account_page_start('Meus acessos');
-account_header('Meus acessos', 'Acessos individuais por ferramenta — não há assinatura global.');
+account_page_start('Minhas Assinaturas');
+account_header('Minhas Assinaturas', 'Acessos individuais por ferramenta — não há assinatura global.');
 ?>
 <div class="ua-filters">
     <a class="ua-chip<?= $tab === 'active' ? ' is-active' : '' ?>" href="?tab=active">Ativos</a>

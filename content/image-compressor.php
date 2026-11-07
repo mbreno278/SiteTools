@@ -1,3 +1,12 @@
+<?php
+    include_once __DIR__ . '/config/functions-user.php';
+    $_COOKIE['user_id'] = 1; // Replace with the actual user ID
+    $user_id = $_COOKIE['user_id'];
+    $tools_id = e($tool['name']); // Replace with the actual tool ID
+    $status =  'processing'; // Replace with the actual status
+    $processing_time = 500; // Replace with the actual processing time in milliseconds
+    $file_size = 1024; // Replace with the actual file size in bytes
+?>
 
 <div class="image-compressor" id="image-compressor">
 
@@ -115,6 +124,7 @@
                 class="button button--primary image-compressor__action"
                 id="compress-button"
             >
+                <?= user_tool_usage($user_id, $tools_id, $status, $processing_time, $file_size); ?>
                 <span class="material-symbols-outlined"
                       aria-hidden="true">compress</span>
                 Compress image

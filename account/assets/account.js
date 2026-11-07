@@ -46,7 +46,7 @@ document.addEventListener("click", async (event) => {
       const row = button.closest(".ua-list-row");
       if (row) row.remove();
     } else {
-      button.textContent = data.active ? "★ Favorito" : "☆ Favoritar";
+      button.textContent = data.active ? "★ Favorito" : "☆ Favorito";
     }
     uaToast(data.message || (data.active ? "Favoritado." : "Removido."));
   } catch (error) {
