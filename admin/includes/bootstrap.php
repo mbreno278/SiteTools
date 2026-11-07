@@ -9,7 +9,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_name(ADMIN_SESSION_NAME);
     session_set_cookie_params([
         'httponly' => true,
-        'secure' => !empty($_SERVER['HTTP']) && $_SERVER['HTTP'] !== 'off',
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         'samesite' => 'Lax',
         'path' => BASE_URL . '/admin',
     ]);
