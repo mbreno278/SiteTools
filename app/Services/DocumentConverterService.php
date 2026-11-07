@@ -176,13 +176,23 @@ final class DocumentConverterService
         $lastResult = ['exit' => -1, 'stdout' => '', 'stderr' => '', 'timed_out' => false];
         $validationReason = null;
         $valid = false;
+        $conversionStartedAt = hrtime(true);
 
         foreach ($commands as $command) {
             if (is_file($docx)) {
                 @unlink($docx);
             }
 
-            $lastResult = $this->runner->run($command, $outDir, $this->timeoutSeconds);
+            // O limite de tempo vale para a conversão inteira, não para cada tentativa.
+            $elapsedSeconds = (int) ((hrtime(true) - $conversionStartedAt) / 1_000_000_000);
+            $remainingSeconds = $this->timeoutSeconds - $elapsedSeconds;
+
+            if ($remainingSeconds <= 0) {
+                $workspace->cleanup();
+                throw new AppException('A conversão excedeu o tempo limite.', 504, 'timeout');
+            }
+
+            $lastResult = $this->runner->run($command, $outDir, $remainingSeconds);
 
             if ($lastResult['timed_out']) {
                 $workspace->cleanup();
