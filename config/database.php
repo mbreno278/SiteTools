@@ -3,30 +3,30 @@
 declare(strict_types=1);
 
 /**
- * SiteTools — conexão PDO segura
+ * SiteTools — conexão PDO
  *
- * Produção: exige DB_HOST, DB_NAME, DB_USER, DB_PASSWORD no ambiente.
- * Desenvolvimento local: permite fallback apenas se APP_ENV=local.
- * Nunca usa o usuário root.
+ * Produção: exige DB_* no ambiente ou .env
+ * Local (APP_ENV=local): permite fallbacks de desenvolvimento
+ * Nunca usa usuário root
  */
 
-$appEnv = strtolower(trim((string) (getenv('APP_ENV') ?: 'production')));
-$isLocal = in_array($appEnv, ['local', 'development', 'dev'], true);
+require_once __DIR__ . '/env.php';
+
+$appEnv = app_env();
+$isLocal = app_is_local();
 
 $required = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
 $config = [];
 
 foreach ($required as $name) {
-    $value = getenv($name);
+    $value = env($name, null);
 
-    // Em produção, tudo obrigatório (senha pode ser string vazia só em local)
-    if ($value === false || ($name !== 'DB_PASSWORD' && trim((string) $value) === '')) {
+    if ($value === null || ($name !== 'DB_PASSWORD' && trim((string) $value) === '')) {
         if (!$isLocal) {
             throw new RuntimeException(
-                "Configuração ausente: defina a variável de ambiente {$name}."
+                "Configuração ausente: defina a variável de ambiente {$name} (ou arquivo .env)."
             );
         }
-        // Fallbacks só para desenvolvimento local
         $value = match ($name) {
             'DB_HOST' => 'localhost',
             'DB_NAME' => 'webtools__sitetools',
@@ -36,7 +36,7 @@ foreach ($required as $name) {
         };
     }
 
-    $config[$name] = is_string($value) ? $value : (string) $value;
+    $config[$name] = (string) $value;
 }
 
 $host = trim($config['DB_HOST']);
@@ -48,16 +48,19 @@ if ($host === '' || $dbname === '' || $username === '') {
     throw new RuntimeException('DB_HOST, DB_NAME e DB_USER são obrigatórios.');
 }
 
-// Bloqueia usuários administrativos do MySQL
 $forbiddenUsers = ['root', 'mysql.sys', 'mysql.session', 'mysql.infoschema', 'debian-sys-maint'];
-if (in_array(strtolower($username), $forbiddenUsers, true)) {
+if (in_array(strtolower($username), $forbiddenUsers, true) && !$isLocal) {
     throw new RuntimeException(
-        'A aplicação não pode conectar ao MySQL com usuário administrativo (' . $username . '). '
-        . 'Use um usuário exclusivo com privilégios mínimos.'
+        'A aplicação não pode conectar ao MySQL com usuário administrativo em produção.'
     );
 }
 
-// Validação básica anti-injeção no DSN (valores vêm do ambiente, mas reforça)
+// Em local permite root apenas se explicitamente configurado (WAMP comum)
+if (in_array(strtolower($username), $forbiddenUsers, true) && $isLocal) {
+    // aviso em log, não bloqueia WAMP padrão
+    error_log('[database] Aviso: usando usuário administrativo MySQL em ambiente local.');
+}
+
 if (!preg_match('/^[a-zA-Z0-9._\-]+$/', $host)) {
     throw new RuntimeException('DB_HOST inválido.');
 }
@@ -65,9 +68,14 @@ if (!preg_match('/^[a-zA-Z0-9_]+$/', $dbname)) {
     throw new RuntimeException('DB_NAME inválido.');
 }
 
+$port = (int) env('DB_PORT', 3306);
+if ($port < 1 || $port > 65535) {
+    $port = 3306;
+}
+
 try {
     $pdo = new PDO(
-        "mysql:host={$host};dbname={$dbname};charset=utf8mb4",
+        "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4",
         $username,
         $password,
         [
@@ -77,9 +85,15 @@ try {
             PDO::ATTR_STRINGIFY_FETCHES  => false,
         ]
     );
+    $GLOBALS['pdo'] = $pdo;
 } catch (PDOException $e) {
-    // Não expõe detalhes da conexão ao usuário final
-    throw new RuntimeException(
-        'Falha na conexão com o banco de dados. Verifique as credenciais e se o MySQL está ativo.'
-    );
+    error_log('[database] conexão falhou: ' . $e->getMessage());
+    if ($isLocal) {
+        throw new RuntimeException(
+            'Falha na conexão com o banco. Verifique DB_* no .env e se o MySQL do WAMP está ativo.',
+            0,
+            $e
+        );
+    }
+    throw new RuntimeException('Serviço de banco de dados indisponível.', 0, $e);
 }

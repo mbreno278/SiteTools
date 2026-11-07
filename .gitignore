@@ -13,6 +13,7 @@
 /storage/temp/*
 /storage/backups/*
 /storage/user-files/*
+/storage/queue/*
 /uploads/*
 !/**/.gitkeep
 !/**/.htaccess
@@ -22,7 +23,7 @@
 mail-log.txt
 *.sql
 !/database/schema.sql
-!/config/webtools__sitetools.sql
+!/database/migrations/*.sql
 
 # Sessões / cache
 /sessions/
