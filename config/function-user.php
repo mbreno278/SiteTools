@@ -22,7 +22,6 @@ function user_tool_usage(
         'INSERT INTO user_tool_usage (
             user_id,
             tool_id,
-            tool_name,
             tool_slug,
             status,
             processing_time_ms,
@@ -31,7 +30,6 @@ function user_tool_usage(
         ) VALUES (
             :user_id,
             :tool_id,
-            :tool_name,
             :tool_slug,
             :status,
             :processing_time_ms,
@@ -43,7 +41,6 @@ function user_tool_usage(
     return $sql->execute([
         ':user_id' => $user_id,
         ':tool_id' => $tools_id,
-        ':tool_name' => $tool_data['name'],
         ':tool_slug' => $tool_data['slug'],
         ':status' => $status,
         ':processing_time_ms' => $processing_time,

@@ -4,50 +4,55 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/function.php';
-
-// Verifica autenticação
-$user_id = $_SESSION['user_id'] ?? null;
-
-if (!$user_id) {
-    http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Authentication required.'
-    ]);
-    exit;
-}
+require_once __DIR__ . '/csrf.php';
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/functions.php';
 
 // Somente POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+
     echo json_encode([
         'success' => false,
         'message' => 'Method not allowed.'
     ]);
+
     exit;
 }
 
-// Recebe JSON
-$data = json_decode(
-    file_get_contents('php://input'),
-    true
-);
+// Proteção CSRF
+csrf_verify();
+
+// Recupera usuário autenticado
+$user = auth_user();
+
+if (!$user) {
+    http_response_code(401);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Authentication required.'
+    ]);
+
+    exit;
+}
+
+// Recupera dados JSON
+$data = csrf_json_input();
 
 if (!is_array($data)) {
     http_response_code(400);
+
     echo json_encode([
         'success' => false,
         'message' => 'Invalid request.'
     ]);
+
     exit;
 }
 
-// Validação dos dados
+// Valida os dados
 $tool_id = filter_var(
     $data['tool_id'] ?? null,
     FILTER_VALIDATE_INT
@@ -76,10 +81,12 @@ if (
     !in_array($status, ['completed', 'failed'], true)
 ) {
     http_response_code(422);
+
     echo json_encode([
         'success' => false,
         'message' => 'Invalid usage data.'
     ]);
+
     exit;
 }
 
@@ -87,7 +94,7 @@ try {
 
     $result = user_tool_usage(
         $pdo,
-        (int) $user_id,
+        (int) $user['id'],
         $tool_id,
         $status,
         $processing_time,
@@ -95,7 +102,9 @@ try {
     );
 
     if (!$result) {
-        throw new RuntimeException('Unable to save usage.');
+        throw new RuntimeException(
+            'Unable to save tool usage.'
+        );
     }
 
     echo json_encode([
@@ -105,7 +114,7 @@ try {
 
 } catch (Throwable $e) {
 
-    error_log($e->getMessage());
+    error_log('[tool-usage] ' . $e->getMessage());
 
     http_response_code(500);
 

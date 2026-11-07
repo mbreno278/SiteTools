@@ -62,6 +62,14 @@ if (cropper) {
         fileSize
     }) {
 
+        if (!historyURL || !Number.isInteger(toolId) || toolId <= 0) {
+            console.error("Invalid tool history configuration.", {
+                toolId,
+                historyURL
+            });
+            return false;
+        }
+
         try {
 
             const response = await fetch(historyURL, {
