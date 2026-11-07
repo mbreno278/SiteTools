@@ -327,31 +327,85 @@ final class DocumentConverterService
 
     private function assertUpload(string $tmp, string $originalName, int $maxBytes, array $exts): void
     {
-        if ($tmp === '' || !is_file($tmp)) {
+        if ($tmp === '' || !is_file($tmp) || !is_readable($tmp)) {
             throw new ValidationException('Arquivo de upload inválido.');
         }
-        $size = (int) filesize($tmp);
-        if ($size <= 0 || $size > $maxBytes) {
+
+        $size = filesize($tmp);
+        if ($size === false || $size <= 0 || $size > $maxBytes) {
             throw new ValidationException('Tamanho de arquivo não permitido.');
         }
+
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         if (!in_array($ext, $exts, true)) {
-            throw new ValidationException('Extensão não permitida.');
-        }
-
-        if (function_exists('upload_validate')) {
-            // validação extra se upload-security estiver carregado
+            throw new ValidationException('Formato de arquivo não permitido.');
         }
 
         if ($ext === 'pdf') {
-            $fh = fopen($tmp, 'rb');
-            $sig = $fh ? (fread($fh, 5) ?: '') : '';
-            if ($fh) {
-                fclose($fh);
+            $handle = fopen($tmp, 'rb');
+            $signature = $handle ? (fread($handle, 5) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
             }
-            if (!str_starts_with($sig, '%PDF')) {
+
+            if ($signature !== '%PDF-') {
                 throw new ValidationException('Arquivo PDF inválido.');
             }
+
+            return;
+        }
+
+        if ($ext === 'docx') {
+            $this->assertDocxPackage($tmp);
+            return;
+        }
+
+        if ($ext === 'doc') {
+            $handle = fopen($tmp, 'rb');
+            $signature = $handle ? (fread($handle, 8) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+
+            // DOC legado é um documento OLE Compound File.
+            if ($signature !== "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1") {
+                throw new ValidationException('O arquivo não possui uma estrutura válida de documento Word (.doc).');
+            }
+        }
+    }
+
+    /**
+     * Valida o pacote ZIP mínimo de um DOCX antes de iniciar o LibreOffice.
+     */
+    private function assertDocxPackage(string $path): void
+    {
+        if (!class_exists(\\ZipArchive::class)) {
+            throw new AppException('A extensão PHP ZIP não está habilitada no servidor.', 503, 'zip_extension_missing');
+        }
+
+        $zip = new \\ZipArchive();
+        if ($zip->open($path) !== true) {
+            throw new ValidationException('O arquivo DOCX não é um pacote Word válido.');
+        }
+
+        $requiredEntries = [
+            '[Content_Types].xml',
+            '_rels/.rels',
+            'word/document.xml',
+        ];
+
+        foreach ($requiredEntries as $entry) {
+            if ($zip->locateName($entry) === false) {
+                $zip->close();
+                throw new ValidationException('O arquivo DOCX está incompleto ou corrompido.');
+            }
+        }
+
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if (!is_string($documentXml) || $documentXml === '' || stripos($documentXml, '<w:document') === false) {
+            throw new ValidationException('O conteúdo interno do arquivo DOCX é inválido.');
         }
     }
 }
