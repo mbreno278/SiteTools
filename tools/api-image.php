@@ -8,89 +8,99 @@ declare(strict_types=1);
  *
  * POST multipart:
  *   action = resize|compress|convert|crop
- *   image  = arquivo
- *   width, height, quality, format, x, y, w, h conforme action
+ *   image/file = arquivo
+ *   width, height, keep_ratio, quality, format, x, y, w, h conforme action
  */
 
 require __DIR__ . '/_csrf_guard.php';
 
 $action = strtolower(trim((string) ($_POST['action'] ?? 'resize')));
+
 $slugMap = [
     'resize' => 'redimensionar-imagem',
     'compress' => 'image-compressor',
     'convert' => 'image-converter',
     'crop' => 'image-cropper',
 ];
-$slug = $slugMap[$action] ?? 'redimensionar-imagem';
+
+// Mantém o comportamento legado: ação ausente ou desconhecida usa resize.
+if (!isset($slugMap[$action])) {
+    $action = 'resize';
+}
+
+$slug = $slugMap[$action];
 
 require __DIR__ . '/_tool_access_guard.php';
 tool_access_guard_for($slug);
 
 require __DIR__ . '/_process_helpers.php';
 
+use App\Controllers\ImageController;
 use App\Exceptions\AppException;
 use App\Exceptions\ValidationException;
 use App\Helpers\Response;
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Allow: POST');
     Response::error('Método não permitido.', 405);
 }
 
-if (empty($_FILES['image']) && empty($_FILES['file'])) {
+$file = $_FILES['image'] ?? $_FILES['file'] ?? null;
+
+if (!is_array($file) || empty($file['tmp_name'])) {
     Response::error('Selecione uma imagem.', 422);
 }
 
-$file = $_FILES['image'] ?? $_FILES['file'];
 $started = hrtime(true);
-$svc = process_image_service();
 
 try {
-    $result = match ($action) {
-        'compress' => $svc->compress(
-            $file,
-            (int) ($_POST['quality'] ?? 75),
-            (string) ($_POST['format'] ?? 'jpeg')
-        ),
-        'convert' => $svc->convert(
-            $file,
-            (string) ($_POST['format'] ?? 'png'),
-            (int) ($_POST['quality'] ?? 90)
-        ),
-        'crop' => $svc->crop(
-            $file,
-            (int) ($_POST['x'] ?? 0),
-            (int) ($_POST['y'] ?? 0),
-            (int) ($_POST['w'] ?? 0),
-            (int) ($_POST['h'] ?? 0),
-            (string) ($_POST['format'] ?? 'jpeg'),
-            (int) ($_POST['quality'] ?? 90)
-        ),
-        default => $svc->resize(
-            $file,
-            (int) ($_POST['width'] ?? 0),
-            (int) ($_POST['height'] ?? 0),
-            (($_POST['keep_ratio'] ?? '1') !== '0'),
-            (string) ($_POST['format'] ?? 'jpeg'),
-            (int) ($_POST['quality'] ?? 85)
-        ),
-    };
+    $controller = new ImageController();
 
-    $ms = (int) ((hrtime(true) - $started) / 1_000_000);
+    $result = $controller->process($action, $file, [
+        'width' => (int) ($_POST['width'] ?? $_POST['w'] ?? 0),
+        'height' => (int) ($_POST['height'] ?? $_POST['h'] ?? 0),
+        'keep_ratio' => (($_POST['keep_ratio'] ?? '1') !== '0'),
+        'format' => (string) ($_POST['format'] ?? match ($action) {
+            'convert' => 'png',
+            default => 'jpeg',
+        }),
+        'quality' => (int) ($_POST['quality'] ?? match ($action) {
+            'compress' => 75,
+            default => 85,
+        }),
+        'x' => (int) ($_POST['x'] ?? 0),
+        'y' => (int) ($_POST['y'] ?? 0),
+    ]);
+
+    $processingMs = (int) ((hrtime(true) - $started) / 1_000_000);
+
     $toolId = null;
     try {
         $toolId = process_tool_id(app_pdo(), $slug);
     } catch (Throwable) {
+        // O processamento não deve falhar apenas porque o histórico não pôde ser consultado.
     }
 
-    $ext = match (true) {
-        str_contains($result['mime'], 'png') => 'png',
-        str_contains($result['mime'], 'webp') => 'webp',
+    $extension = match ($result['mime']) {
+        'image/png' => 'png',
+        'image/webp' => 'webp',
         default => 'jpg',
     };
-    $name = pathinfo((string) ($file['name'] ?? 'image'), PATHINFO_FILENAME) . '.' . $ext;
 
-    process_send_file($result['path'], $name, $result['mime'], $slug, $toolId, $ms);
+    $originalName = pathinfo(
+        (string) ($file['name'] ?? 'image'),
+        PATHINFO_FILENAME
+    );
+    $downloadName = ($originalName !== '' ? $originalName : 'image') . '.' . $extension;
+
+    process_send_file(
+        $result['path'],
+        $downloadName,
+        $result['mime'],
+        $slug,
+        $toolId,
+        $processingMs
+    );
 } catch (ValidationException $e) {
     Response::error($e->getMessage(), 422, null, 'validation_error');
 } catch (AppException $e) {
