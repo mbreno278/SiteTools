@@ -1,12 +1,20 @@
 <?php
-    $_COOKIE['user_id'] = 1; // Replace with the actual user ID
-    $user_id = $_COOKIE['user_id'];
-    $tools_id = $tool['id']; // Replace with the actual tool ID
-    $status =  'processing'; // Replace with the actual status
-    $processing_time = 500; // Replace with the actual processing time in milliseconds
-    $file_size = 1024; // Replace with the actual file size in bytes
+    require_once __DIR__ . '/config/functions-user.php';
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $user_id = $_SESSION['user_id'] ?? null;
+
+    // ID real da ferramenta na tabela tools
+    $tools_id = (int) $tool['id'];
 ?>
-<div class="image-cropper" id="image-cropper">
+<div
+    class="image-cropper"
+    id="image-cropper"
+    data-tool-id="<?= $tools_id ?>"
+    data-history-url="http://localhost/projetos/SiteTools/config/save-tool-usage.php">
 
     <div class="image-cropper__dropzone" id="crop-dropzone">
         <input

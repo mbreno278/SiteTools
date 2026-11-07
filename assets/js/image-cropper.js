@@ -28,6 +28,10 @@ if (cropper) {
     const removeButton = cropper.querySelector("#crop-remove");
     const changeButton = cropper.querySelector("#crop-change");
 
+    const toolId = Number(cropper.dataset.toolId);
+    const historyURL = cropper.dataset.historyUrl;
+
+
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const MAX_PIXELS = 40000000;
     const MAX_SIDE = 30000;
@@ -51,6 +55,50 @@ if (cropper) {
     let interaction = null;
     let stageWidth = 0;
     let stageHeight = 0;
+
+    async function saveToolUsage({
+        status,
+        processingTime,
+        fileSize
+    }) {
+
+        try {
+
+            const response = await fetch(historyURL, {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    tool_id: toolId,
+                    status: status,
+                    processing_time_ms: processingTime,
+                    file_size_bytes: fileSize
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Unable to save usage."
+                );
+            }
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "Tool usage history error:",
+                error
+            );
+
+            return false;
+        }
+    }
 
     function showError(message) {
         errorBox.textContent = message;
@@ -632,6 +680,9 @@ if (cropper) {
 
         const currentOperation = operationId;
 
+        const startedAt = performance.now();
+        const originalFileSize = sourceFile.size;
+
         downloadButton.disabled = true;
         downloadButton.textContent = "Processing...";
 
@@ -710,12 +761,27 @@ if (cropper) {
 
             setTimeout(() => URL.revokeObjectURL(downloadURL), 1000);
 
-            fileInfo.textContent =
-                `Cropped: ${bounds.width} × ${bounds.height} px · ${formatBytes(blob.size)}`;
+            fileInfo.textContent = `Cropped: ${bounds.width} × ${bounds.height} px · ${formatBytes(blob.size)}`;
+            
+            await saveToolUsage({
+                status: "completed",
+                processingTime: Math.round(
+                    performance.now() - startedAt
+                ),
+                fileSize: originalFileSize
+            });
 
         } catch (error) {
             if (currentOperation === operationId) {
                 showError(error.message || "Unable to crop this image.");
+
+                await saveToolUsage({
+                    status: "failed",
+                    processingTime: Math.round(
+                        performance.now() - startedAt
+                    ),
+                    fileSize: originalFileSize
+                });
             }
         } finally {
             if (currentOperation === operationId) {
