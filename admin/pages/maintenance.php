@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/_guard.php';
 $php = PHP_VERSION;
 $diskFree = @disk_free_space(__DIR__) ?: 0;
 $diskTotal = @disk_total_space(__DIR__) ?: 1;
