@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Protege páginas administrativas contra acesso direto fora do roteador.
  * Quando incluída por admin/index.php, o roteador já validou a permissão.
  */
-$adminScript = str_replace('\\\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+$adminScript = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
 if (preg_match('~(?:^|/)admin/pages/([^/]+\\.php)$~i', $adminScript, $matches)) {
     require_once dirname(__DIR__) . '/includes/permissions.php';
 
