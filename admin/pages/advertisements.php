@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/_guard.php';
 $ads = [];
 try { $ads = db()->query('SELECT * FROM advertisements ORDER BY id DESC')->fetchAll(); } catch (Throwable) { $ads = null; }
 ?>
