@@ -10,18 +10,18 @@ require_once dirname(__DIR__, 2) . '/app/Helpers/Autoloader.php';
  */
 function admin_permission_map(): array
 {
-    return \\App\\Security\\AdminPermissionPolicy::rolePermissions();
+    return \App\Security\AdminPermissionPolicy::rolePermissions();
 }
 
 function admin_page_permission_map(): array
 {
-    return \\App\\Security\\AdminPermissionPolicy::pagePermissions();
+    return \App\Security\AdminPermissionPolicy::pagePermissions();
 }
 
 function can(string $permission): bool
 {
     $role = (string) (current_admin()['role'] ?? '');
-    return \\App\\Security\\AdminPermissionPolicy::allows($role, $permission);
+    return \App\Security\AdminPermissionPolicy::allows($role, $permission);
 }
 
 function require_permission(string $permission): void
