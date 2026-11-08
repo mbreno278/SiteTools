@@ -27,7 +27,7 @@ final class ProcessRunnerTest extends SimpleTestCase
     {
         $script = tempnam(sys_get_temp_dir(), 'st_process_');
         if ($script === false) {
-            throw new \\RuntimeException('Não foi possível criar script temporário.');
+            throw new \RuntimeException('Não foi possível criar script temporário.');
         }
 
         $scriptPath = $script . '.php';
@@ -35,7 +35,7 @@ final class ProcessRunnerTest extends SimpleTestCase
 
         try {
             if (file_put_contents($scriptPath, "<?php echo 'runner-ok';") === false) {
-                throw new \\RuntimeException('Não foi possível gravar script temporário.');
+                throw new \RuntimeException('Não foi possível gravar script temporário.');
             }
 
             $result = (new ProcessRunner())->run([PHP_BINARY, $scriptPath], null, 10);
