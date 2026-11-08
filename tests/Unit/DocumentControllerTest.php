@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Controllers\\DocumentController;
-use App\\Exceptions\\ValidationException;
-use Tests\\Support\\SimpleTestCase;
+use App\Controllers\DocumentController;
+use App\Exceptions\ValidationException;
+use Tests\Support\SimpleTestCase;
 
 final class DocumentControllerTest extends SimpleTestCase
 {
