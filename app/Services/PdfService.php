@@ -252,6 +252,193 @@ final class PdfService
         }
     }
 
+    /**
+     * Separa um PDF em páginas individuais ou extrai um intervalo selecionado.
+     *
+     * @return array{path:string,mime:string,bytes:int,workspace:TempWorkspace}
+     */
+    public function split(array $upload, string $mode = 'each', string $range = '', int $maxBytes = 31457280): array
+    {
+        $inputPath = $this->validateUploadedPdf($upload, $maxBytes);
+        $ghostscript = $this->findGhostscript();
+
+        if ($ghostscript === null) {
+            throw new AppException(
+                'Ghostscript não encontrado. Instale o Ghostscript e configure GHOSTSCRIPT_PATH ou o PATH do servidor.',
+                503,
+                'ghostscript_missing'
+            );
+        }
+
+        $mode = $mode === 'range' ? 'range' : 'each';
+        $pagesToExtract = [];
+
+        if ($mode === 'range') {
+            $range = trim($range);
+            if ($range === '' || !preg_match('/^[0-9,\\s\\-]+$/', $range)) {
+                throw new ValidationException('Intervalo inválido. Use apenas números, vírgulas e hífens (ex: 1-3,5).');
+            }
+
+            foreach (explode(',', $range) as $part) {
+                $part = trim($part);
+                if (preg_match('/^(\\d+)\\s*-\\s*(\\d+)$/', $part, $matches)) {
+                    $first = (int) $matches[1];
+                    $last = (int) $matches[2];
+
+                    if ($first > $last) {
+                        [$first, $last] = [$last, $first];
+                    }
+                    if ($last - $first > 100) {
+                        throw new ValidationException('Intervalo muito grande (máximo 100 páginas por vez).');
+                    }
+
+                    for ($page = $first; $page <= $last; $page++) {
+                        if ($page >= 1) {
+                            $pagesToExtract[] = $page;
+                        }
+                    }
+                } elseif (preg_match('/^\\d+$/', $part)) {
+                    $page = (int) $part;
+                    if ($page >= 1) {
+                        $pagesToExtract[] = $page;
+                    }
+                }
+            }
+
+            $pagesToExtract = array_values(array_unique($pagesToExtract));
+            sort($pagesToExtract);
+
+            if ($pagesToExtract === []) {
+                throw new ValidationException('Informe um intervalo de páginas válido (ex: 1-3 ou 1,3,5).');
+            }
+        }
+
+        if (!class_exists(\\ZipArchive::class)) {
+            throw new AppException('A extensão ZIP do PHP não está habilitada no servidor.', 503, 'zip_extension_missing');
+        }
+
+        $workspace = new TempWorkspace();
+
+        try {
+            $input = $workspace->join('input.pdf');
+            if (!@copy($inputPath, $input)) {
+                throw new AppException('Falha ao preparar o arquivo PDF.', 500, 'upload_store_failed');
+            }
+
+            $outputFiles = [];
+            $safeArgs = [
+                '-dSAFER',
+                '-dNOPAUSE',
+                '-dBATCH',
+                '-dQUIET',
+                '-dNOOUTERSAVE',
+                '-dCompatibilityLevel=1.4',
+            ];
+
+            if ($mode === 'each') {
+                $pattern = $workspace->join('page_%03d.pdf');
+                $command = array_merge(
+                    [$ghostscript, '-sDEVICE=pdfwrite'],
+                    $safeArgs,
+                    ['-sOutputFile=' . $pattern, $input]
+                );
+
+                $result = $this->runner->run($command, $workspace->path(), $this->timeoutSeconds);
+                if ($result['timed_out']) {
+                    throw new AppException('A separação do PDF excedeu o tempo limite.', 504, 'timeout');
+                }
+                if ($result['exit'] !== 0) {
+                    $detail = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                    if ($detail !== '') {
+                        error_log('[pdf-split] Ghostscript: ' . mb_substr($detail, 0, 500));
+                    }
+                    throw new AppException('Não foi possível separar o PDF. Verifique se o arquivo não está protegido ou corrompido.', 422, 'pdf_split_failed');
+                }
+
+                $generated = glob($workspace->join('page_*.pdf')) ?: [];
+                sort($generated);
+                foreach ($generated as $file) {
+                    if (is_file($file) && filesize($file) > 50) {
+                        $outputFiles[] = $file;
+                    }
+                }
+            } else {
+                foreach ($pagesToExtract as $page) {
+                    $output = $workspace->join(sprintf('page_%03d.pdf', $page));
+                    $command = array_merge(
+                        [$ghostscript, '-sDEVICE=pdfwrite'],
+                        $safeArgs,
+                        [
+                            '-dFirstPage=' . $page,
+                            '-dLastPage=' . $page,
+                            '-sOutputFile=' . $output,
+                            $input,
+                        ]
+                    );
+
+                    $result = $this->runner->run($command, $workspace->path(), 60);
+                    if ($result['timed_out']) {
+                        throw new AppException('A extração das páginas excedeu o tempo limite.', 504, 'timeout');
+                    }
+                    if ($result['exit'] === 0 && is_file($output) && filesize($output) > 50) {
+                        $outputFiles[] = $output;
+                    }
+                }
+            }
+
+            if ($outputFiles === []) {
+                throw new AppException(
+                    'Não foi possível separar o PDF. Verifique se o arquivo está protegido ou se o intervalo informado existe.',
+                    422,
+                    'pdf_split_empty'
+                );
+            }
+
+            foreach ($outputFiles as $file) {
+                $handle = @fopen($file, 'rb');
+                $signature = $handle ? (fread($handle, 5) ?: '') : '';
+                if (is_resource($handle)) {
+                    fclose($handle);
+                }
+                if ($signature !== '%PDF-') {
+                    throw new AppException('O Ghostscript gerou uma página PDF inválida.', 500, 'invalid_output');
+                }
+            }
+
+            if (count($outputFiles) === 1) {
+                $finalPath = $outputFiles[0];
+                $mime = 'application/pdf';
+            } else {
+                $finalPath = $workspace->join('paginas.zip');
+                $zip = new \\ZipArchive();
+                if ($zip->open($finalPath, \\ZipArchive::CREATE | \\ZipArchive::OVERWRITE) !== true) {
+                    throw new AppException('Não foi possível criar o arquivo ZIP.', 500, 'zip_create_failed');
+                }
+
+                foreach ($outputFiles as $file) {
+                    if (!$zip->addFile($file, basename($file))) {
+                        $zip->close();
+                        throw new AppException('Não foi possível adicionar uma página ao arquivo ZIP.', 500, 'zip_add_failed');
+                    }
+                }
+                if (!$zip->close() || !is_file($finalPath)) {
+                    throw new AppException('Não foi possível finalizar o arquivo ZIP.', 500, 'zip_create_failed');
+                }
+                $mime = 'application/zip';
+            }
+
+            return [
+                'path' => $finalPath,
+                'mime' => $mime,
+                'bytes' => (int) filesize($finalPath),
+                'workspace' => $workspace,
+            ];
+        } catch (\\Throwable $e) {
+            $workspace->cleanup();
+            throw $e;
+        }
+    }
+
     private function validateUploadedPdf(array $file, int $maxBytes): string
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
