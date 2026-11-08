@@ -20,6 +20,8 @@ final class PdfServiceTest extends SimpleTestCase
         $this->testSplitRejectsMissingUpload();
         $this->testProtectRejectsShortPassword();
         $this->testProtectRejectsMissingUpload();
+        $this->testUnlockRejectsEmptyPassword();
+        $this->testUnlockRejectsMissingUpload();
     }
 
     private function testRejectsMissingPdf(): void
@@ -132,6 +134,33 @@ final class PdfServiceTest extends SimpleTestCase
         try {
             (new PdfService())->protect($upload, 'senha123');
             $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao proteger PDF.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
+        }
+    }
+
+    private function testUnlockRejectsEmptyPassword(): void
+    {
+        try {
+            (new PdfService())->unlock([], '');
+            $this->assertTrue(false, 'Senha vazia deveria ser rejeitada.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('Informe a senha', $exception->getMessage());
+        }
+    }
+
+    private function testUnlockRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new PdfService())->unlock($upload, 'senha123');
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao desbloquear PDF.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }
