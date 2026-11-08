@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
+require_once dirname(__DIR__, 2) . '/app/Helpers/Autoloader.php';
 
 /**
  * Permissões por funcionalidade do painel administrativo.
@@ -9,68 +10,18 @@ require_once __DIR__ . '/auth.php';
  */
 function admin_permission_map(): array
 {
-    return [
-        'admin' => [
-            'dashboard.view',
-            'tools.view', 'tools.edit',
-            'categories.view', 'categories.edit',
-            'users.view',
-            'analytics.view',
-            'files.view', 'files.manage',
-            'logs.view',
-            'support.view', 'support.manage',
-            'settings.view',
-            'seo.view',
-            'advertisements.view',
-            'security.view',
-        ],
-        'editor' => [
-            'dashboard.view',
-            'tools.view', 'tools.edit',
-            'categories.view', 'categories.edit',
-            'seo.view',
-        ],
-        'support' => [
-            'dashboard.view',
-            'support.view', 'support.manage',
-            'users.view',
-        ],
-    ];
+    return \\App\\Security\\AdminPermissionPolicy::rolePermissions();
 }
 
-/**
- * Permissão mínima exigida por cada página do painel.
- * maintenance.manage fica restrita ao super_admin.
- */
 function admin_page_permission_map(): array
 {
-    return [
-        'dashboard' => 'dashboard.view',
-        'tools' => 'tools.view',
-        'categories' => 'categories.view',
-        'users' => 'users.view',
-        'analytics' => 'analytics.view',
-        'files' => 'files.view',
-        'logs' => 'logs.view',
-        'advertisements' => 'advertisements.view',
-        'support' => 'support.view',
-        'seo' => 'seo.view',
-        'security' => 'security.view',
-        'settings' => 'settings.view',
-        'maintenance' => 'maintenance.manage',
-    ];
+    return \\App\\Security\\AdminPermissionPolicy::pagePermissions();
 }
 
 function can(string $permission): bool
 {
     $role = (string) (current_admin()['role'] ?? '');
-
-    if ($role === 'super_admin') {
-        return true;
-    }
-
-    $map = admin_permission_map();
-    return in_array($permission, $map[$role] ?? [], true);
+    return \\App\\Security\\AdminPermissionPolicy::allows($role, $permission);
 }
 
 function require_permission(string $permission): void
