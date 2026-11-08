@@ -31,7 +31,7 @@ $tests = [
     \Tests\Unit\ToolAccessNormalizeTest::class,
     \Tests\Unit\UsageLimitServiceTest::class,
     \Tests\Unit\ToolAccessServiceTest::class,
-    \\Tests\\Unit\\AdminPermissionPolicyTest::class,
+    \Tests\Unit\AdminPermissionPolicyTest::class,
     \Tests\Unit\FileStorageServiceTest::class,
     \Tests\Unit\ImageControllerTest::class,
     \Tests\Unit\DocumentControllerTest::class,
