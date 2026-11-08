@@ -22,7 +22,7 @@ final class AdminPermissionPolicy
                 'files.view', 'files.manage',
                 'logs.view',
                 'support.view', 'support.manage',
-                'settings.view',
+                'settings.view', 'settings.edit',
                 'seo.view',
                 'advertisements.view',
                 'security.view',
