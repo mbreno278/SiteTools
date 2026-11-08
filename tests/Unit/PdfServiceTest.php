@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Exceptions\\ValidationException;
-use App\\Services\\PdfService;
-use Tests\\Support\\SimpleTestCase;
+use App\Exceptions\ValidationException;
+use App\Services\PdfService;
+use Tests\Support\SimpleTestCase;
 
 final class PdfServiceTest extends SimpleTestCase
 {
@@ -76,7 +76,7 @@ final class PdfServiceTest extends SimpleTestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'st_pdf_test_');
         if ($path === false || file_put_contents($path, $content) === false) {
-            throw new \\RuntimeException('Não foi possível criar arquivo temporário de teste.');
+            throw new \RuntimeException('Não foi possível criar arquivo temporário de teste.');
         }
         return $path;
     }
