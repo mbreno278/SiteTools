@@ -38,6 +38,29 @@ function admin_permission_map(): array
     ];
 }
 
+/**
+ * Permissão mínima exigida por cada página do painel.
+ * maintenance.manage fica restrita ao super_admin.
+ */
+function admin_page_permission_map(): array
+{
+    return [
+        'dashboard' => 'dashboard.view',
+        'tools' => 'tools.view',
+        'categories' => 'categories.view',
+        'users' => 'users.view',
+        'analytics' => 'analytics.view',
+        'files' => 'files.view',
+        'logs' => 'logs.view',
+        'advertisements' => 'advertisements.view',
+        'support' => 'support.view',
+        'seo' => 'seo.view',
+        'security' => 'security.view',
+        'settings' => 'settings.view',
+        'maintenance' => 'maintenance.manage',
+    ];
+}
+
 function can(string $permission): bool
 {
     $role = (string) (current_admin()['role'] ?? '');
