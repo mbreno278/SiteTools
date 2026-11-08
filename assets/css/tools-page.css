@@ -1,0 +1,113 @@
+/* Catálogo público de ferramentas */
+.tools-catalog__search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+}
+
+.tools-catalog__search input[type="search"] {
+    flex: 1 1 260px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 14px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    font: inherit;
+}
+
+.tools-catalog__categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.tools-catalog__category {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 6px 12px;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.tools-catalog__category:hover,
+.tools-catalog__category.is-active {
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+}
+
+.tools-catalog__count {
+    margin: 0 0 14px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.tools-catalog .card__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border-radius: var(--border-radius-md);
+    font-size: 30px;
+}
+
+.tools-catalog .card__badge {
+    margin-top: -2px;
+}
+
+.tools-catalog__state {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 42px 20px;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+}
+
+.tools-catalog__state > .material-symbols-outlined {
+    color: var(--color-text-secondary);
+    font-size: 38px;
+}
+
+.tools-catalog__state h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+}
+
+.tools-catalog__state p {
+    margin: 0;
+    max-width: 520px;
+}
+
+@media (max-width: 700px) {
+    .tools-catalog__search {
+        align-items: stretch;
+    }
+
+    .tools-catalog__search input[type="search"],
+    .tools-catalog__search .button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tools-catalog__category {
+        transition: none;
+    }
+}
