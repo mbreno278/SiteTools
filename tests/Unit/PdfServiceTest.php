@@ -17,6 +17,7 @@ final class PdfServiceTest extends SimpleTestCase
         $this->testAcceptsPdfHeader();
         $this->testMergeRequiresAtLeastTwoFiles();
         $this->testCompressRejectsMissingUpload();
+        $this->testSplitRejectsMissingUpload();
     }
 
     private function testRejectsMissingPdf(): void
@@ -70,6 +71,23 @@ final class PdfServiceTest extends SimpleTestCase
             $this->assertTrue(false, 'A união deve exigir pelo menos dois arquivos.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('pelo menos 2', $exception->getMessage());
+        }
+    }
+
+    private function testSplitRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new PdfService())->split($upload);
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao separar PDF.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }
     }
 

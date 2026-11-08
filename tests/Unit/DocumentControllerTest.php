@@ -16,6 +16,7 @@ final class DocumentControllerTest extends SimpleTestCase
         $this->testWordToPdfRejectsMissingFile();
         $this->testMergeRejectsMalformedUpload();
         $this->testCompressPdfRejectsMissingUpload();
+        $this->testSplitPdfRejectsMissingUpload();
     }
 
     private function testPdfToWordRejectsMissingFile(): void
@@ -39,6 +40,24 @@ final class DocumentControllerTest extends SimpleTestCase
             $this->assertTrue(false, 'DOCX inexistente deveria ser rejeitado.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('inválido', $exception->getMessage());
+        }
+    }
+
+    private function testSplitPdfRejectsMissingUpload(): void
+    {
+        $controller = new DocumentController();
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            $controller->splitPdf($upload);
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao separar PDF.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }
     }
 

@@ -2,154 +2,94 @@
 
 declare(strict_types=1);
 
+/**
+ * SiteTools — Separar PDF.
+ * Mantém o contrato multipart (pdf, mode, range) e o download direto.
+ */
+
 require __DIR__ . '/_csrf_guard.php';
 
 require __DIR__ . '/_tool_access_guard.php';
 tool_access_guard_for('separar-pdf');
 
+require __DIR__ . '/_process_helpers.php';
 
+use App\Controllers\DocumentController;
+use App\Exceptions\AppException;
+use App\Exceptions\ValidationException;
 
-require __DIR__ . '/pdf-common.php';
+function separar_pdf_respond_error(string $message, int $status = 400): never
+{
+    if (!headers_sent()) {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: no-store');
+    }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+const SEPARAR_PDF_MAX_SIZE = 30 * 1024 * 1024;
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Allow: POST');
-    pdfRespondError('Método não permitido.', 405);
+    separar_pdf_respond_error('Método não permitido.', 405);
 }
 
-if (!isset($_FILES['pdf'])) {
-    pdfRespondError('Selecione um arquivo PDF.');
-}
-
-$gs = pdfFindGs();
-if ($gs === null) {
-    pdfRespondError('Ghostscript não encontrado. Instale o Ghostscript e adicione no PATH.', 500);
+if (!isset($_FILES['pdf']) || !is_array($_FILES['pdf'])) {
+    separar_pdf_respond_error('Selecione um arquivo PDF.', 422);
 }
 
 $mode = (string) ($_POST['mode'] ?? 'each');
 $range = trim((string) ($_POST['range'] ?? ''));
+$startedAt = hrtime(true);
 
-$tmpPath = pdfValidateUpload($_FILES['pdf']);
-$dir = pdfTmpDir();
-$input = $dir . DIRECTORY_SEPARATOR . 'input.pdf';
-
-if (!copy($tmpPath, $input)) {
-    pdfCleanup($dir);
-    pdfRespondError('Falha ao preparar o arquivo.', 500);
-}
-
-// Separação segura com -dSAFER (sem -dNOSAFER e sem -c PostScript arbitrário)
-$pagesToExtract = [];
-
-if ($mode === 'range' && $range !== '') {
-    // Parse: 1-3,5,7-9 — apenas números (sem path injection)
-    if (!preg_match('/^[0-9,\s\-]+$/', $range)) {
-        pdfCleanup($dir);
-        pdfRespondError('Intervalo inválido. Use apenas números, vírgulas e hífens (ex: 1-3,5).');
-    }
-    foreach (explode(',', $range) as $part) {
-        $part = trim($part);
-        if (preg_match('/^(\d+)\s*-\s*(\d+)$/', $part, $m)) {
-            $a = (int) $m[1];
-            $b = (int) $m[2];
-            if ($a > $b) {
-                [$a, $b] = [$b, $a];
-            }
-            // Limite de páginas por requisição
-            if ($b - $a > 100) {
-                pdfCleanup($dir);
-                pdfRespondError('Intervalo muito grande (máximo 100 páginas por vez).');
-            }
-            for ($p = $a; $p <= $b; $p++) {
-                if ($p >= 1) {
-                    $pagesToExtract[] = $p;
-                }
-            }
-        } elseif (preg_match('/^\d+$/', $part)) {
-            $p = (int) $part;
-            if ($p >= 1) {
-                $pagesToExtract[] = $p;
-            }
-        }
-    }
-    $pagesToExtract = array_values(array_unique($pagesToExtract));
-    sort($pagesToExtract);
-} else {
-    // Extrai todas as páginas de uma vez (Ghostscript gera page_001.pdf, ...)
-    $pattern = $dir . DIRECTORY_SEPARATOR . 'page_%03d.pdf';
-    $cmd = array_merge(
-        [$gs, '-sDEVICE=pdfwrite'],
-        pdfGsSafeArgs(),
-        ['-sOutputFile=' . $pattern, $input]
+try {
+    $controller = new DocumentController();
+    $result = $controller->splitPdf(
+        $_FILES['pdf'],
+        $mode,
+        $range,
+        SEPARAR_PDF_MAX_SIZE
     );
-    pdfRun($cmd, 180);
 
-    $generated = glob($dir . DIRECTORY_SEPARATOR . 'page_*.pdf') ?: [];
-    sort($generated);
-    $pagesToExtract = [];
-    foreach ($generated as $i => $f) {
-        if (is_file($f) && filesize($f) > 50) {
-            $pagesToExtract[] = $i + 1;
-        }
+    $processingMs = (int) ((hrtime(true) - $startedAt) / 1_000_000);
+    $toolId = null;
+
+    try {
+        $toolId = process_tool_id(app_pdo(), 'separar-pdf');
+    } catch (Throwable) {
+        // A falha ao consultar o histórico não deve descartar o arquivo pronto.
     }
-}
 
-if (empty($pagesToExtract) && $mode === 'range') {
-    pdfCleanup($dir);
-    pdfRespondError('Informe um intervalo de páginas válido (ex: 1-3 ou 1,3,5).');
-}
+    $originalName = basename((string) ($_FILES['pdf']['name'] ?? 'documento.pdf'));
+    $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+    $safeBaseName = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $baseName) ?: 'documento';
 
-$outFiles = [];
-
-if ($mode === 'range') {
-    foreach ($pagesToExtract as $p) {
-        $out = $dir . DIRECTORY_SEPARATOR . sprintf('page_%03d.pdf', $p);
-        $cmd = array_merge(
-            [$gs, '-sDEVICE=pdfwrite'],
-            pdfGsSafeArgs(),
-            [
-                '-dFirstPage=' . $p,
-                '-dLastPage=' . $p,
-                '-sOutputFile=' . $out,
-                $input,
-            ]
-        );
-        $result = pdfRun($cmd, 60);
-        if ($result['exit'] === 0 && is_file($out) && filesize($out) > 50) {
-            $outFiles[] = $out;
-        }
+    if (($result['mime'] ?? '') === 'application/zip') {
+        $downloadName = $safeBaseName . '-paginas.zip';
+    } else {
+        $downloadName = $safeBaseName . '-pagina.pdf';
     }
-} else {
-    $generated = glob($dir . DIRECTORY_SEPARATOR . 'page_*.pdf') ?: [];
-    sort($generated);
-    foreach ($generated as $f) {
-        if (is_file($f) && filesize($f) > 50) {
-            $outFiles[] = $f;
-        }
-    }
-}
 
-if (empty($outFiles)) {
-    pdfCleanup($dir);
-    pdfRespondError('Não foi possível separar o PDF. Verifique se o arquivo não está protegido.');
-}
+    // Mantém o workspace vivo até o término do envio do arquivo.
+    $workspace = $result['workspace'];
 
-// Se só 1 página, envia PDF; senão ZIP
-if (count($outFiles) === 1) {
-    pdfSendFile($outFiles[0], 'pagina.pdf');
-    pdfCleanup($dir);
+    process_send_file(
+        $result['path'],
+        $downloadName,
+        $result['mime'] ?? 'application/pdf',
+        'separar-pdf',
+        $toolId,
+        $processingMs
+    );
+} catch (ValidationException $e) {
+    separar_pdf_respond_error($e->getMessage(), 422);
+} catch (AppException $e) {
+    separar_pdf_respond_error($e->getMessage(), $e->getStatusCode());
+} catch (Throwable $e) {
+    error_log('[separar-pdf] ' . $e->getMessage());
+    separar_pdf_respond_error('Não foi possível separar este PDF. Tente novamente.', 500);
 }
-
-$zipPath = $dir . DIRECTORY_SEPARATOR . 'paginas.zip';
-$zip = new ZipArchive();
-if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-    pdfCleanup($dir);
-    pdfRespondError('Não foi possível criar o arquivo ZIP.', 500);
-}
-
-foreach ($outFiles as $f) {
-    $zip->addFile($f, basename($f));
-}
-$zip->close();
-
-pdfSendZip($zipPath, 'pdf-separado.zip');
-pdfCleanup($dir);
