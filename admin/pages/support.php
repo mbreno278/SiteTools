@@ -1,6 +1,11 @@
 <?php
 
 require_once __DIR__ . '/_guard.php';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    require_once dirname(__DIR__) . '/includes/permissions.php';
+    require_permission('support.manage');
+}
+
 $messages = [];
 $flash = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
