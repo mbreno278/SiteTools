@@ -44,6 +44,7 @@ $qpdfCandidates = array_filter([
 
 $ytdlpCandidates = array_filter([
     env('YTDLP_PATH'),
+    $isWindows ? 'C:\\yt-dlp\\yt-dlp.exe' : null,
     $isWindows ? 'C:\\Tools\\yt-dlp\\yt-dlp.exe' : null,
     'yt-dlp',
     '/usr/local/bin/yt-dlp',
