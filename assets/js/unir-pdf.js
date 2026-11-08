@@ -17,17 +17,31 @@
     function clearError() { errorEl.textContent = ""; errorEl.hidden = true; }
 
     function renderList() {
-        listEl.innerHTML = "";
+        listEl.replaceChildren();
         files.forEach((f, i) => {
             const li = document.createElement("li");
             li.draggable = true;
             li.dataset.index = String(i);
-            li.innerHTML = `
-                <span class="material-symbols-outlined drag" aria-hidden="true">drag_indicator</span>
-                <strong>${f.name}</strong>
-                <button type="button" aria-label="Remover" data-i="${i}">
-                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>`;
+            const dragIcon = document.createElement("span");
+            dragIcon.className = "material-symbols-outlined drag";
+            dragIcon.setAttribute("aria-hidden", "true");
+            dragIcon.textContent = "drag_indicator";
+
+            const name = document.createElement("strong");
+            name.textContent = f.name;
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.setAttribute("aria-label", "Remover");
+            removeButton.dataset.i = String(i);
+
+            const removeIcon = document.createElement("span");
+            removeIcon.className = "material-symbols-outlined";
+            removeIcon.setAttribute("aria-hidden", "true");
+            removeIcon.textContent = "close";
+            removeButton.appendChild(removeIcon);
+
+            li.append(dragIcon, name, removeButton);
             li.querySelector("button").addEventListener("click", () => {
                 files.splice(i, 1);
                 if (files.length < 2) {
