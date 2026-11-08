@@ -21,6 +21,16 @@ final class YoutubeController
         return $this->youtube->getVideoInfo($url);
     }
 
+    public function getAudioInfo(string $url): array
+    {
+        return $this->youtube->getAudioInfo($url);
+    }
+
+    public function downloadAudio(string $url, string $formatId, string $output): array
+    {
+        return $this->youtube->downloadAudio($url, $formatId, $output);
+    }
+
     public function download(string $url, string $formatId): array
     {
         return $this->youtube->downloadVideo($url, $formatId);
