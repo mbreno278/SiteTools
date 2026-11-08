@@ -14,9 +14,9 @@ tool_access_guard_for('proteger-pdf');
 
 require __DIR__ . '/_process_helpers.php';
 
-use App\\Controllers\\DocumentController;
-use App\\Exceptions\\AppException;
-use App\\Exceptions\\ValidationException;
+use App\Controllers\DocumentController;
+use App\Exceptions\AppException;
+use App\Exceptions\ValidationException;
 
 function proteger_pdf_respond_error(string $message, int $status = 400): never
 {
