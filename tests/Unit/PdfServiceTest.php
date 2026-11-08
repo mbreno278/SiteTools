@@ -16,6 +16,7 @@ final class PdfServiceTest extends SimpleTestCase
         $this->testRejectsInvalidSignature();
         $this->testAcceptsPdfHeader();
         $this->testMergeRequiresAtLeastTwoFiles();
+        $this->testCompressRejectsMissingUpload();
     }
 
     private function testRejectsMissingPdf(): void
@@ -69,6 +70,23 @@ final class PdfServiceTest extends SimpleTestCase
             $this->assertTrue(false, 'A união deve exigir pelo menos dois arquivos.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('pelo menos 2', $exception->getMessage());
+        }
+    }
+
+    private function testCompressRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new PdfService())->compress($upload);
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }
     }
 

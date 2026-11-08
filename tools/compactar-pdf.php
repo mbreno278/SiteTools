@@ -2,70 +2,88 @@
 
 declare(strict_types=1);
 
+/**
+ * SiteTools — Compactar PDF.
+ * Mantém o contrato multipart (pdf, quality) e o download direto do arquivo.
+ */
+
 require __DIR__ . '/_csrf_guard.php';
 
 require __DIR__ . '/_tool_access_guard.php';
 tool_access_guard_for('compactar-pdf');
 
+require __DIR__ . '/_process_helpers.php';
 
+use App\Controllers\DocumentController;
+use App\Exceptions\AppException;
+use App\Exceptions\ValidationException;
 
-require __DIR__ . '/pdf-common.php';
+function compactar_pdf_respond_error(string $message, int $status = 400): never
+{
+    if (!headers_sent()) {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: no-store');
+    }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+const COMPACTAR_PDF_MAX_SIZE = 30 * 1024 * 1024;
+const COMPACTAR_PDF_MIME = 'application/pdf';
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Allow: POST');
-    pdfRespondError('Método não permitido.', 405);
+    compactar_pdf_respond_error('Método não permitido.', 405);
 }
 
-if (!isset($_FILES['pdf'])) {
-    pdfRespondError('Selecione um arquivo PDF.');
+if (!isset($_FILES['pdf']) || !is_array($_FILES['pdf'])) {
+    compactar_pdf_respond_error('Selecione um arquivo PDF.', 422);
 }
 
-$gs = pdfFindGs();
-if ($gs === null) {
-    pdfRespondError('Ghostscript não encontrado. Instale o Ghostscript e adicione no PATH.', 500);
-}
-
-$tmpPath = pdfValidateUpload($_FILES['pdf']);
 $quality = (string) ($_POST['quality'] ?? 'ebook');
-$allowed = ['screen', 'ebook', 'printer', 'prepress'];
-if (!in_array($quality, $allowed, true)) {
-    $quality = 'ebook';
+$startedAt = hrtime(true);
+
+try {
+    $controller = new DocumentController();
+    $result = $controller->compressPdf(
+        $_FILES['pdf'],
+        $quality,
+        COMPACTAR_PDF_MAX_SIZE
+    );
+
+    $processingMs = (int) ((hrtime(true) - $startedAt) / 1_000_000);
+    $toolId = null;
+
+    try {
+        $toolId = process_tool_id(app_pdo(), 'compactar-pdf');
+    } catch (Throwable) {
+        // A falha ao consultar o histórico não deve descartar o arquivo pronto.
+    }
+
+    $originalName = basename((string) ($_FILES['pdf']['name'] ?? 'documento.pdf'));
+    $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+    $safeBaseName = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $baseName) ?: 'documento';
+    $downloadName = $safeBaseName . '-compactado.pdf';
+
+    // Mantém o workspace vivo até o término do envio do arquivo.
+    $workspace = $result['workspace'];
+
+    process_send_file(
+        $result['path'],
+        $downloadName,
+        $result['mime'] ?? COMPACTAR_PDF_MIME,
+        'compactar-pdf',
+        $toolId,
+        $processingMs
+    );
+} catch (ValidationException $e) {
+    compactar_pdf_respond_error($e->getMessage(), 422);
+} catch (AppException $e) {
+    compactar_pdf_respond_error($e->getMessage(), $e->getStatusCode());
+} catch (Throwable $e) {
+    error_log('[compactar-pdf] ' . $e->getMessage());
+    compactar_pdf_respond_error('Não foi possível compactar este PDF. Tente novamente.', 500);
 }
-
-$dir = pdfTmpDir();
-$input = $dir . DIRECTORY_SEPARATOR . 'input.pdf';
-$output = $dir . DIRECTORY_SEPARATOR . 'output.pdf';
-
-if (!copy($tmpPath, $input)) {
-    pdfCleanup($dir);
-    pdfRespondError('Falha ao preparar o arquivo.', 500);
-}
-
-$cmd = [
-    $gs,
-    '-sDEVICE=pdfwrite',
-    '-dCompatibilityLevel=1.4',
-    '-dPDFSETTINGS=/' . $quality,
-    '-dSAFER',
-    '-dNOPAUSE',
-    '-dQUIET',
-    '-dBATCH',
-    '-dDetectDuplicateImages=true',
-    '-dCompressFonts=true',
-    '-dSubsetFonts=true',
-    '-sOutputFile=' . $output,
-    $input,
-];
-
-$result = pdfRun($cmd, 180);
-
-if ($result['exit'] !== 0 || !is_file($output)) {
-    pdfCleanup($dir);
-    pdfRespondError('Não foi possível compactar o PDF. Verifique se o arquivo não está corrompido ou protegido.');
-}
-
-$originalName = pathinfo($_FILES['pdf']['name'] ?? 'documento', PATHINFO_FILENAME);
-$safeName = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $originalName) ?: 'documento';
-
-pdfSendFile($output, $safeName . '-compactado.pdf');
-pdfCleanup($dir);
