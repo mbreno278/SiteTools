@@ -12,11 +12,7 @@ try {
     exit;
 }
 
-if (!function_exists('admin_logged_in') || !admin_logged_in()) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Sessão expirada. Faça login novamente.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
+require_permission('tools.edit');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     http_response_code(405);
@@ -130,6 +126,6 @@ try {
 } catch (Throwable $e) {
     error_log('[admin tools api] ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Falha ao salvar: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'Não foi possível salvar a ferramenta.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
