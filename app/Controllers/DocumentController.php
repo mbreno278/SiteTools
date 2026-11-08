@@ -29,6 +29,11 @@ final class DocumentController
         return $this->documents->wordToPdf($temporaryPath, $originalName, $maxBytes);
     }
 
+    public function compressPdf(array $upload, string $quality = 'ebook', int $maxBytes = 31457280): array
+    {
+        return $this->pdf->compress($upload, $quality, $maxBytes);
+    }
+
     /**
      * @param array{name:array, tmp_name:array, error:array, size:array} $uploads
      */
