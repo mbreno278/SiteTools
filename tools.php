@@ -82,7 +82,7 @@ try {
     if ($categorySlug !== '') {
         $sql .= " AND (
             c.slug = :category_slug
-            OR (c.id IS NULL AND t.category = :legacy_category)
+            OR t.category = :legacy_category
         )";
         $params['category_slug'] = $categorySlug;
         $params['legacy_category'] = $categorySlug;
