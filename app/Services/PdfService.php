@@ -161,6 +161,97 @@ final class PdfService
         }
     }
 
+    /**
+     * Compacta um PDF com Ghostscript e um perfil de qualidade permitido.
+     *
+     * @return array{path:string,mime:string,bytes:int,original_bytes:int,workspace:TempWorkspace}
+     */
+    public function compress(array $upload, string $quality = 'ebook', int $maxBytes = 31457280): array
+    {
+        $allowedQualities = ['screen', 'ebook', 'printer', 'prepress'];
+        if (!in_array($quality, $allowedQualities, true)) {
+            $quality = 'ebook';
+        }
+
+        $inputPath = $this->validateUploadedPdf($upload, $maxBytes);
+        $originalBytes = (int) filesize($inputPath);
+        $ghostscript = $this->findGhostscript();
+
+        if ($ghostscript === null) {
+            throw new AppException(
+                'Ghostscript não encontrado. Instale o Ghostscript e configure GHOSTSCRIPT_PATH ou o PATH do servidor.',
+                503,
+                'ghostscript_missing'
+            );
+        }
+
+        $workspace = new TempWorkspace();
+
+        try {
+            $input = $workspace->join('input.pdf');
+            $output = $workspace->join('compressed.pdf');
+
+            if (!@copy($inputPath, $input)) {
+                throw new AppException('Falha ao preparar o arquivo PDF.', 500, 'upload_store_failed');
+            }
+
+            $command = [
+                $ghostscript,
+                '-sDEVICE=pdfwrite',
+                '-dCompatibilityLevel=1.4',
+                '-dPDFSETTINGS=/' . $quality,
+                '-dSAFER',
+                '-dNOPAUSE',
+                '-dQUIET',
+                '-dBATCH',
+                '-dDetectDuplicateImages=true',
+                '-dCompressFonts=true',
+                '-dSubsetFonts=true',
+                '-sOutputFile=' . $output,
+                $input,
+            ];
+
+            $result = $this->runner->run($command, $workspace->path(), $this->timeoutSeconds);
+
+            if ($result['timed_out']) {
+                throw new AppException('A compactação do PDF excedeu o tempo limite.', 504, 'timeout');
+            }
+
+            if ($result['exit'] !== 0 || !is_file($output) || filesize($output) < 5) {
+                $detail = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                if ($detail !== '') {
+                    error_log('[pdf-compress] Ghostscript: ' . mb_substr($detail, 0, 500));
+                }
+                throw new AppException(
+                    'Não foi possível compactar o PDF. Verifique se o arquivo não está corrompido ou protegido.',
+                    422,
+                    'pdf_compress_failed'
+                );
+            }
+
+            $handle = @fopen($output, 'rb');
+            $signature = $handle ? (fread($handle, 5) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+
+            if ($signature !== '%PDF-') {
+                throw new AppException('O arquivo gerado não é um PDF válido.', 500, 'invalid_output');
+            }
+
+            return [
+                'path' => $output,
+                'mime' => 'application/pdf',
+                'bytes' => (int) filesize($output),
+                'original_bytes' => $originalBytes,
+                'workspace' => $workspace,
+            ];
+        } catch (\Throwable $e) {
+            $workspace->cleanup();
+            throw $e;
+        }
+    }
+
     private function validateUploadedPdf(array $file, int $maxBytes): string
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
