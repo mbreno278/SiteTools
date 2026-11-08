@@ -248,12 +248,12 @@ final class DocumentConverterService
     {
         $reason = null;
 
-        if (!class_exists(\\ZipArchive::class)) {
+        if (!class_exists(\ZipArchive::class)) {
             $reason = 'A extensão PHP ZIP não está habilitada no servidor.';
             return false;
         }
 
-        $zip = new \\ZipArchive();
+        $zip = new \ZipArchive();
         if ($zip->open($path) !== true) {
             $reason = 'O arquivo gerado não é um pacote DOCX válido.';
             return false;
@@ -277,9 +277,9 @@ final class DocumentConverterService
         $hasText = false;
         $hasVisual = false;
 
-        if (class_exists(\\DOMDocument::class)) {
+        if (class_exists(\DOMDocument::class)) {
             $previous = libxml_use_internal_errors(true);
-            $document = new \\DOMDocument();
+            $document = new \DOMDocument();
             $loaded = $document->loadXML($xml, LIBXML_NONET | LIBXML_NOBLANKS);
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
@@ -298,7 +298,7 @@ final class DocumentConverterService
                 }
             }
 
-            $xpath = new \\DOMXPath($document);
+            $xpath = new \DOMXPath($document);
             $visualNodes = $xpath->query('//*[local-name()="drawing" or local-name()="pict" or local-name()="object"]');
             $hasVisual = $visualNodes !== false && $visualNodes->length > 0;
         } else {
@@ -380,11 +380,11 @@ final class DocumentConverterService
      */
     private function assertDocxPackage(string $path): void
     {
-        if (!class_exists(\\ZipArchive::class)) {
+        if (!class_exists(\ZipArchive::class)) {
             throw new AppException('A extensão PHP ZIP não está habilitada no servidor.', 503, 'zip_extension_missing');
         }
 
-        $zip = new \\ZipArchive();
+        $zip = new \ZipArchive();
         if ($zip->open($path) !== true) {
             throw new ValidationException('O arquivo DOCX não é um pacote Word válido.');
         }
