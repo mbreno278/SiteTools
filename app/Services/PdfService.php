@@ -570,7 +570,7 @@ final class PdfService
                 'bytes' => (int) filesize($output),
                 'workspace' => $workspace,
             ];
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $workspace->cleanup();
             throw $e;
         }
