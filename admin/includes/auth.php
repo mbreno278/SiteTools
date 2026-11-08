@@ -74,42 +74,53 @@ function admin_login_user(array $user): void
     ];
 }
 
-function admin_login_attempts_key(string $email): string
-{
-    return 'admin_login_attempts_' . hash('sha256', strtolower($email) . '|' . ($_SERVER['REMOTE_ADDR'] ?? ''));
-}
-
 function admin_is_login_locked(string $email): bool
 {
-    $key = admin_login_attempts_key($email);
-    $data = $_SESSION[$key] ?? null;
-    if (!is_array($data)) {
-        return false;
-    }
-    $count = (int) ($data['count'] ?? 0);
-    $until = (int) ($data['locked_until'] ?? 0);
-    if ($until > time()) {
+    try {
+        $since = date('Y-m-d H:i:s', time() - ADMIN_LOCKOUT_SECONDS);
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $stmt = db()->prepare(
+            'SELECT COUNT(*) FROM login_attempts
+             WHERE attempted_at >= :since
+               AND (email = :email OR ip_address = :ip)'
+        );
+        $stmt->execute([
+            'since' => $since,
+            'email' => strtolower(trim($email)),
+            'ip' => $ip,
+        ]);
+        return (int) $stmt->fetchColumn() >= ADMIN_MAX_LOGIN_ATTEMPTS;
+    } catch (Throwable $e) {
+        // Se o armazenamento do rate limit falhar, bloqueia a tentativa.
+        error_log('[admin rate limit] ' . $e->getMessage());
         return true;
     }
-    if ($until > 0 && $until <= time()) {
-        unset($_SESSION[$key]);
-        return false;
-    }
-    return false;
 }
 
 function admin_record_login_failure(string $email): void
 {
-    $key = admin_login_attempts_key($email);
-    $data = $_SESSION[$key] ?? ['count' => 0, 'locked_until' => 0];
-    $data['count'] = (int) $data['count'] + 1;
-    if ($data['count'] >= ADMIN_MAX_LOGIN_ATTEMPTS) {
-        $data['locked_until'] = time() + ADMIN_LOCKOUT_SECONDS;
+    try {
+        db()->prepare(
+            'INSERT INTO login_attempts (email, ip_address) VALUES (:email, :ip)'
+        )->execute([
+            'email' => strtolower(trim($email)),
+            'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+        ]);
+    } catch (Throwable $e) {
+        error_log('[admin rate limit record] ' . $e->getMessage());
     }
-    $_SESSION[$key] = $data;
 }
 
 function admin_clear_login_failures(string $email): void
 {
-    unset($_SESSION[admin_login_attempts_key($email)]);
+    try {
+        db()->prepare(
+            'DELETE FROM login_attempts WHERE email = :email OR ip_address = :ip'
+        )->execute([
+            'email' => strtolower(trim($email)),
+            'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+        ]);
+    } catch (Throwable $e) {
+        error_log('[admin rate limit clear] ' . $e->getMessage());
+    }
 }

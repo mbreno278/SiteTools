@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
+require_once dirname(__DIR__, 2) . '/app/Helpers/Autoloader.php';
 
 /**
  * Permissões por funcionalidade do painel administrativo.
@@ -9,45 +10,18 @@ require_once __DIR__ . '/auth.php';
  */
 function admin_permission_map(): array
 {
-    return [
-        'admin' => [
-            'dashboard.view',
-            'tools.view', 'tools.edit',
-            'categories.view', 'categories.edit',
-            'users.view',
-            'analytics.view',
-            'files.view', 'files.manage',
-            'logs.view',
-            'support.view', 'support.manage',
-            'settings.view',
-            'seo.view',
-            'advertisements.view',
-            'security.view',
-        ],
-        'editor' => [
-            'dashboard.view',
-            'tools.view', 'tools.edit',
-            'categories.view', 'categories.edit',
-            'seo.view',
-        ],
-        'support' => [
-            'dashboard.view',
-            'support.view', 'support.manage',
-            'users.view',
-        ],
-    ];
+    return \App\Security\AdminPermissionPolicy::rolePermissions();
+}
+
+function admin_page_permission_map(): array
+{
+    return \App\Security\AdminPermissionPolicy::pagePermissions();
 }
 
 function can(string $permission): bool
 {
     $role = (string) (current_admin()['role'] ?? '');
-
-    if ($role === 'super_admin') {
-        return true;
-    }
-
-    $map = admin_permission_map();
-    return in_array($permission, $map[$role] ?? [], true);
+    return \App\Security\AdminPermissionPolicy::allows($role, $permission);
 }
 
 function require_permission(string $permission): void

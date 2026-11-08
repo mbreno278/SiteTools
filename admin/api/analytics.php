@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_permission('analytics.view');
 
 try {
     $total = (int)db()->query('SELECT COUNT(*) FROM tool_usage')->fetchColumn();

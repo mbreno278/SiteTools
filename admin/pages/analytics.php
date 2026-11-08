@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/_guard.php';
 $stats = [
     'tools' => 0, 'users' => 0, 'usage' => 0, 'support_new' => 0,
 ];

@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/_guard.php';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    require_once dirname(__DIR__) . '/includes/permissions.php';
+    require_permission('tools.edit');
+}
+
+
 $tools = [];
 $loadError = false;
 $editId = (int) ($_GET['edit'] ?? 0);

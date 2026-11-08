@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/_guard.php';
 $users = [];
 $admins = [];
 $error = false;
