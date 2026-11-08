@@ -39,6 +39,11 @@ final class DocumentController
         return $this->pdf->split($upload, $mode, $range, $maxBytes);
     }
 
+    public function unlockPdf(array $upload, string $password, int $maxBytes = 31457280): array
+    {
+        return $this->pdf->unlock($upload, $password, $maxBytes);
+    }
+
     public function protectPdf(array $upload, string $password, int $maxBytes = 31457280): array
     {
         return $this->pdf->protect($upload, $password, $maxBytes);
