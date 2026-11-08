@@ -15,7 +15,7 @@ use App\Services\Process\TempWorkspace;
 final class ImageProcessingService
 {
     private const MAX_BYTES = 15 * 1024 * 1024;
-    private const MAX_PIXELS = 40_000_000;
+    private const MAX_PIXELS = 16_000_000;
     private const MAX_OUTPUT_DIMENSION = 10_000;
     private const MAX_OUTPUT_PIXELS = 16_000_000;
 
@@ -160,6 +160,7 @@ final class ImageProcessingService
     private function encodeToTemp($im, string $format, int $quality): array
     {
         $format = strtolower($format);
+        $quality = max(10, min(95, $quality));
         if (!in_array($format, ['jpeg', 'jpg', 'png', 'webp'], true)) {
             $format = 'jpeg';
         }
