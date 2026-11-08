@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/_guard.php';
+?>
 <div class="page-heading"><div><p class="eyebrow">NEGÓCIOS</p><h1>SEO e conteúdo</h1><p class="muted">Meta títulos e descrições vêm da tabela tools (edite em Ferramentas).</p></div></div>
 <div class="panel module-placeholder">
     <span class="material-symbols-rounded">search</span>
