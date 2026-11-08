@@ -187,7 +187,7 @@ final class YoutubeService
             ];
 
             $command = $baseCommand;
-            array_splice($command, 9, 0, [
+            array_splice($command, 10, 0, [
                 '--prefer-ffmpeg',
                 '--postprocessor-args',
                 'ffmpeg:-ar 44100',
