@@ -172,6 +172,7 @@ final class DocumentConverterService
             ]),
         ];
 
+        $base = pathinfo($input, PATHINFO_FILENAME);
         $docx = $outDir . DIRECTORY_SEPARATOR . $base . '.docx';
         $lastResult = ['exit' => -1, 'stdout' => '', 'stderr' => '', 'timed_out' => false];
         $validationReason = null;

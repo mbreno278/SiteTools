@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit;
+
+use App\Controllers\DocumentController;
+use App\Exceptions\ValidationException;
+use Tests\Support\SimpleTestCase;
+
+final class DocumentControllerTest extends SimpleTestCase
+{
+    public function run(): void
+    {
+        $this->testPdfToWordRejectsMissingFile();
+        $this->testWordToPdfRejectsMissingFile();
+        $this->testMergeRejectsMalformedUpload();
+    }
+
+    private function testPdfToWordRejectsMissingFile(): void
+    {
+        $controller = new DocumentController();
+
+        try {
+            $controller->pdfToWord(sys_get_temp_dir() . '/missing-' . bin2hex(random_bytes(4)), 'arquivo.pdf');
+            $this->assertTrue(false, 'PDF inexistente deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('inválido', $exception->getMessage());
+        }
+    }
+
+    private function testWordToPdfRejectsMissingFile(): void
+    {
+        $controller = new DocumentController();
+
+        try {
+            $controller->wordToPdf(sys_get_temp_dir() . '/missing-' . bin2hex(random_bytes(4)), 'arquivo.docx');
+            $this->assertTrue(false, 'DOCX inexistente deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('inválido', $exception->getMessage());
+        }
+    }
+
+    private function testMergeRejectsMalformedUpload(): void
+    {
+        $controller = new DocumentController();
+
+        try {
+            $controller->mergePdfs([]);
+            $this->assertTrue(false, 'Upload malformado deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('Envie os arquivos', $exception->getMessage());
+        }
+    }
+}
