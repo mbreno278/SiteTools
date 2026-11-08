@@ -576,6 +576,139 @@ final class PdfService
         }
     }
 
+    /**
+     * Remove a senha de abertura de um PDF usando qpdf ou Ghostscript.
+     *
+     * @return array{path:string,mime:string,bytes:int,workspace:TempWorkspace}
+     */
+    public function unlock(array $upload, string $password, int $maxBytes = 31457280): array
+    {
+        $password = preg_replace('/[\\x00-\\x1F\\x7F]/', '', $password) ?? '';
+        $password = trim($password);
+
+        if ($password === '') {
+            throw new ValidationException('Informe a senha do PDF.');
+        }
+        if (strlen($password) > 64) {
+            throw new ValidationException('Senha muito longa (máximo 64 caracteres).');
+        }
+
+        $inputPath = $this->validateUploadedPdf($upload, $maxBytes);
+        $configFile = dirname(__DIR__, 2) . '/config/converters.php';
+        $config = is_file($configFile) ? require $configFile : [];
+        $qpdf = is_array($config) ? ($config['qpdf'] ?? null) : null;
+        $ghostscript = $this->findGhostscript();
+
+        if ((!is_string($qpdf) || $qpdf === '') && $ghostscript === null) {
+            throw new AppException(
+                'Nenhuma ferramenta encontrada. Instale o qpdf (recomendado) ou o Ghostscript.',
+                503,
+                'pdf_unlock_tool_missing'
+            );
+        }
+
+        $workspace = new TempWorkspace();
+
+        try {
+            $input = $workspace->join('input.pdf');
+            $output = $workspace->join('unlocked.pdf');
+
+            if (!@copy($inputPath, $input)) {
+                throw new AppException('Falha ao preparar o arquivo PDF.', 500, 'upload_store_failed');
+            }
+
+            $unlocked = false;
+            $lastError = '';
+
+            if (is_string($qpdf) && $qpdf !== '') {
+                $command = [
+                    $qpdf,
+                    '--password=' . $password,
+                    '--decrypt',
+                    $input,
+                    $output,
+                ];
+
+                $result = $this->runner->run($command, $workspace->path(), 120);
+                if ($result['timed_out']) {
+                    throw new AppException('A remoção da senha excedeu o tempo limite.', 504, 'timeout');
+                }
+
+                $lastError = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                $unlocked = $result['exit'] === 0
+                    && is_file($output)
+                    && filesize($output) > 200;
+
+                if (!$unlocked && preg_match('/invalid password|incorrect password|password.*required|requires.*password/i', $lastError)) {
+                    throw new ValidationException('Senha incorreta.');
+                }
+
+                if (!$unlocked) {
+                    @unlink($output);
+                }
+            }
+
+            if (!$unlocked && $ghostscript !== null) {
+                $command = [
+                    $ghostscript,
+                    '-sDEVICE=pdfwrite',
+                    '-dSAFER',
+                    '-dNOPAUSE',
+                    '-dQUIET',
+                    '-dBATCH',
+                    '-dCompatibilityLevel=1.4',
+                    '-sPDFPassword=' . $password,
+                    '-sOutputFile=' . $output,
+                    $input,
+                ];
+
+                $result = $this->runner->run($command, $workspace->path(), 180);
+                if ($result['timed_out']) {
+                    throw new AppException('A remoção da senha excedeu o tempo limite.', 504, 'timeout');
+                }
+
+                $lastError = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                if (preg_match('/password incorrect|invalid password|requires a password|password.*required/i', $lastError)) {
+                    throw new ValidationException('Senha incorreta.');
+                }
+
+                $unlocked = $result['exit'] === 0
+                    && is_file($output)
+                    && filesize($output) > 200;
+            }
+
+            if (!$unlocked) {
+                if ($lastError !== '') {
+                    error_log('[pdf-unlock] ' . mb_substr($lastError, 0, 500));
+                }
+                throw new AppException(
+                    'Não foi possível desbloquear o PDF. Verifique a senha e se o arquivo não está corrompido.',
+                    422,
+                    'pdf_unlock_failed'
+                );
+            }
+
+            $handle = @fopen($output, 'rb');
+            $signature = $handle ? (fread($handle, 5) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+            if ($signature !== '%PDF-') {
+                throw new AppException('O arquivo desbloqueado gerado não é um PDF válido.', 500, 'invalid_output');
+            }
+
+            return [
+                'path' => $output,
+                'mime' => 'application/pdf',
+                'bytes' => (int) filesize($output),
+                'workspace' => $workspace,
+            ];
+        } catch (\\Throwable $e) {
+            $workspace->cleanup();
+            throw $e;
+        }
+    }
+
     private function validateUploadedPdf(array $file, int $maxBytes): string
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
