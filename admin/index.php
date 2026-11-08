@@ -20,11 +20,14 @@ $allowedPages = [
     'maintenance' => 'maintenance.php',
 ];
 
-$page = $_GET['page'] ?? 'dashboard';
+$page = (string) ($_GET['page'] ?? 'dashboard');
 if (!isset($allowedPages[$page])) {
     http_response_code(404);
     $page = 'dashboard';
 }
+
+$pagePermissions = admin_page_permission_map();
+require_permission($pagePermissions[$page] ?? 'dashboard.view');
 
 ?>
 <!doctype html>
