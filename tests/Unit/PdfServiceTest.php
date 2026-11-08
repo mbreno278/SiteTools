@@ -18,6 +18,8 @@ final class PdfServiceTest extends SimpleTestCase
         $this->testMergeRequiresAtLeastTwoFiles();
         $this->testCompressRejectsMissingUpload();
         $this->testSplitRejectsMissingUpload();
+        $this->testProtectRejectsShortPassword();
+        $this->testProtectRejectsMissingUpload();
     }
 
     private function testRejectsMissingPdf(): void
@@ -103,6 +105,33 @@ final class PdfServiceTest extends SimpleTestCase
         try {
             (new PdfService())->compress($upload);
             $this->assertTrue(false, 'Upload ausente deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
+        }
+    }
+
+    private function testProtectRejectsShortPassword(): void
+    {
+        try {
+            (new PdfService())->protect([], 'ab');
+            $this->assertTrue(false, 'Senha curta deveria ser rejeitada.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('pelo menos 3', $exception->getMessage());
+        }
+    }
+
+    private function testProtectRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new PdfService())->protect($upload, 'senha123');
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao proteger PDF.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }
