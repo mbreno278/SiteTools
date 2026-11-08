@@ -313,7 +313,7 @@ final class PdfService
             }
         }
 
-        if (!class_exists(\\ZipArchive::class)) {
+        if (!class_exists(\ZipArchive::class)) {
             throw new AppException('A extensão ZIP do PHP não está habilitada no servidor.', 503, 'zip_extension_missing');
         }
 
@@ -410,8 +410,8 @@ final class PdfService
                 $mime = 'application/pdf';
             } else {
                 $finalPath = $workspace->join('paginas.zip');
-                $zip = new \\ZipArchive();
-                if ($zip->open($finalPath, \\ZipArchive::CREATE | \\ZipArchive::OVERWRITE) !== true) {
+                $zip = new \ZipArchive();
+                if ($zip->open($finalPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
                     throw new AppException('Não foi possível criar o arquivo ZIP.', 500, 'zip_create_failed');
                 }
 
@@ -433,7 +433,7 @@ final class PdfService
                 'bytes' => (int) filesize($finalPath),
                 'workspace' => $workspace,
             ];
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $workspace->cleanup();
             throw $e;
         }
