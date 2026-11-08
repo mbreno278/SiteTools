@@ -8,7 +8,9 @@ declare(strict_types=1);
  * Uso no terminal:
  *   php tests/run_simple.php
  *
- * No Windows/WAMP, também pode ser executado pelo caminho completo do php.exe.
+ * No Windows/WAMP, use o caminho completo do php.exe se "php" não estiver no PATH.
+ * Pelo navegador, testes que iniciam subprocessos são ignorados por segurança/
+ * compatibilidade com o SAPI Apache; execute-os pelo CLI.
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -44,8 +46,18 @@ $totalAssertions = 0;
 
 echo "SiteTools — Testes Automatizados (runner simples)\n";
 echo str_repeat('=', 50) . "\n\n";
+echo "Ambiente: " . PHP_SAPI . "\n\n";
 
 foreach ($tests as $class) {
+    // ProcessRunnerTest inicia outro executável PHP. Sob Apache, PHP_BINARY
+    // pode apontar para o binário do servidor; esse teste deve rodar no CLI.
+    if ($class === \Tests\Unit\ProcessRunnerTest::class && PHP_SAPI !== 'cli') {
+        echo "[SKIP] {$class} (teste de subprocesso requer PHP CLI; execute pelo terminal)\n";
+        $skipped++;
+        flush();
+        continue;
+    }
+
     echo "[RUN ] {$class} ...\n";
     flush();
 
