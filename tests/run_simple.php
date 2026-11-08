@@ -17,11 +17,11 @@ $tests = [
     \Tests\Unit\UsageLimitServiceTest::class,
     \Tests\Unit\ToolAccessServiceTest::class,
     \Tests\Unit\FileStorageServiceTest::class,
-    \\Tests\\Unit\\ImageControllerTest::class,
-    \\Tests\\Unit\\DocumentControllerTest::class,
-    \\Tests\\Unit\\PdfServiceTest::class,
-    \\Tests\\Unit\\TempWorkspaceTest::class,
-    \\Tests\\Unit\\ProcessRunnerTest::class,
+    \Tests\Unit\ImageControllerTest::class,
+    \Tests\Unit\DocumentControllerTest::class,
+    \Tests\Unit\PdfServiceTest::class,
+    \Tests\Unit\TempWorkspaceTest::class,
+    \Tests\Unit\ProcessRunnerTest::class,
 ];
 
 $passed = 0;
