@@ -16,6 +16,8 @@ final class ImageProcessingService
 {
     private const MAX_BYTES = 15 * 1024 * 1024;
     private const MAX_PIXELS = 40_000_000;
+    private const MAX_OUTPUT_DIMENSION = 10_000;
+    private const MAX_OUTPUT_PIXELS = 16_000_000;
 
     /** @return array{im:\GdImage,w:int,h:int,type:int} */
     public function loadFromUpload(array $file): array
@@ -85,6 +87,15 @@ final class ImageProcessingService
             $th = max(1, $targetH ?: $sh);
         }
 
+        if (
+            $tw > self::MAX_OUTPUT_DIMENSION
+            || $th > self::MAX_OUTPUT_DIMENSION
+            || ($tw * $th) > self::MAX_OUTPUT_PIXELS
+        ) {
+            imagedestroy($src);
+            throw new ValidationException('As dimensões solicitadas excedem o limite de saída permitido.');
+        }
+
         $dst = imagecreatetruecolor($tw, $th);
         if ($dst === false) {
             imagedestroy($src);
@@ -95,7 +106,7 @@ final class ImageProcessingService
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $tw, $th, $sw, $sh);
         imagedestroy($src);
 
-        return $this->encodeToTemp($dst, $format, $quality);
+        return $this->encodeToTemp($dst, $format, max(10, min(95, $quality)));
     }
 
     /**
@@ -114,7 +125,7 @@ final class ImageProcessingService
     public function convert(array $file, string $format = 'png', int $quality = 90): array
     {
         $loaded = $this->loadFromUpload($file);
-        return $this->encodeToTemp($loaded['im'], $format, $quality);
+        return $this->encodeToTemp($loaded['im'], $format, max(10, min(95, $quality)));
     }
 
     /**
