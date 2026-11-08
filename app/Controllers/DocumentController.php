@@ -34,6 +34,11 @@ final class DocumentController
         return $this->pdf->compress($upload, $quality, $maxBytes);
     }
 
+    public function splitPdf(array $upload, string $mode = 'each', string $range = '', int $maxBytes = 31457280): array
+    {
+        return $this->pdf->split($upload, $mode, $range, $maxBytes);
+    }
+
     /**
      * @param array{name:array, tmp_name:array, error:array, size:array} $uploads
      */
