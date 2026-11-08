@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/_guard.php';
 $messages = [];
 $flash = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
