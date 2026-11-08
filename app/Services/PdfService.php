@@ -439,6 +439,143 @@ final class PdfService
         }
     }
 
+    /**
+     * Protege um PDF com senha de usuário e proprietário.
+     *
+     * Prioriza qpdf com AES-256 e utiliza Ghostscript como alternativa.
+     *
+     * @return array{path:string,mime:string,bytes:int,workspace:TempWorkspace}
+     */
+    public function protect(array $upload, string $password, int $maxBytes = 31457280): array
+    {
+        $password = preg_replace('/[\\x00-\\x1F\\x7F]/', '', $password) ?? '';
+        $password = trim($password);
+
+        if (strlen($password) < 3) {
+            throw new ValidationException('A senha deve ter pelo menos 3 caracteres.');
+        }
+        if (strlen($password) > 64) {
+            throw new ValidationException('Senha muito longa (máximo 64 caracteres).');
+        }
+
+        $inputPath = $this->validateUploadedPdf($upload, $maxBytes);
+        $configFile = dirname(__DIR__, 2) . '/config/converters.php';
+        $config = is_file($configFile) ? require $configFile : [];
+        $qpdf = is_array($config) ? ($config['qpdf'] ?? null) : null;
+        $ghostscript = $this->findGhostscript();
+
+        if ((!is_string($qpdf) || $qpdf === '') && $ghostscript === null) {
+            throw new AppException(
+                'Nenhuma ferramenta encontrada. Instale o qpdf (recomendado) ou o Ghostscript.',
+                503,
+                'pdf_protection_tool_missing'
+            );
+        }
+
+        $workspace = new TempWorkspace();
+
+        try {
+            $input = $workspace->join('input.pdf');
+            $output = $workspace->join('protected.pdf');
+
+            if (!@copy($inputPath, $input)) {
+                throw new AppException('Falha ao preparar o arquivo PDF.', 500, 'upload_store_failed');
+            }
+
+            $protected = false;
+            $lastError = '';
+
+            if (is_string($qpdf) && $qpdf !== '') {
+                $command = [
+                    $qpdf,
+                    '--encrypt',
+                    $password,
+                    $password,
+                    '256',
+                    '--',
+                    $input,
+                    $output,
+                ];
+
+                $result = $this->runner->run($command, $workspace->path(), 120);
+                if ($result['timed_out']) {
+                    throw new AppException('A proteção do PDF excedeu o tempo limite.', 504, 'timeout');
+                }
+
+                $protected = $result['exit'] === 0
+                    && is_file($output)
+                    && filesize($output) > 200;
+
+                if (!$protected) {
+                    $lastError = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                    @unlink($output);
+                }
+            }
+
+            if (!$protected && $ghostscript !== null) {
+                $command = [
+                    $ghostscript,
+                    '-sDEVICE=pdfwrite',
+                    '-dSAFER',
+                    '-dNOPAUSE',
+                    '-dQUIET',
+                    '-dBATCH',
+                    '-dCompatibilityLevel=1.4',
+                    '-sOwnerPassword=' . $password,
+                    '-sUserPassword=' . $password,
+                    '-dEncryptionR=3',
+                    '-dKeyLength=128',
+                    '-dPermissions=-4',
+                    '-sOutputFile=' . $output,
+                    $input,
+                ];
+
+                $result = $this->runner->run($command, $workspace->path(), 120);
+                if ($result['timed_out']) {
+                    throw new AppException('A proteção do PDF excedeu o tempo limite.', 504, 'timeout');
+                }
+
+                $protected = $result['exit'] === 0
+                    && is_file($output)
+                    && filesize($output) > 200;
+
+                if (!$protected) {
+                    $lastError = trim(($result['stderr'] ?? '') . ' ' . ($result['stdout'] ?? ''));
+                }
+            }
+
+            if (!$protected) {
+                if ($lastError !== '') {
+                    error_log('[pdf-protect] ' . mb_substr($lastError, 0, 500));
+                }
+                throw new AppException(
+                    'Não foi possível proteger o PDF. Verifique se o arquivo já não está protegido ou corrompido.',
+                    422,
+                    'pdf_protection_failed'
+                );
+            }
+
+            $handle = @fopen($output, 'rb');
+            $signature = $handle ? (fread($handle, 5) ?: '') : '';
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+            if ($signature !== '%PDF-') {
+                throw new AppException('O arquivo protegido gerado não é um PDF válido.', 500, 'invalid_output');
+            }
+
+            return [
+                'path' => $output,
+                'mime' => 'application/pdf',
+                'bytes' => (int) filesize($output),
+                'workspace' => $workspace,
+            ];
+        } catch (\\Throwable $e) {
+            $workspace->cleanup();
+            throw $e;
+        }
+    }
+
     private function validateUploadedPdf(array $file, int $maxBytes): string
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
