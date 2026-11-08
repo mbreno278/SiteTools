@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\\Unit;
 
-use App\Services\Process\ProcessRunner;
-use Tests\Support\SimpleTestCase;
+use App\\Services\\Process\\ProcessRunner;
+use Tests\\Support\\SimpleTestCase;
 
 final class ProcessRunnerTest extends SimpleTestCase
 {
@@ -25,11 +25,26 @@ final class ProcessRunnerTest extends SimpleTestCase
 
     private function testRunsPhpProcess(): void
     {
-        $code = 'echo "runner-ok";';
-        $result = (new ProcessRunner())->run([PHP_BINARY, '-r', $code], null, 10);
+        $script = tempnam(sys_get_temp_dir(), 'st_process_');
+        if ($script === false) {
+            throw new \\RuntimeException('Não foi possível criar script temporário.');
+        }
 
-        $this->assertFalse($result['timed_out']);
-        $this->assertSame(0, $result['exit']);
-        $this->assertSame('runner-ok', trim($result['stdout']));
+        $scriptPath = $script . '.php';
+        @unlink($script);
+
+        try {
+            if (file_put_contents($scriptPath, "<?php echo 'runner-ok';") === false) {
+                throw new \\RuntimeException('Não foi possível gravar script temporário.');
+            }
+
+            $result = (new ProcessRunner())->run([PHP_BINARY, $scriptPath], null, 10);
+
+            $this->assertFalse($result['timed_out']);
+            $this->assertSame(0, $result['exit'], 'Processo PHP falhou: ' . $result['stderr']);
+            $this->assertSame('runner-ok', trim($result['stdout']));
+        } finally {
+            @unlink($scriptPath);
+        }
     }
 }
