@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Controllers\\ImageController;
+use App\Controllers\ImageController;
 use InvalidArgumentException;
-use Tests\\Support\\SimpleTestCase;
+use Tests\Support\SimpleTestCase;
 
 final class ImageControllerTest extends SimpleTestCase
 {
