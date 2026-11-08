@@ -254,7 +254,7 @@ final class YoutubeService
                 'bytes' => (int) $bytes,
                 'workspace' => $workspace,
             ];
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $workspace->cleanup();
             throw $e;
         }
