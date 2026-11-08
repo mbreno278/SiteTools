@@ -42,8 +42,18 @@ $qpdfCandidates = array_filter([
     '/usr/local/bin/qpdf',
 ]);
 
+$ffmpegCandidates = array_filter([
+    env('FFMPEG_PATH'),
+    $isWindows ? 'C:\\ffmpeg\\bin\\ffmpeg.exe' : null,
+    $isWindows ? 'C:\\Windows\\System32\\ffmpeg.exe' : null,
+    'ffmpeg',
+    '/usr/bin/ffmpeg',
+    '/usr/local/bin/ffmpeg',
+]);
+
 $ytdlpCandidates = array_filter([
     env('YTDLP_PATH'),
+    $isWindows ? 'C:\\yt-dlp\\yt-dlp.exe' : null,
     $isWindows ? 'C:\\Tools\\yt-dlp\\yt-dlp.exe' : null,
     'yt-dlp',
     '/usr/local/bin/yt-dlp',
@@ -72,6 +82,7 @@ return [
     'ghostscript' => $pick($gsCandidates),
     'qpdf' => $pick($qpdfCandidates),
     'ytdlp' => $pick($ytdlpCandidates),
+    'ffmpeg' => $pick($ffmpegCandidates),
     'max_file_size' => (int) env('UPLOAD_MAX_BYTES', 20 * 1024 * 1024),
     'process_timeout' => (int) env('PROCESS_TIMEOUT', 180),
 ];

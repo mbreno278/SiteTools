@@ -17,6 +17,10 @@ final class DocumentControllerTest extends SimpleTestCase
         $this->testMergeRejectsMalformedUpload();
         $this->testCompressPdfRejectsMissingUpload();
         $this->testSplitPdfRejectsMissingUpload();
+        $this->testProtectPdfRejectsShortPassword();
+        $this->testProtectPdfRejectsMissingUpload();
+        $this->testUnlockPdfRejectsEmptyPassword();
+        $this->testUnlockPdfRejectsMissingUpload();
     }
 
     private function testPdfToWordRejectsMissingFile(): void
@@ -74,6 +78,60 @@ final class DocumentControllerTest extends SimpleTestCase
         try {
             $controller->compressPdf($upload);
             $this->assertTrue(false, 'Upload ausente deveria ser rejeitado.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
+        }
+    }
+
+    private function testProtectPdfRejectsShortPassword(): void
+    {
+        try {
+            (new DocumentController())->protectPdf([], 'ab');
+            $this->assertTrue(false, 'Senha curta deveria ser rejeitada.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('pelo menos 3', $exception->getMessage());
+        }
+    }
+
+    private function testProtectPdfRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new DocumentController())->protectPdf($upload, 'senha123');
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao proteger PDF.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('não foi enviado', $exception->getMessage());
+        }
+    }
+
+    private function testUnlockPdfRejectsEmptyPassword(): void
+    {
+        try {
+            (new DocumentController())->unlockPdf([], '');
+            $this->assertTrue(false, 'Senha vazia deveria ser rejeitada.');
+        } catch (ValidationException $exception) {
+            $this->assertStringContainsString('Informe a senha', $exception->getMessage());
+        }
+    }
+
+    private function testUnlockPdfRejectsMissingUpload(): void
+    {
+        $upload = [
+            'name' => '',
+            'tmp_name' => '',
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 0,
+        ];
+
+        try {
+            (new DocumentController())->unlockPdf($upload, 'senha123');
+            $this->assertTrue(false, 'Upload ausente deveria ser rejeitado ao desbloquear PDF.');
         } catch (ValidationException $exception) {
             $this->assertStringContainsString('não foi enviado', $exception->getMessage());
         }

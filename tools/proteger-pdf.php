@@ -2,105 +2,87 @@
 
 declare(strict_types=1);
 
+/**
+ * SiteTools — Proteger PDF.
+ * Mantém o contrato multipart (pdf, password) e o download direto.
+ */
+
 require __DIR__ . '/_csrf_guard.php';
 
 require __DIR__ . '/_tool_access_guard.php';
 tool_access_guard_for('proteger-pdf');
 
+require __DIR__ . '/_process_helpers.php';
 
+use App\Controllers\DocumentController;
+use App\Exceptions\AppException;
+use App\Exceptions\ValidationException;
 
-require __DIR__ . '/pdf-common.php';
+function proteger_pdf_respond_error(string $message, int $status = 400): never
+{
+    if (!headers_sent()) {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: no-store');
+    }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+const PROTEGER_PDF_MAX_SIZE = 30 * 1024 * 1024;
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Allow: POST');
-    pdfRespondError('Método não permitido.', 405);
+    proteger_pdf_respond_error('Método não permitido.', 405);
 }
 
-if (!isset($_FILES['pdf'])) {
-    pdfRespondError('Selecione um arquivo PDF.');
+if (!isset($_FILES['pdf']) || !is_array($_FILES['pdf'])) {
+    proteger_pdf_respond_error('Selecione um arquivo PDF.', 422);
 }
 
-$password = pdfSanitizePassword((string) ($_POST['password'] ?? ''));
-if (strlen($password) < 3) {
-    pdfRespondError('A senha deve ter pelo menos 3 caracteres.');
-}
+$password = (string) ($_POST['password'] ?? '');
+$startedAt = hrtime(true);
 
-$tmpPath = pdfValidateUpload($_FILES['pdf']);
-$dir = pdfTmpDir();
-$input = $dir . DIRECTORY_SEPARATOR . 'input.pdf';
-$output = $dir . DIRECTORY_SEPARATOR . 'protected.pdf';
+try {
+    $controller = new DocumentController();
+    $result = $controller->protectPdf(
+        $_FILES['pdf'],
+        $password,
+        PROTEGER_PDF_MAX_SIZE
+    );
 
-if (!copy($tmpPath, $input)) {
-    pdfCleanup($dir);
-    pdfRespondError('Falha ao preparar o arquivo.', 500);
-}
+    $processingMs = (int) ((hrtime(true) - $startedAt) / 1_000_000);
+    $toolId = null;
 
-$qpdf = pdfFindQpdf();
-$gs = pdfFindGs();
-$ok = false;
-
-// 1) qpdf — proteção padrão (AES), compatível com leitores comuns
-if ($qpdf !== null) {
-    $cmd = [
-        $qpdf,
-        '--encrypt',
-        $password,  // user password
-        $password,  // owner password
-        '256',
-        '--',
-        $input,
-        $output,
-    ];
-
-    $result = pdfRun($cmd, 120);
-
-    if ($result['exit'] === 0 && is_file($output) && filesize($output) > 200) {
-        $ok = true;
-    }
-}
-
-// 2) Fallback Ghostscript
-if (!$ok && $gs !== null) {
-    if (is_file($output)) {
-        @unlink($output);
+    try {
+        $toolId = process_tool_id(app_pdo(), 'proteger-pdf');
+    } catch (Throwable) {
+        // A falha ao consultar o histórico não deve descartar o arquivo pronto.
     }
 
-    $cmd = [
-        $gs,
-        '-sDEVICE=pdfwrite',
-        '-dSAFER',
-        '-dNOPAUSE',
-        '-dQUIET',
-        '-dBATCH',
-        '-dCompatibilityLevel=1.4',
-        '-sOwnerPassword=' . $password,
-        '-sUserPassword=' . $password,
-        '-dEncryptionR=3',
-        '-dKeyLength=128',
-        '-dPermissions=-4',
-        '-sOutputFile=' . $output,
-        $input,
-    ];
+    $originalName = basename((string) ($_FILES['pdf']['name'] ?? 'documento.pdf'));
+    $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+    $safeBaseName = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $baseName) ?: 'documento';
+    $downloadName = $safeBaseName . '-protegido.pdf';
 
-    $result = pdfRun($cmd, 120);
+    // Mantém o workspace vivo até o término do envio do arquivo.
+    $workspace = $result['workspace'];
 
-    if ($result['exit'] === 0 && is_file($output) && filesize($output) > 200) {
-        // Garante que não gerou PDF “vazio”
-        pdfAssertSaneOutput($input, $output, 'Não foi possível proteger o PDF corretamente.');
-        $ok = true;
-    }
+    process_send_file(
+        $result['path'],
+        $downloadName,
+        $result['mime'] ?? 'application/pdf',
+        'proteger-pdf',
+        $toolId,
+        $processingMs
+    );
+} catch (ValidationException $e) {
+    proteger_pdf_respond_error($e->getMessage(), 422);
+} catch (AppException $e) {
+    proteger_pdf_respond_error($e->getMessage(), $e->getStatusCode());
+} catch (Throwable $e) {
+    error_log('[proteger-pdf] ' . $e->getMessage());
+    proteger_pdf_respond_error('Não foi possível proteger este PDF. Tente novamente.', 500);
 }
-
-if (!$ok) {
-    pdfCleanup($dir);
-    if ($qpdf === null && $gs === null) {
-        pdfRespondError('Nenhuma ferramenta encontrada. Instale o qpdf (recomendado) ou o Ghostscript.', 500);
-    }
-    pdfRespondError('Não foi possível proteger o PDF. Verifique se o arquivo já não está protegido ou corrompido.');
-}
-
-$originalName = pathinfo($_FILES['pdf']['name'] ?? 'documento', PATHINFO_FILENAME);
-$safeName = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $originalName) ?: 'documento';
-
-pdfSendFile($output, $safeName . '-protegido.pdf');
-pdfCleanup($dir);
