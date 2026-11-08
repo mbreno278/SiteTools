@@ -80,7 +80,7 @@ function tool_access_guard_for(string $slug): void
 
     try {
         // Primeiro confirma o acesso comercial/operacional.
-        tool_access_require($pdo, $slug);
+        $accessCheck = tool_access_require($pdo, $slug);
 
         // A cota é verificada antes de iniciar qualquer processamento pesado.
         $stmt = $pdo->prepare('SELECT id FROM tools WHERE slug = :slug LIMIT 1');
@@ -94,18 +94,7 @@ function tool_access_guard_for(string $slug): void
         $user = function_exists('auth_user') ? auth_user() : null;
         $userId = $user ? (int) $user['id'] : null;
 
-        $grantStmt = $pdo->prepare(
-            "SELECT id FROM user_tool_access
-             WHERE user_id = :uid AND tool_id = :tid AND status = 'active'
-               AND revoked_at IS NULL AND starts_at <= NOW()
-               AND (expires_at IS NULL OR expires_at > NOW())
-             LIMIT 1"
-        );
-        $hasPaidGrant = false;
-        if ($userId !== null && $userId > 0) {
-            $grantStmt->execute(['uid' => $userId, 'tid' => $toolId]);
-            $hasPaidGrant = (bool) $grantStmt->fetchColumn();
-        }
+        $hasPaidGrant = ($accessCheck['reason'] ?? '') === 'paid_active';
 
         \\App\\Services\\UsageLimitService::make($pdo)->assertWithinLimit(
             $toolId,
