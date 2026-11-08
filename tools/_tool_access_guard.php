@@ -96,12 +96,12 @@ function tool_access_guard_for(string $slug): void
 
         $hasPaidGrant = ($accessCheck['reason'] ?? '') === 'paid_active';
 
-        \\App\\Services\\UsageLimitService::make($pdo)->assertWithinLimit(
+        \App\Services\UsageLimitService::make($pdo)->assertWithinLimit(
             $toolId,
             $userId,
             $hasPaidGrant
         );
-    } catch (\\App\\Exceptions\\AppException $e) {
+    } catch (\App\Exceptions\AppException $e) {
         tool_access_guard_deny(
             $e->getMessage(),
             $e->getErrorCode() ?? 'authorization_error',
