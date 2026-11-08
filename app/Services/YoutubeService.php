@@ -137,6 +137,140 @@ final class YoutubeService
         }
     }
 
+    public function getAudioInfo(string $url): array
+    {
+        $info = $this->getVideoInfo($url);
+        $info['formats'] = $this->buildAudioFormatList();
+        return $info;
+    }
+
+    /**
+     * @return array{path:string,mime:string,filename:string,bytes:int,workspace:TempWorkspace}
+     */
+    public function downloadAudio(string $url, string $formatId, string $output): array
+    {
+        $url = $this->validateYoutubeUrl($url);
+
+        if (!preg_match('/^[a-zA-Z0-9_+\\-\\/.]+$/', $formatId)) {
+            throw new ValidationException('Formato inválido.');
+        }
+
+        $allowedOutputs = ['mp3', 'm4a', 'opus', 'wav', 'best'];
+        if (!in_array($output, $allowedOutputs, true)) {
+            $output = 'mp3';
+        }
+        if ($output === 'best') {
+            $output = 'm4a';
+        }
+
+        $ytdlp = $this->findYtDlp();
+        $workspace = new TempWorkspace();
+
+        try {
+            $template = $workspace->join('audio.%(ext)s');
+            $baseCommand = [
+                $ytdlp,
+                '--no-warnings',
+                '--no-playlist',
+                '--extract-audio',
+                '--audio-format',
+                $output,
+                '--audio-quality',
+                '0',
+                '-f',
+                $formatId,
+                '-o',
+                $template,
+                '--no-part',
+                '--restrict-filenames',
+                $url,
+            ];
+
+            $command = $baseCommand;
+            array_splice($command, 9, 0, [
+                '--prefer-ffmpeg',
+                '--postprocessor-args',
+                'ffmpeg:-ar 44100',
+            ]);
+
+            $result = $this->runner->run($command, $workspace->path(), 240);
+            if ($result['timed_out']) {
+                throw new AppException('A extração do áudio excedeu o tempo limite.', 504, 'youtube_audio_timeout');
+            }
+
+            if ($result['exit'] !== 0) {
+                $result = $this->runner->run($baseCommand, $workspace->path(), 240);
+                if ($result['timed_out']) {
+                    throw new AppException('A extração do áudio excedeu o tempo limite.', 504, 'youtube_audio_timeout');
+                }
+            }
+
+            if ($result['exit'] !== 0) {
+                $error = trim((string) ($result['stderr'] ?? ''));
+                if (stripos($error, 'ffmpeg') !== false || stripos($error, 'ffprobe') !== false) {
+                    throw new AppException('FFmpeg não encontrado no servidor. Instale o FFmpeg e configure o PATH.', 503, 'ffmpeg_missing');
+                }
+                throw new AppException($this->friendlyError($error, 'Falha ao extrair o áudio.'), 422, 'youtube_audio_failed');
+            }
+
+            $files = array_values(array_filter(
+                glob($workspace->path() . DIRECTORY_SEPARATOR . 'audio.*') ?: [],
+                static fn(string $file): bool => is_file($file) && !str_ends_with($file, '.part')
+            ));
+
+            if ($files === []) {
+                throw new AppException('Arquivo de áudio não encontrado após a conversão.', 500, 'youtube_audio_missing');
+            }
+
+            $path = $files[0];
+            foreach ($files as $file) {
+                if (str_ends_with(strtolower($file), '.' . $output)) {
+                    $path = $file;
+                    break;
+                }
+            }
+
+            $bytes = filesize($path);
+            if ($bytes === false || $bytes < 1000) {
+                throw new AppException('O arquivo de áudio gerado está vazio ou corrompido.', 500, 'youtube_audio_invalid');
+            }
+
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION) ?: $output);
+            $mimeMap = [
+                'mp3' => 'audio/mpeg',
+                'm4a' => 'audio/mp4',
+                'aac' => 'audio/aac',
+                'opus' => 'audio/opus',
+                'ogg' => 'audio/ogg',
+                'wav' => 'audio/wav',
+                'flac' => 'audio/flac',
+                'webm' => 'audio/webm',
+            ];
+
+            return [
+                'path' => $path,
+                'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
+                'filename' => 'youtube-audio.' . $ext,
+                'bytes' => (int) $bytes,
+                'workspace' => $workspace,
+            ];
+        } catch (\\Throwable $e) {
+            $workspace->cleanup();
+            throw $e;
+        }
+    }
+
+    private function buildAudioFormatList(): array
+    {
+        return [
+            ['format_id' => 'bestaudio', 'output' => 'mp3', 'type' => 'audio', 'label' => 'MP3 · Alta qualidade', 'ext' => 'mp3', 'abr' => 192, 'acodec' => 'mp3', 'filesize' => null],
+            ['format_id' => 'bestaudio', 'output' => 'mp3', 'type' => 'audio', 'label' => 'MP3 · Qualidade máxima', 'ext' => 'mp3', 'abr' => 320, 'acodec' => 'mp3', 'filesize' => null, 'quality' => '0'],
+            ['format_id' => 'bestaudio', 'output' => 'm4a', 'type' => 'audio', 'label' => 'M4A (AAC) · Alta qualidade', 'ext' => 'm4a', 'abr' => 192, 'acodec' => 'aac', 'filesize' => null],
+            ['format_id' => 'bestaudio', 'output' => 'opus', 'type' => 'audio', 'label' => 'OPUS · Compacto e nítido', 'ext' => 'opus', 'abr' => 160, 'acodec' => 'opus', 'filesize' => null],
+            ['format_id' => 'bestaudio', 'output' => 'wav', 'type' => 'audio', 'label' => 'WAV · Sem compressão', 'ext' => 'wav', 'abr' => null, 'acodec' => 'pcm', 'filesize' => null],
+        ];
+    }
+
     private function validateYoutubeUrl(string $url): string
     {
         $url = trim($url);
