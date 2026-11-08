@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Security\\AdminPermissionPolicy;
-use Tests\\Support\\SimpleTestCase;
+use App\Security\AdminPermissionPolicy;
+use Tests\Support\SimpleTestCase;
 
 final class AdminPermissionPolicyTest extends SimpleTestCase
 {
