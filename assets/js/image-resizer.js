@@ -1,4 +1,3 @@
-
 "use strict";
 
 const imageResizer = document.querySelector("#image-resizer");
@@ -24,9 +23,24 @@ if (imageResizer) {
     const removeButton = imageResizer.querySelector("#image-remove");
     const changeButton = imageResizer.querySelector("#image-change");
 
+    const required = [
+        fileInput, uploadArea, dropzone, loading, editor, errorMessage,
+        preview, originalInfo, previewInfo, widthInput, heightInput,
+        keepRatio, outputInfo, downloadButton, removeButton, changeButton
+    ];
+
+    if (required.some((el) => !el)) {
+        console.warn(
+            "[image-resizer] Missing required elements inside #image-resizer. Script aborted safely."
+        );
+    } else {
+
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const MAX_DIMENSION = 5000;
     const MIN_LOADING_TIME = 450;
+
+    // Qualidade padrão para JPEG / WebP (PNG é lossless)
+    const OUTPUT_QUALITY = 0.92;
 
     let originalImage = null;
     let originalFile = null;
@@ -55,6 +69,27 @@ if (imageResizer) {
         return Number.isInteger(value) &&
             value >= 1 &&
             value <= MAX_DIMENSION;
+    }
+
+    /**
+     * Resolve MIME e extensão a partir do arquivo original.
+     * Fallback para PNG se o tipo for desconhecido.
+     */
+    function resolveOutputFormat(file) {
+        const type = (file && file.type) || "image/png";
+
+        const map = {
+            "image/jpeg": { mime: "image/jpeg", ext: "jpg", quality: OUTPUT_QUALITY },
+            "image/jpg":  { mime: "image/jpeg", ext: "jpg", quality: OUTPUT_QUALITY },
+            "image/png":  { mime: "image/png",  ext: "png", quality: undefined },
+            "image/webp": { mime: "image/webp", ext: "webp", quality: OUTPUT_QUALITY }
+        };
+
+        return map[type] || { mime: "image/png", ext: "png", quality: undefined };
+    }
+
+    function getBaseName(name) {
+        return (name || "image").replace(/\.[^.]+$/, "") || "image";
     }
 
     function updatePreview() {
@@ -172,7 +207,6 @@ if (imageResizer) {
                 image.onerror = () => reject(
                     new Error("The selected file is not a valid image.")
                 );
-
                 image.src = temporaryURL;
             });
 
@@ -181,28 +215,25 @@ if (imageResizer) {
                 return;
             }
 
-            const width = image.naturalWidth;
-            const height = image.naturalHeight;
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
 
             if (
-                !width ||
-                !height ||
-                width > 30000 ||
-                height > 30000 ||
-                width * height > 40000000
+                !naturalWidth ||
+                !naturalHeight ||
+                naturalWidth > MAX_DIMENSION ||
+                naturalHeight > MAX_DIMENSION
             ) {
                 throw new Error(
-                    "This image is too large to process safely."
+                    `Image dimensions must be between 1 and ${MAX_DIMENSION} px.`
                 );
             }
 
-            const remainingTime = MIN_LOADING_TIME -
-                (performance.now() - startedAt);
+            const elapsed = performance.now() - startedAt;
+            const remaining = MIN_LOADING_TIME - elapsed;
 
-            if (remainingTime > 0) {
-                await new Promise(resolve =>
-                    setTimeout(resolve, remainingTime)
-                );
+            if (remaining > 0) {
+                await new Promise(resolve => setTimeout(resolve, remaining));
             }
 
             if (currentSelection !== selectionId) {
@@ -210,20 +241,22 @@ if (imageResizer) {
                 return;
             }
 
+            if (originalURL) {
+                URL.revokeObjectURL(originalURL);
+            }
+
             originalImage = image;
             originalFile = file;
             originalURL = temporaryURL;
             temporaryURL = null;
-
-            aspectRatio = width / height;
+            aspectRatio = naturalWidth / naturalHeight;
 
             preview.src = originalURL;
-
-            widthInput.value = width;
-            heightInput.value = height;
-
             originalInfo.textContent =
-                `${file.name} · ${width} × ${height} px`;
+                `Original: ${naturalWidth} × ${naturalHeight} px`;
+
+            widthInput.value = naturalWidth;
+            heightInput.value = naturalHeight;
 
             loading.hidden = true;
             editor.hidden = false;
@@ -237,11 +270,8 @@ if (imageResizer) {
             uploadArea.hidden = false;
             editor.hidden = true;
 
-            showError(
-                error.message || "Unable to load this image."
-            );
+            showError(error.message || "Unable to load this image.");
 
-        } finally {
             if (temporaryURL) {
                 URL.revokeObjectURL(temporaryURL);
             }
@@ -315,6 +345,8 @@ if (imageResizer) {
 
         clearError();
 
+        const format = resolveOutputFormat(originalFile);
+
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
@@ -326,26 +358,45 @@ if (imageResizer) {
             return;
         }
 
+        // JPEG não tem transparência — fundo branco evita preencher com preto
+        if (format.mime === "image/jpeg") {
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0, 0, width, height);
+        }
+
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
-
         context.drawImage(originalImage, 0, 0, width, height);
 
         downloadButton.disabled = true;
+
+        const toBlobArgs = format.quality !== undefined
+            ? [format.mime, format.quality]
+            : [format.mime];
 
         canvas.toBlob(blob => {
             downloadButton.disabled = false;
 
             if (!blob) {
                 showError("Unable to generate the resized image.");
+                canvas.width = 0;
+                canvas.height = 0;
                 return;
             }
 
+            // Alguns browsers podem cair em PNG se o formato não for suportado
+            const effectiveExt = blob.type === format.mime
+                ? format.ext
+                : (blob.type === "image/jpeg" ? "jpg"
+                    : blob.type === "image/webp" ? "webp"
+                    : "png");
+
+            const baseName = getBaseName(originalFile.name);
             const downloadURL = URL.createObjectURL(blob);
             const link = document.createElement("a");
 
             link.href = downloadURL;
-            link.download = "webtools-resized.png";
+            link.download = `${baseName}-resized.${effectiveExt}`;
 
             document.body.appendChild(link);
             link.click();
@@ -355,7 +406,7 @@ if (imageResizer) {
             canvas.width = 0;
             canvas.height = 0;
 
-        }, "image/png");
+        }, ...toBlobArgs);
     });
 
     removeButton.addEventListener("click", resetEditor);
@@ -398,4 +449,5 @@ if (imageResizer) {
     });
 
     window.addEventListener("resize", updatePreview);
+}
 }

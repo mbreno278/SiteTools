@@ -12,6 +12,10 @@ declare(strict_types=1);
  *   free | login | paid | temporary
  *
  * guest_allowed: se 1, visitante pode usar quando mode=free
+ *
+ * Comportamento paid/temporary:
+ *   - Visitante ou logado sem grant → reason = payment_required (tela premium)
+ *   - Logado com grant ativo → allowed = true
  */
 
 require_once __DIR__ . '/auth.php';
@@ -121,7 +125,15 @@ function tool_user_has_grant(PDO $pdo, int $userId, int $toolId): bool
 }
 
 /**
- * @return array{allowed:bool,mode:string,status:string,reason:string,label:string,tool_slug?:string}
+ * @return array{
+ *   allowed:bool,
+ *   mode:string,
+ *   status:string,
+ *   reason:string,
+ *   label:string,
+ *   tool_slug?:string,
+ *   logged_in?:bool
+ * }
  */
 function tool_access_check(PDO $pdo, array $tool): array
 {
@@ -134,6 +146,7 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'unavailable',
             'label' => 'Indisponível',
             'tool_slug' => (string) ($tool['slug'] ?? ''),
+            'logged_in' => false,
         ];
     }
 
@@ -152,6 +165,7 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'unavailable',
             'label' => $labels['unavailable'],
             'tool_slug' => $slug,
+            'logged_in' => false,
         ];
     }
 
@@ -163,10 +177,11 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'development',
             'label' => $labels['development'],
             'tool_slug' => $slug,
+            'logged_in' => false,
         ];
     }
 
-    // is_active = 0
+    // is_active = 0 (defesa extra)
     if (isset($tool['is_active']) && (int) $tool['is_active'] !== 1) {
         return [
             'allowed' => false,
@@ -175,23 +190,29 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'unavailable',
             'label' => $labels['unavailable'],
             'tool_slug' => $slug,
+            'logged_in' => false,
         ];
     }
 
     $user = function_exists('auth_user') ? auth_user() : null;
     $userId = (int) ($user['id'] ?? 0);
+    $loggedIn = $userId > 0;
 
+    // ---------- free ----------
     if ($mode === 'free') {
-        if ($guestAllowed || $userId > 0) {
+        if ($guestAllowed || $loggedIn) {
             return [
                 'allowed' => true,
                 'mode' => $mode,
                 'status' => $status,
-                'reason' => $userId > 0 ? 'logged_in' : 'public',
+                'reason' => $loggedIn ? 'logged_in' : 'public',
                 'label' => $labels['free'],
                 'tool_slug' => $slug,
+                'logged_in' => $loggedIn,
             ];
         }
+
+        // free com guest_allowed = 0 e visitante
         return [
             'allowed' => false,
             'mode' => $mode,
@@ -199,11 +220,13 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'login_required',
             'label' => $labels['login'],
             'tool_slug' => $slug,
+            'logged_in' => false,
         ];
     }
 
+    // ---------- login ----------
     if ($mode === 'login') {
-        if ($userId > 0) {
+        if ($loggedIn) {
             return [
                 'allowed' => true,
                 'mode' => $mode,
@@ -211,8 +234,10 @@ function tool_access_check(PDO $pdo, array $tool): array
                 'reason' => 'logged_in',
                 'label' => $labels['login'],
                 'tool_slug' => $slug,
+                'logged_in' => true,
             ];
         }
+
         return [
             'allowed' => false,
             'mode' => $mode,
@@ -220,40 +245,49 @@ function tool_access_check(PDO $pdo, array $tool): array
             'reason' => 'login_required',
             'label' => $labels['login'],
             'tool_slug' => $slug,
+            'logged_in' => false,
         ];
     }
 
-    // paid | temporary
-    if ($userId <= 0) {
+    // ---------- paid | temporary ----------
+    // Sempre trata como premium na UI (payment_required),
+    // inclusive para visitante — não força só a tela de login.
+    if ($mode === 'paid' || $mode === 'temporary') {
+        if ($loggedIn) {
+            $toolId = (int) ($tool['id'] ?? 0);
+            if (tool_user_has_grant($pdo, $userId, $toolId)) {
+                return [
+                    'allowed' => true,
+                    'mode' => $mode,
+                    'status' => $status,
+                    'reason' => 'paid_active',
+                    'label' => $labels[$mode] ?? $labels['paid'],
+                    'tool_slug' => $slug,
+                    'logged_in' => true,
+                ];
+            }
+        }
+
         return [
             'allowed' => false,
             'mode' => $mode,
             'status' => $status,
-            'reason' => 'login_required',
+            'reason' => 'payment_required',
             'label' => $labels[$mode] ?? $labels['paid'],
             'tool_slug' => $slug,
+            'logged_in' => $loggedIn,
         ];
     }
 
-    $toolId = (int) ($tool['id'] ?? 0);
-    if (tool_user_has_grant($pdo, $userId, $toolId)) {
-        return [
-            'allowed' => true,
-            'mode' => $mode,
-            'status' => $status,
-            'reason' => 'paid_active',
-            'label' => $labels[$mode] ?? $labels['paid'],
-            'tool_slug' => $slug,
-        ];
-    }
-
+    // Fallback fail-closed
     return [
         'allowed' => false,
         'mode' => $mode,
         'status' => $status,
-        'reason' => 'payment_required',
-        'label' => $labels[$mode] ?? $labels['paid'],
+        'reason' => 'unavailable',
+        'label' => $labels['unavailable'],
         'tool_slug' => $slug,
+        'logged_in' => $loggedIn,
     ];
 }
 
@@ -272,6 +306,7 @@ function tool_access_block_html(array $check): string
     $title = 'Ferramenta indisponível';
     $message = 'Esta ferramenta não está disponível no momento.';
     $action = '';
+    $loggedIn = !empty($check['logged_in']);
 
     if ($reason === 'development') {
         $title = 'Em desenvolvimento';
@@ -286,7 +321,14 @@ function tool_access_block_html(array $check): string
     } elseif ($reason === 'payment_required') {
         $title = 'Ferramenta paga';
         $message = 'Esta é uma ferramenta premium. Adquira o acesso para continuar.';
-        $action = '<a class="button button--primary" href="./account/">Minha conta</a>';
+
+        if ($loggedIn) {
+            $action = '<a class="button button--primary" href="./account/">Ver planos / Minha conta</a>';
+        } else {
+            $action =
+                '<a class="button button--primary" href="./account/">Ver planos</a>'
+                . '<button type="button" class="button" data-auth-open="login">Já tenho conta — entrar</button>';
+        }
     }
 
     return '<div class="tool-access-lock" role="status">'
@@ -320,6 +362,7 @@ function tool_access_deny_json(array $check): never
         'reason' => $reason,
         'mode' => $check['mode'] ?? null,
         'status' => $check['status'] ?? null,
+        'logged_in' => !empty($check['logged_in']),
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -341,6 +384,7 @@ function tool_access_require(PDO $pdo, string $slug): array
             'status' => 'unavailable',
             'reason' => 'unavailable',
             'label' => 'Indisponível',
+            'logged_in' => false,
         ]);
     }
 
