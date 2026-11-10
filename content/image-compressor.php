@@ -1,11 +1,39 @@
 <?php
-    include_once __DIR__ . '/config/functions-user.php';
-    $_COOKIE['user_id'] = 1; // Replace with the actual user ID
-    $user_id = $_COOKIE['user_id'];
-    $tools_id = e($tool['name']); // Replace with the actual tool ID
-    $status =  'processing'; // Replace with the actual status
-    $processing_time = 500; // Replace with the actual processing time in milliseconds
-    $file_size = 1024; // Replace with the actual file size in bytes
+/**
+ * Image Compressor tool UI
+ * Included from page.php when $handler === 'image-compressor'
+ *
+ * $tool is available from page.php scope.
+ */
+
+// Caminho correto: content/ → sobe um nível → config/
+$functionsUser = __DIR__ . '/../config/functions-user.php';
+if (is_file($functionsUser)) {
+    include_once $functionsUser;
+}
+
+// Não force cookie em produção — use só se realmente precisar de fallback de dev
+// $_COOKIE['user_id'] = 1;
+
+$user_id = isset($_COOKIE['user_id']) ? (int) $_COOKIE['user_id'] : null;
+$tools_id = isset($tool['name']) ? (string) $tool['name'] : 'image-compressor';
+$status = 'processing';
+$processing_time = 500;
+$file_size = 1024;
+
+// Tracking opcional (não deve quebrar o HTML do botão)
+$usageHtml = '';
+if ($user_id && function_exists('user_tool_usage')) {
+    // Se a função só registra no banco e não imprime HTML, chame aqui e deixe $usageHtml vazio.
+    // Se ela retorna/imprime markup, capture com output buffering:
+    ob_start();
+    try {
+        user_tool_usage($user_id, $tools_id, $status, $processing_time, $file_size);
+    } catch (Throwable $e) {
+        error_log('[image-compressor] user_tool_usage: ' . $e->getMessage());
+    }
+    $usageHtml = trim(ob_get_clean());
+}
 ?>
 
 <div class="image-compressor" id="image-compressor">
@@ -119,12 +147,17 @@
                 WebP usually offers a good balance between image quality and file size.
             </p>
 
+            <?php if ($usageHtml !== ''): ?>
+                <div class="image-compressor__usage" hidden aria-hidden="true">
+                    <?= $usageHtml /* só se for markup seguro e intencional */ ?>
+                </div>
+            <?php endif; ?>
+
             <button
                 type="button"
                 class="button button--primary image-compressor__action"
                 id="compress-button"
             >
-                <?= user_tool_usage($user_id, $tools_id, $status, $processing_time, $file_size); ?>
                 <span class="material-symbols-outlined"
                       aria-hidden="true">compress</span>
                 Compress image
