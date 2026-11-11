@@ -9,15 +9,15 @@ declare(strict_types=1);
 
 return [
     'modules' => [
-        'admin' => true,
-        'account' => true,
-        'authentication' => true,
-        'payments' => true,
-        'premium' => true,
-        'video_downloads' => true,
+        'admin' => false,
+        'account' => false,
+        'authentication' => false,
+        'payments' => false,
+        'premium' => false,
+        'video_downloads' => false,
     ],
     'beta' => [
-        'enabled' => false,
+        'enabled' => true,
         'unlimited_usage' => false,
     ],
 ];
