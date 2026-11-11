@@ -1,0 +1,414 @@
+/* =========================================================
+   S I T E T O O L S
+   Download de Áudio do YouTube
+   ========================================================= */
+
+.yt-audio {
+    width: 100%;
+    min-width: 0;
+}
+
+.yt-audio [hidden] {
+    display: none !important;
+}
+
+/* ---------- Formulário inicial ---------- */
+
+.yt-audio__form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 640px;
+}
+
+.yt-audio__label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.yt-audio__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.yt-audio__input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--tool-text-muted, #64748B);
+    font-size: 22px;
+    pointer-events: none;
+}
+
+.yt-audio__input {
+    width: 100%;
+    padding: 14px 52px 14px 48px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    color: var(--tool-text, #0F172A);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.yt-audio__input:focus {
+    outline: none;
+    border-color: var(--tool-primary, #5938FF);
+    box-shadow: 0 0 0 3px rgb(89 56 255 / 15%);
+}
+
+.yt-audio__input::placeholder {
+    color: var(--tool-text-muted, #94A3B8);
+}
+
+.yt-audio__paste-btn {
+    position: absolute;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--tool-text-muted, #64748B);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.yt-audio__paste-btn:hover {
+    background: var(--tool-surface-muted, #F1F5F9);
+    color: var(--tool-primary, #5938FF);
+}
+
+.yt-audio__hint {
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.yt-audio__submit {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 22px;
+}
+
+.yt-audio__error {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #FEF2F2;
+    color: #B91C1C;
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+/* ---------- Loading ---------- */
+
+.yt-audio__loading,
+.yt-audio__downloading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 220px;
+    text-align: center;
+}
+
+.yt-audio__loading strong,
+.yt-audio__downloading strong {
+    color: var(--tool-text, #0F172A);
+    font-size: 1rem;
+}
+
+.yt-audio__loading > span:last-child,
+.yt-audio__downloading > span:last-child {
+    color: var(--tool-text-muted, #64748B);
+    font-size: 0.875rem;
+}
+
+.yt-audio__spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid var(--tool-border, #E2E8F0);
+    border-top-color: var(--tool-primary, #5938FF);
+    border-radius: 50%;
+    animation: yta-spin 0.75s linear infinite;
+}
+
+@keyframes yta-spin {
+    to { transform: rotate(360deg); }
+}
+
+.yt-audio__progress-bar {
+    width: 100%;
+    max-width: 280px;
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: var(--tool-border, #E2E8F0);
+    overflow: hidden;
+}
+
+.yt-audio__progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: var(--tool-primary, #5938FF);
+    transition: width 0.3s ease;
+}
+
+/* ---------- Resultado ---------- */
+
+.yt-audio__result {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.yt-audio__video-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    padding: 20px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 16px;
+    background: var(--tool-surface, #FFFFFF);
+    box-shadow: var(--tool-shadow, 0 8px 28px rgb(15 23 42 / 4%));
+}
+
+.yt-audio__thumbnail-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    aspect-ratio: 1 / 1;
+}
+
+.yt-audio__thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.85;
+}
+
+.yt-audio__duration {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 80%);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    z-index: 2;
+}
+
+.yt-audio__play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: rgb(255 255 255 / 90%);
+    text-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.yt-audio__video-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.yt-audio__title {
+    margin: 0 0 6px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--tool-text, #0F172A);
+    overflow-wrap: anywhere;
+}
+
+.yt-audio__channel {
+    margin: 0 0 14px;
+    font-size: 0.875rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.yt-audio__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.yt-audio__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.yt-audio__meta-item .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.yt-audio__change-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding: 8px 14px;
+    font-size: 0.8125rem;
+}
+
+/* ---------- Lista de formatos ---------- */
+
+.yt-audio__formats-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.yt-audio__formats-title .material-symbols-outlined {
+    color: var(--tool-primary, #5938FF);
+    font-size: 22px;
+}
+
+.yt-audio__format-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.yt-audio__format-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.yt-audio__format-item:hover {
+    border-color: var(--tool-primary, #5938FF);
+    box-shadow: 0 0 0 1px var(--tool-primary, #5938FF);
+}
+
+.yt-audio__format-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.yt-audio__format-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.yt-audio__format-meta {
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.yt-audio__format-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgb(16 185 129 / 12%);
+    color: #059669;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.yt-audio__format-badge--mp3 {
+    background: rgb(239 68 68 / 12%);
+    color: #DC2626;
+}
+
+.yt-audio__format-badge--m4a {
+    background: rgb(59 130 246 / 12%);
+    color: #2563EB;
+}
+
+.yt-audio__format-badge--opus {
+    background: rgb(168 85 247 / 12%);
+    color: #7C3AED;
+}
+
+.yt-audio__download-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.875rem;
+}
+
+.yt-audio__privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+    line-height: 1.45;
+}
+
+.yt-audio__privacy .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 18px;
+    margin-top: 1px;
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 720px) {
+    .yt-audio__video-card {
+        grid-template-columns: 1fr;
+    }
+
+    .yt-audio__thumbnail-wrap {
+        max-width: 180px;
+        margin: 0 auto;
+    }
+
+    .yt-audio__format-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .yt-audio__download-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

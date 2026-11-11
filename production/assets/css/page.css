@@ -1,0 +1,852 @@
+
+/* =========================================================
+   S I T E T O O L S
+   Tool Page — Componentes e estilos específicos
+   O layout principal pertence ao style.css.
+   ========================================================= */
+
+
+/* =========================================================
+   1. TOOL PAGE — BASE
+   ========================================================= */
+
+.tool-page {
+    width: 100%;
+    min-width: 0;
+
+    color: var(--tool-text, var(--color-text));
+}
+
+.tool-page *,
+.tool-page *::before,
+.tool-page *::after {
+    box-sizing: border-box;
+}
+
+.tool-page [hidden] {
+    display: none !important;
+}
+
+
+/* =========================================================
+   2. BREADCRUMBS
+   ========================================================= */
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+
+    margin: 0 0 var(--spacing-lg);
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+.breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+
+    transition: color var(--transition-fast);
+}
+
+.breadcrumbs a:hover,
+.breadcrumbs a:focus-visible {
+    color: var(--tool-primary, var(--color-primary));
+}
+
+.breadcrumbs a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    border-radius: var(--border-radius-sm);
+}
+
+.breadcrumbs .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 16px;
+}
+
+.breadcrumbs [aria-current="page"] {
+    color: var(--color-text, #374151);
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   3. TOOL HEADING
+   ========================================================= */
+
+.tool-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+
+    min-width: 0;
+    margin: 0 0 var(--spacing-lg);
+}
+
+.tool-heading__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+
+    width: 48px;
+    height: 48px;
+
+    color: var(--tool-primary, var(--color-primary));
+    background: var(--tool-surface, var(--color-surface));
+
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--tool-radius, var(--border-radius-md));
+}
+
+.tool-heading__icon .material-symbols-outlined {
+    font-size: 26px;
+}
+
+.tool-heading__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tool-heading__eyebrow {
+    display: block;
+    margin: 0 0 var(--spacing-xs);
+
+    color: var(--tool-primary, var(--color-primary));
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.tool-heading h1 {
+    margin: 0;
+
+    color: var(--tool-text, var(--color-text));
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 700;
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.05rem;
+
+    overflow-wrap: anywhere;
+}
+
+.tool-heading__description {
+    margin: var(--spacing-sm) 0 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+}
+
+
+/* =========================================================
+   4. TOOL WORKSPACE
+   ========================================================= */
+
+.tool-workspace {
+    min-width: 0;
+    padding: var(--spacing-lg);
+
+    color: var(--tool-text, var(--color-text));
+    background: var(--tool-surface, var(--color-surface));
+
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--tool-radius, var(--border-radius-lg));
+    box-shadow: var(--tool-shadow, var(--shadow-sm));
+}
+
+.workspace__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    margin-bottom: var(--spacing-md);
+}
+
+.workspace__header > div {
+    min-width: 0;
+}
+
+.workspace__header h2 {
+    margin: 0 0 var(--spacing-xs);
+
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-md);
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+}
+
+.workspace__header p {
+    margin: 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+
+/* =========================================================
+   5. TEXT WORKSPACE
+   ========================================================= */
+
+.text-workspace {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 260px;
+    padding: var(--spacing-md);
+
+    resize: vertical;
+
+    color: var(--tool-text, var(--color-text));
+    background: var(--tool-surface-muted, var(--surface-secondary));
+
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--border-radius-sm);
+    outline: none;
+
+    font: inherit;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.text-workspace:focus {
+    border-color: var(--tool-primary, var(--color-primary));
+    box-shadow: 0 0 0 3px rgb(105 69 228 / 12%);
+}
+
+.text-workspace::placeholder {
+    color: var(--tool-text-muted, var(--color-text-muted));
+    opacity: 1;
+}
+
+
+/* =========================================================
+   6. BUTTONS
+   ========================================================= */
+
+.tool-page .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 0 var(--spacing-md);
+
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+
+    font: inherit;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.tool-page .button .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 18px;
+}
+
+.tool-page .button--primary {
+    color: var(--color-text-inverse, #fff);
+    background: var(--tool-primary, var(--color-primary));
+
+    box-shadow: 0 4px 10px rgb(89 56 255 / 14%);
+}
+
+.tool-page .button--primary:hover {
+    background: var(--tool-primary-hover, var(--color-primary-hover));
+}
+
+.tool-page .button--secondary {
+    color: var(--tool-text, var(--color-text));
+    background: var(--tool-surface, var(--color-surface));
+    border-color: var(--tool-border, var(--color-border-strong));
+}
+
+.tool-page .button--secondary:hover {
+    background: var(--tool-surface-muted, var(--surface-secondary));
+}
+
+.tool-page .button--compact {
+    min-height: 34px;
+    padding-inline: 11px;
+}
+
+.tool-page .button:focus-visible {
+    outline: 3px solid rgb(105 69 228 / 35%);
+    outline-offset: 2px;
+}
+
+.tool-page .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   7. STATISTICS
+   ========================================================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+
+    margin-top: var(--spacing-sm);
+}
+
+.stat-card {
+    display: grid;
+    align-content: start;
+    gap: var(--spacing-xs);
+
+    min-width: 0;
+    padding: var(--spacing-md);
+
+    background: var(--tool-surface-muted, var(--surface-secondary));
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--border-radius-sm);
+}
+
+.stat-card span {
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+.stat-card strong {
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-xl);
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Workspace footer */
+
+.workspace__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+
+    margin-top: var(--spacing-md);
+}
+
+.privacy-note {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: 11px;
+    line-height: var(--line-height-normal);
+}
+
+.privacy-note .material-symbols-outlined {
+    flex: 0 0 auto;
+    color: var(--color-success);
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   8. FORMS AND UPLOADS
+   ========================================================= */
+
+.tool-form {
+    display: grid;
+    gap: var(--spacing-md);
+
+    min-width: 0;
+}
+
+
+/* Upload zone */
+
+.upload-zone {
+    display: grid;
+    justify-items: center;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+    padding: var(--spacing-xl) var(--spacing-md);
+
+    color: var(--tool-text, var(--color-text));
+    text-align: center;
+
+    background: var(--tool-surface-muted, var(--surface-secondary));
+    border: 1.5px dashed var(--tool-border, var(--color-border-strong));
+    border-radius: var(--border-radius-md);
+
+    cursor: pointer;
+
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.upload-zone:hover,
+.upload-zone:focus-within {
+    background: var(--color-primary-soft);
+    border-color: var(--tool-primary, var(--color-primary));
+}
+
+.upload-zone > .material-symbols-outlined {
+    color: var(--tool-primary, var(--color-primary));
+    font-size: 34px;
+}
+
+.upload-zone strong {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+}
+
+.upload-zone > span:not(.material-symbols-outlined) {
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+.upload-zone input {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    color: inherit;
+    font: inherit;
+    font-size: var(--font-size-xs);
+}
+
+
+/* Form rows */
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.field {
+    display: grid;
+    gap: var(--spacing-xs);
+
+    min-width: 0;
+}
+
+.field label {
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: var(--line-height-normal);
+}
+
+.field input {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 10px 12px;
+
+    color: var(--tool-text, var(--color-text));
+    background: var(--tool-surface, var(--color-surface));
+
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--border-radius-sm);
+
+    font: inherit;
+    font-size: 13px;
+}
+
+.field input:focus-visible {
+    outline: 0;
+    border-color: var(--tool-primary, var(--color-primary));
+    box-shadow: 0 0 0 3px rgb(105 69 228 / 12%);
+}
+
+.form-help {
+    margin: -5px 0 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: 11px;
+    line-height: var(--line-height-normal);
+}
+
+
+/* Form status */
+
+.form-status {
+    min-height: 18px;
+    margin: 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+
+    overflow-wrap: anywhere;
+}
+
+.form-status[data-state="error"] {
+    color: var(--color-danger);
+}
+
+.form-status[data-state="success"] {
+    color: var(--color-success);
+}
+
+
+/* File preview */
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+    padding: var(--spacing-sm);
+
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--border-radius-sm);
+
+    font-size: var(--font-size-xs);
+    overflow-wrap: anywhere;
+}
+
+.file-preview img {
+    flex: 0 0 64px;
+
+    width: 64px;
+    height: 64px;
+
+    object-fit: contain;
+    background: var(--tool-surface-muted, var(--surface-secondary));
+    border-radius: var(--border-radius-sm);
+}
+
+
+/* Selected files */
+
+.selected-files {
+    display: grid;
+    gap: var(--spacing-sm);
+
+    margin: 0;
+    padding-left: 25px;
+
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-xs);
+}
+
+.selected-files li {
+    padding: var(--spacing-sm);
+
+    background: var(--tool-surface-muted, var(--surface-secondary));
+    border-radius: var(--border-radius-sm);
+
+    line-height: var(--line-height-normal);
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   9. TOOL INFORMATION
+   ========================================================= */
+
+.tool-info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-md);
+
+    min-width: 0;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-lg);
+
+    background: var(--tool-surface, var(--color-surface));
+    border: 1px solid var(--tool-border, var(--color-border));
+    border-radius: var(--tool-radius, var(--border-radius-lg));
+}
+
+.tool-info__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+}
+
+.tool-info__item > .material-symbols-outlined {
+    flex: 0 0 auto;
+
+    color: var(--tool-primary, var(--color-primary));
+    font-size: 23px;
+}
+
+.tool-info__item strong {
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+.tool-info__item p {
+    margin: var(--spacing-xs) 0 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: 11px;
+    line-height: var(--line-height-normal);
+}
+
+
+/* =========================================================
+   10. TOOL NOT FOUND
+   ========================================================= */
+
+.tool-not-found {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--spacing-sm);
+
+    min-height: 330px;
+    padding: var(--spacing-lg);
+
+    text-align: center;
+}
+
+.tool-not-found > .material-symbols-outlined {
+    color: var(--tool-primary, var(--color-primary));
+    font-size: 48px;
+}
+
+.tool-not-found h1 {
+    margin: 0;
+
+    color: var(--tool-text, var(--color-text));
+    font-size: var(--font-size-2xl);
+}
+
+.tool-not-found p {
+    max-width: 520px;
+    margin: 0 0 var(--spacing-sm);
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+}
+
+
+/* =========================================================
+   11. OPTIONAL SITE FOOTER
+   ========================================================= */
+
+.site-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+
+    margin-top: 34px;
+    padding: var(--spacing-lg) 0;
+
+    color: var(--tool-text-muted, var(--color-text-secondary));
+    border-top: 1px solid var(--tool-border, var(--color-border));
+
+    font-size: 11px;
+}
+
+.site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.site-footer a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
+    color: var(--tool-primary, var(--color-primary));
+}
+
+
+/* =========================================================
+   12. ACCESSIBILITY
+   ========================================================= */
+
+.tool-page .sr-only {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+
+    border: 0;
+}
+
+
+/* =========================================================
+   13. DARK THEME
+   Usa o mesmo seletor do sistema global de temas.
+   ========================================================= */
+
+:root[data-theme="dark"] {
+    --tool-bg: var(--color-bg);
+    --tool-surface: var(--color-surface);
+    --tool-surface-muted: var(--surface-secondary);
+    --tool-border: var(--color-border);
+    --tool-text: var(--color-text);
+    --tool-text-muted: var(--color-text-secondary);
+    --tool-primary: var(--color-primary);
+    --tool-primary-hover: var(--color-primary-hover);
+}
+
+:root[data-theme="dark"] .tool-heading__icon {
+    background: var(--color-primary-soft);
+}
+
+:root[data-theme="dark"] .upload-zone:hover,
+:root[data-theme="dark"] .upload-zone:focus-within {
+    background: var(--color-primary-soft);
+    border-color: var(--tool-primary);
+}
+
+
+/* =========================================================
+   14. RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+    .tool-info {
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 760px) {
+    .tool-workspace {
+        padding: 18px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tool-info {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+
+/* =========================================================
+   15. RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+    .breadcrumbs {
+        gap: 5px;
+        margin-bottom: var(--spacing-md);
+        font-size: 11px;
+    }
+
+    .tool-heading {
+        gap: var(--spacing-sm);
+    }
+
+    .tool-heading__icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+    }
+
+    .tool-heading h1 {
+        font-size: var(--font-size-lg);
+    }
+
+    .workspace__header {
+        gap: var(--spacing-sm);
+    }
+
+    .workspace__header h2 {
+        font-size: var(--font-size-md);
+    }
+
+    .form-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .workspace__footer {
+        align-items: stretch;
+    }
+
+    .workspace__footer .button {
+        width: 100%;
+    }
+
+    .upload-zone {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .tool-info {
+        padding: var(--spacing-md);
+    }
+
+    .site-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .site-footer nav {
+        gap: var(--spacing-sm);
+    }
+}
+
+
+/* =========================================================
+   16. REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .tool-page *,
+    .tool-page *::before,
+    .tool-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

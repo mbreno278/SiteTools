@@ -1,0 +1,31 @@
+Options -Indexes
+ServerSignature Off
+
+# Bloquear acesso a arquivos sensíveis na raiz e subpastas (quando aplicável)
+<FilesMatch "(?i)\.(sql|env|log|bak|ini|pem|key)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "(?i)^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+</IfModule>
+
+# PHP embutido no Apache (mod_php) — em PHP-FPM use o pool
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_value upload_max_filesize 32M
+    php_value post_max_size 36M
+    php_value max_execution_time 180
+    php_value max_input_time 180
+</IfModule>
+
+# Bloqueio extra de pastas sensíveis (quando AllowOverride permite)
+RedirectMatch 403 (?i)/(\.env|storage/|config/)

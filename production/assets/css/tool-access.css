@@ -1,0 +1,96 @@
+/* SiteTools — badges e bloqueio de acesso */
+
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.tool-badge--free {
+    background: #ECFDF5;
+    color: #047857;
+}
+
+.tool-badge--login {
+    background: #EFF6FF;
+    color: #1D4ED8;
+}
+
+.tool-badge--paid {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.tool-badge--development {
+    background: #F3E8FF;
+    color: #7E22CE;
+}
+
+.tool-badge--unavailable {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+html[data-theme="dark"] .tool-badge--free { background: rgb(4 120 87 / 20%); color: #6EE7B7; }
+html[data-theme="dark"] .tool-badge--login { background: rgb(29 78 216 / 20%); color: #93C5FD; }
+html[data-theme="dark"] .tool-badge--paid { background: rgb(180 83 9 / 20%); color: #FCD34D; }
+html[data-theme="dark"] .tool-badge--development { background: rgb(126 34 206 / 20%); color: #D8B4FE; }
+html[data-theme="dark"] .tool-badge--unavailable { background: rgb(185 28 28 / 20%); color: #FCA5A5; }
+
+.tool-access-lock {
+    max-width: 420px;
+    margin: 32px auto;
+    padding: 32px 24px;
+    text-align: center;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 16px;
+    background: var(--tool-surface, #fff);
+}
+
+.tool-access-lock__icon {
+    font-size: 48px;
+    color: var(--tool-primary, #5938FF);
+    margin-bottom: 8px;
+}
+
+.tool-access-lock__title {
+    margin: 0 0 8px;
+    font-size: 1.25rem;
+    color: var(--tool-text, #0F172A);
+}
+
+.tool-access-lock__text {
+    margin: 0 0 16px;
+    color: var(--tool-text-muted, #64748B);
+    font-size: 0.9375rem;
+}
+
+.tool-access-lock__actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Seções do catálogo */
+.tools-section {
+    margin-bottom: 40px;
+}
+
+.tools-section__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    font-size: 1.125rem;
+}
+
+.tools-section__title .tool-badge {
+    font-size: 0.7rem;
+}
