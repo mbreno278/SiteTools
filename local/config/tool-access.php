@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-//tool-access.php
+
 /**
  * SiteTools — controle de acesso (modelo v2)
  *

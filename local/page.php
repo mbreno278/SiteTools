@@ -6,11 +6,6 @@
     require_once __DIR__ . '/config/tool-access.php';
     //include_once __DIR__ . '/config/functions-user.php';
 
-    // ===== Sistema de Redirecionamentos =====
-    require_once __DIR__ . '/config/redirects.php';
-    handle_redirects();
-    // ========================================
-
     try {
         require __DIR__ . '/config/database.php';
     } catch (Throwable $e) {
