@@ -143,6 +143,15 @@
 
     $handler = $allowedHandlers[$tool['handler'] ?? ''] ?? 'not-found';
 
+    /** Assets e content file por handler (config/tool-registry.php) */
+    $toolRegistry = is_file(__DIR__ . '/config/tool-registry.php')
+        ? require __DIR__ . '/config/tool-registry.php'
+        : [];
+    if (!is_array($toolRegistry)) {
+        $toolRegistry = [];
+    }
+    $toolAssets = $toolRegistry[$handler] ?? null;
+
     $metaTitle = $tool['meta_title']
         ?: $tool['name'] . ' | SiteTools';
 
@@ -280,111 +289,31 @@
     
     <script src="./assets/js/auth.js" defer></script>
 
-    <?php if ($handler === 'image-resizer'): ?>
-        <link
-            rel="stylesheet"
-            href="./assets/css/image-resizer.css">
-        <script
-            src="./assets/js/image-resizer.js"
-            defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'image-compressor'): ?>
-        <link
-            rel="stylesheet"
-            href="./assets/css/image-compressor.css"
-        >
-        <script
-            src="./assets/js/image-compressor.js"
-            defer
-        ></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'image-converter'): ?>
-        <link
-            rel="stylesheet"
-            href="./assets/css/image-converter.css"
-        >
-        <script
-            src="./assets/js/image-converter.js"
-            defer
-        ></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'image-cropper'): ?>
-        <link
-            rel="stylesheet"
-            href="./assets/css/image-cropper.css"
-        >
-        <script
-            src="./assets/js/image-cropper.js"
-            defer
-        ></script>
-    <?php endif; ?>
-
-    <?php if ($handler == 'pdf-to-word'): ?>
-        <link rel="stylesheet" href="assets/css/pdf-to-word.css">
-        <script src="assets/js/pdf-to-word.js" defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'download-video-youtube'): ?>
-        <link rel="stylesheet" href="./assets/css/download-video-youtube.css">
-        <script src="./assets/js/download-video-youtube.js" defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'download-audio-youtube'): ?>
-        <link rel="stylesheet" href="./assets/css/download-audio-youtube.css">
-        <script src="./assets/js/download-audio-youtube.js" defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'download-video-instagram'): ?>
-        <link rel="stylesheet" href="./assets/css/download-video-instagram.css">
-        <script src="./assets/js/download-video-instagram.js" defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'download-video-tiktok'): ?>
-        <link rel="stylesheet" href="./assets/css/download-video-tiktok.css">
-        <script src="./assets/js/download-video-tiktok.js" defer></script>
-    <?php endif; ?>
-
-    <?php if (in_array($handler, ['compactar-pdf','unir-pdf','separar-pdf','proteger-pdf','desbloquear-pdf'], true)): ?>
-      <link rel="stylesheet" href="./assets/css/pdf-tools.css">
-    <?php endif; ?>
-    <?php if ($handler === 'compactar-pdf'): ?>
-        <script src="./assets/js/compactar-pdf.js" defer></script>
-    <?php endif; ?>
-    <?php if ($handler === 'unir-pdf'): ?>
-        <script src="./assets/js/unir-pdf.js" defer></script>
-    <?php endif; ?>
-    <?php if ($handler === 'separar-pdf'): ?>
-        <script src="./assets/js/separar-pdf.js" defer></script>
-    <?php endif; ?>
-    <?php if ($handler === 'proteger-pdf'): ?>
-        <script src="./assets/js/proteger-pdf.js" defer></script>
-    <?php endif; ?>
-    <?php if ($handler === 'desbloquear-pdf'): ?>
-        <script src="./assets/js/desbloquear-pdf.js" defer></script>
-    <?php endif; ?>
-
-    <?php if ($handler === 'formatar-texto'): ?>
-       <link rel="stylesheet" href="./assets/css/formatar-texto.css">
-       <script src="./assets/js/formatar-texto.js" defer></script>
-   <?php endif; ?>
-
-    <?php if ($handler === 'remover-espacos'): ?>
-       <link rel="stylesheet" href="./assets/css/remover-espacos.css">
-       <script src="./assets/js/remover-espacos.js" defer></script>
-   <?php endif; ?>
-
-   <?php if ($handler === 'gerador-lorem'): ?>
-       <link rel="stylesheet" href="./assets/css/gerador-lorem.css">
-       <script src="./assets/js/gerador-lorem.js" defer></script>
-   <?php endif; ?>
-
-   <?php if ($handler === 'word-to-pdf'): ?>
-       <link rel="stylesheet" href="./assets/css/word-to-pdf.css">
-       <script src="./assets/js/word-to-pdf.js" defer></script>
-   <?php endif; ?>
+    <?php
+    // CSS/JS da ferramenta via registry (evita dezenas de if/elseif)
+    if (is_array($toolAssets)):
+        $emittedCss = [];
+        foreach (($toolAssets['shared_css'] ?? []) as $cssFile):
+            if (isset($emittedCss[$cssFile])) continue;
+            $emittedCss[$cssFile] = true;
+            $href = './assets/css/' . rawurlencode(basename((string) $cssFile));
+            echo '    <link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">' . "
+";
+        endforeach;
+        foreach (($toolAssets['css'] ?? []) as $cssFile):
+            if (isset($emittedCss[$cssFile])) continue;
+            $emittedCss[$cssFile] = true;
+            $href = './assets/css/' . rawurlencode(basename((string) $cssFile));
+            echo '    <link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">' . "
+";
+        endforeach;
+        foreach (($toolAssets['js'] ?? []) as $jsFile):
+            $src = './assets/js/' . rawurlencode(basename((string) $jsFile));
+            echo '    <script src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" defer></script>' . "
+";
+        endforeach;
+    endif;
+    ?>
 
     <script>
         try {
@@ -514,42 +443,19 @@
                         <?php if (!$toolAccessAllowed): ?>
                             <?= function_exists('tool_access_block_html') ? tool_access_block_html($toolAccess) : '<p>Ferramenta indisponível.</p>' ?>
                         <?php else: ?>
-                        <?php if ($handler === 'word-counter'):
-                            include __DIR__ . '/content/word-counter.php';
-                        elseif ($handler === 'image-resizer'):
-                            include __DIR__ . '/content/image-resizer.php';
-                        elseif ($handler === 'image-compressor'):
-                            include __DIR__ . '/content/image-compressor.php';
-                        elseif ($handler === 'pdf-merge'):
-                            include __DIR__ . '/content/pdf-merge.php';
-                        elseif ($handler === 'image-converter'):
-                            include __DIR__ . '/content/image-converter.php';
-                        elseif ($handler === 'image-cropper'):
-                            include __DIR__ . '/content/image-cropper.php';
-                        elseif ($handler == 'pdf-to-word'):
-                            include __DIR__ . '/content/pdf-to-word.php';
-                        elseif ($handler === 'download-video-youtube'):
-                            include __DIR__ . '/content/download-video-youtube.php';
-                        elseif ($handler === 'download-audio-youtube'):
-                            include __DIR__ . '/content/download-audio-youtube.php';
-                        elseif ($handler === 'download-video-instagram'):
-                            include __DIR__ . '/content/download-video-instagram.php';
-                        elseif ($handler === 'download-video-tiktok'):
-                            include __DIR__ . '/content/download-video-tiktok.php';
-                        elseif ($handler === 'compactar-pdf'): include __DIR__ . '/content/compactar-pdf.php';
-                        elseif ($handler === 'unir-pdf'): include __DIR__ . '/content/unir-pdf.php';
-                        elseif ($handler === 'separar-pdf'): include __DIR__ . '/content/separar-pdf.php';
-                        elseif ($handler === 'proteger-pdf'): include __DIR__ . '/content/proteger-pdf.php';
-                        elseif ($handler === 'desbloquear-pdf'): include __DIR__ . '/content/desbloquear-pdf.php';
-                        elseif ($handler === 'formatar-texto'):
-                            include __DIR__ . '/content/formatar-texto.php';
-                        elseif ($handler === 'remover-espacos'):
-                            include __DIR__ . '/content/remover-espacos.php';
-                        elseif ($handler === 'gerador-lorem'):
-                            include __DIR__ . '/content/gerador-lorem.php';
-                        elseif ($handler === 'word-to-pdf'):
-                            include __DIR__ . '/content/word-to-pdf.php';
-                        endif; ?>
+                        <?php
+                        if (is_array($toolAssets) && !empty($toolAssets['content'])) {
+                            $contentFile = basename((string) $toolAssets['content']);
+                            $contentPath = __DIR__ . '/content/' . $contentFile;
+                            if (is_file($contentPath)) {
+                                include $contentPath;
+                            } else {
+                                echo '<p class="tool-workspace__missing">Conteúdo da ferramenta indisponível.</p>';
+                            }
+                        } elseif ($handler !== 'not-found') {
+                            echo '<p class="tool-workspace__missing">Ferramenta sem interface registrada.</p>';
+                        }
+                        ?>
                         <?php endif; /* tool access */ ?>
 
                     </section>
