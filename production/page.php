@@ -286,6 +286,13 @@
 
     <meta name="theme-color" content="#F8FAFC">
 
+    <?php
+    $canonicalHref = !empty($tool['slug'])
+        ? absolute_url('/' . ltrim((string) $tool['slug'], '/'))
+        : absolute_url('/');
+    ?>
+    <link rel="canonical" href="<?= e($canonicalHref) ?>">
+
     <link rel="icon" href="<?=e($baseUrl)?>/assets/img/logo.png" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

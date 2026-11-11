@@ -8,6 +8,10 @@ ServerSignature Off
     RewriteEngine On
     RewriteBase /
 
+    # Canonical: page.php?slug=foo → /foo (301)
+    RewriteCond %{QUERY_STRING} (^|&)slug=([a-z0-9\-]+)(&|$) [NC]
+    RewriteRule ^page\.php$ /%2? [R=301,L]
+
     # Não reescreve arquivos e pastas reais
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -15,7 +19,11 @@ ServerSignature Off
     # /admin/redirects → painel de redirecionamentos
     RewriteRule ^admin/redirects/?$ admin/redirects.php [L,QSA]
 
+    # /sitemap.xml → gerador dinâmico
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
     # /curl  ou  /ferramentas/curl  → page.php?slug=curl
+    # Também cobre qualquer ferramenta: /image-cropper → page.php?slug=image-cropper
     RewriteRule ^(ferramentas/)?([a-z0-9\-]+)/?$ page.php?slug=$2 [L,QSA]
 </IfModule>
 

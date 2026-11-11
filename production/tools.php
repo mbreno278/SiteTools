@@ -194,7 +194,7 @@ $pageHeading = $selectedCategoryName !== ''
 
                     <div class="section__content grid grid__content">
                         <?php foreach ($tools as $tool): ?>
-                            <a class="card card--link" href="page.php?slug=<?= rawurlencode((string) $tool['slug']) ?>">
+                            <a class="card card--link" href="<?= e(tool_url((string) $tool['slug'])) ?>">
                                 <span class="card__logo material-symbols-outlined" aria-hidden="true"><?= e((string) ($tool['icon'] ?: 'build')) ?></span>
                                 <h2 class="card__title"><?= e((string) $tool['name']) ?></h2>
                                 <span class="badge"><?= e((string) $tool['category_name']) ?></span>

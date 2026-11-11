@@ -80,3 +80,74 @@ if (!defined('CLEANUP_TOKEN')) {
 if (!defined('MAIL_FROM')) {
     define('MAIL_FROM', (string) env('MAIL_FROM', 'noreply@sitetools.local'));
 }
+
+// -----------------------------------------------------------------------------
+// URLs amigáveis
+// -----------------------------------------------------------------------------
+
+if (!function_exists('base_path')) {
+    /**
+     * Caminho no site respeitando BASE_URL.
+     * Ex.: base_path('/tools.php') → /tools.php ou /subpasta/tools.php
+     */
+    function base_path(string $path = '/'): string
+    {
+        $base = defined('BASE_URL') ? BASE_URL : '';
+        $path = '/' . ltrim($path, '/');
+        if ($path === '/') {
+            return $base === '' ? '/' : $base . '/';
+        }
+        return $base . $path;
+    }
+}
+
+if (!function_exists('tool_url')) {
+    /**
+     * URL amigável de uma ferramenta: /slug
+     */
+    function tool_url(string $slug): string
+    {
+        $slug = trim($slug, '/');
+        if ($slug === '' || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
+            return base_path('/tools.php');
+        }
+        return base_path('/' . $slug);
+    }
+}
+
+if (!function_exists('absolute_url')) {
+    /**
+     * URL absoluta (scheme + host + path).
+     * Aceita path relativo (/slug) ou já com BASE_URL.
+     */
+    function absolute_url(string $path = '/'): string
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $origin = (defined('APP_URL') && APP_URL !== '')
+            ? rtrim(APP_URL, '/')
+            : ($scheme . '://' . $host);
+
+        // Se já é URL absoluta, devolve
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        $base = defined('BASE_URL') ? BASE_URL : '';
+        $path = '/' . ltrim($path, '/');
+
+        // Evita duplicar BASE_URL se o path já começar com ele
+        if ($base !== '' && str_starts_with($path, $base . '/')) {
+            return $origin . $path;
+        }
+        if ($base !== '' && $path === $base) {
+            return $origin . $path;
+        }
+
+        if ($path === '/') {
+            return $origin . ($base === '' ? '' : $base);
+        }
+
+        return $origin . $base . $path;
+    }
+}

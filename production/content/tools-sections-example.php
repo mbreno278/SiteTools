@@ -24,7 +24,7 @@ $user = function_exists('auth_user') ? auth_user() : null;
     <p class="muted">Use sem precisar de conta.</p>
     <div class="tools-grid">
         <?php foreach ($freeTools as $t): ?>
-            <a class="tool-card" href="./page.php?slug=<?= rawurlencode((string) $t['slug']) ?>">
+            <a class="tool-card" href="<?= e(tool_url((string) $t['slug'])) ?>">
                 <strong><?= htmlspecialchars((string) $t['name'], ENT_QUOTES, 'UTF-8') ?></strong>
                 <?= tool_access_badge_html('free') ?>
             </a>
@@ -43,7 +43,7 @@ $user = function_exists('auth_user') ? auth_user() : null;
     <p class="muted">Disponíveis para usuários cadastrados.</p>
     <div class="tools-grid">
         <?php foreach ($loginTools as $t): ?>
-            <a class="tool-card" href="./page.php?slug=<?= rawurlencode((string) $t['slug']) ?>">
+            <a class="tool-card" href="<?= e(tool_url((string) $t['slug'])) ?>">
                 <strong><?= htmlspecialchars((string) $t['name'], ENT_QUOTES, 'UTF-8') ?></strong>
                 <?= tool_access_badge_html('login') ?>
             </a>
@@ -63,7 +63,7 @@ $user = function_exists('auth_user') ? auth_user() : null;
     <p class="muted">Ferramentas pagas da sua conta.</p>
     <div class="tools-grid">
         <?php foreach ($paidTools as $t): ?>
-            <a class="tool-card" href="./page.php?slug=<?= rawurlencode((string) $t['slug']) ?>">
+            <a class="tool-card" href="<?= e(tool_url((string) $t['slug'])) ?>">
                 <strong><?= htmlspecialchars((string) $t['name'], ENT_QUOTES, 'UTF-8') ?></strong>
                 <?= tool_access_badge_html('paid') ?>
             </a>

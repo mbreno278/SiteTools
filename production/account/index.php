@@ -158,7 +158,7 @@ account_header('Painel', 'Resumo da sua conta no SiteTools.');
                     <strong><?= user_area_e((string) $e['name']) ?></strong>
                     <small>Expira em <?= user_area_e(date('d/m/Y H:i', strtotime((string) $e['expires_at']))) ?></small>
                 </div>
-                <a class="ua-button ua-button--light" href="../page.php?slug=<?= rawurlencode((string) $e['slug']) ?>">Abrir</a>
+                <a class="ua-button ua-button--light" href="<?= e(tool_url((string) ($e['slug'] ?? ''))) ?>">Abrir</a>
             </div>
         <?php endforeach; ?>
     </div>
