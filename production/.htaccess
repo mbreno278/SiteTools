@@ -6,7 +6,7 @@ ServerSignature Off
 # ============================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /projetos/SiteTools/local/
+    RewriteBase /
 
     # Não reescreve arquivos e pastas reais
     RewriteCond %{REQUEST_FILENAME} !-f
