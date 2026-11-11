@@ -16,18 +16,18 @@
         href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0"
         rel="stylesheet"
     >
-    <link rel="stylesheet" href="./assets/css/variables.css">
-    <link rel="stylesheet" href="./assets/css/style.css">
-    <link rel="stylesheet" href="./assets/css/layout.css">
-    <link rel="stylesheet" href="./assets/css/components.css">
-    <link rel="stylesheet" href="./assets/css/modo.css">
-    <link rel="stylesheet" href="./assets/css/tools-page.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/layout.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/components.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/modo.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/tools-page.css">
 
-    <link rel="stylesheet" href="./assets/css/auth.css">
-    <link rel="stylesheet" href="./assets/css/auth-extra.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/auth.css">
+    <link rel="stylesheet" href="<?= __DIR__ ?>/assets/css/auth-extra.css">
     
-    <script src="./assets/js/csrf.js" defer></script>
-    <script src="./assets/js/auth.js" defer></script>
+    <script src="<?= __DIR__ ?>/assets/js/csrf.js" defer></script>
+    <script src="<?= __DIR__ ?>/assets/js/auth.js" defer></script>
 
     <script>
         try {

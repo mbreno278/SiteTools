@@ -6,6 +6,11 @@
     require_once __DIR__ . '/config/tool-access.php';
     //include_once __DIR__ . '/config/functions-user.php';
 
+    // ===== Sistema de Redirecionamentos =====
+    require_once __DIR__ . '/config/redirects.php';
+    handle_redirects();
+    // ========================================
+
     try {
         require __DIR__ . '/config/database.php';
     } catch (Throwable $e) {
@@ -287,21 +292,21 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="./assets/css/variables.css">
-    <link rel="stylesheet" href="./assets/css/style.css">
-    <link rel="stylesheet" href="./assets/css/layout.css">
-    <link rel="stylesheet" href="./assets/css/components.css">
-    <link rel="stylesheet" href="./assets/css/modo.css">
-    <link rel="stylesheet" href="./assets/css/page.css">
-    <link rel="stylesheet" href="./assets/css/tool-access.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/layout.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/components.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/modo.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/page.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/tool-access.css">
 
-    <script src="./assets/js/csrf.js" defer></script>
-    <script src="./assets/js/tool-page.js" defer></script>
+    <script src="<?=__DIR__?>/assets/js/csrf.js" defer></script>
+    <script src="<?=__DIR__?>/assets/js/tool-page.js" defer></script>
 
-    <link rel="stylesheet" href="./assets/css/auth.css">
-    <link rel="stylesheet" href="./assets/css/auth-extra.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/auth.css">
+    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/auth-extra.css">
     
-    <script src="./assets/js/auth.js" defer></script>
+    <script src="<?=__DIR__?>/assets/js/auth.js" defer></script>
 
     <?php
     // CSS/JS da ferramenta via registry (evita dezenas de if/elseif)
@@ -342,7 +347,6 @@
 </head>
 
 <body>
-
     <!-- Cabeçalho compartilhado -->
     <?php include __DIR__ . '/templates/header.php'; ?>
 
