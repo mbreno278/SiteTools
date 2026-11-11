@@ -4,7 +4,6 @@
     require_once __DIR__ . '/config/csrf.php';
     require_once __DIR__ . '/config/auth.php';
     require_once __DIR__ . '/config/tool-access.php';
-    //include_once __DIR__ . '/config/functions-user.php';
 
     try {
         require __DIR__ . '/config/database.php';
@@ -526,7 +525,5 @@
 
     <!-- Rodapé compartilhado -->
     <?php include __DIR__ . '/templates/footer.php'; ?>
-    
-    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

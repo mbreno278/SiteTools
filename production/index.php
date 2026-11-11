@@ -461,7 +461,5 @@ $benefits = [
 
     <!-- Rodapé -->
     <?php require __DIR__ . '/templates/footer.php'; ?>
-
-    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>
