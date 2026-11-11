@@ -70,7 +70,7 @@
      * Fallback para ferramentas registradas no código
      * (útil quando o banco ainda não tem o registro).
      */
-    /*$fallbackTools = [
+    $fallbackTools = [
         'download-video-youtube' => [
             'name' => 'Download de Vídeo do YouTube',
             'slug' => 'download-video-youtube',
@@ -90,7 +90,7 @@
         'meta_title' => 'Formatar Texto | SiteTools',
         'meta_description' => 'Transforme texto em maiúsculas, minúsculas e outros formatos.',
     ],
-    ];*/
+    ];
 
     if (!$tool && isset($fallbackTools[$slug])) {
         $tool = $fallbackTools[$slug];
@@ -126,10 +126,10 @@
         'image-converter' => 'image-converter',
         'image-cropper' => 'image-cropper',
         'pdf-to-word' => 'pdf-to-word',
-        /*'download-video-youtube' => 'download-video-youtube',
+        'download-video-youtube' => 'download-video-youtube',
         'download-audio-youtube' => 'download-audio-youtube',
         'download-video-instagram' => 'download-video-instagram',
-        'download-video-tiktok' => 'download-video-tiktok',*/
+        'download-video-tiktok' => 'download-video-tiktok',
         'compactar-pdf' => 'compactar-pdf',
         'unir-pdf' => 'unir-pdf',
         'separar-pdf' => 'separar-pdf',
@@ -152,7 +152,6 @@
     }
     $toolAssets = $toolRegistry[$handler] ?? null;
 
-    // Feature flags: handlers de download de vídeo
     if ($handler !== 'not-found' && function_exists('module_allows_handler') && !module_allows_handler($handler)) {
         $handler = 'not-found';
         $toolAssets = null;
@@ -193,7 +192,7 @@
         'mode' => 'free',
         'status' => 'active',
         'reason' => 'public',
-        /*'label' => 'Gratuito',*/
+        'label' => 'Gratuito',
     ];
     $toolAccessAllowed = true;
 
@@ -435,11 +434,11 @@
                             <?php endif; ?>
 
                             <h1><?= e($tool['name']) ?></h1>
-                            <?php /*if (!empty($toolAccess['mode'])):
+                            <?php if (!empty($toolAccess['mode'])): ?>
                                 <div class="tool-heading__badges" style="margin-top:8px;">
                                     <?= function_exists('tool_access_badge_html') ? tool_access_badge_html((string)($toolAccess['mode'] ?? 'free')) : '' ?>
                                 </div>
-                            endif; */?>
+                            <?php endif; ?>
 
                             <p class="tool-heading__description">
                                 <?= e($tool['description']) ?>
@@ -541,7 +540,7 @@
 
     <!-- Rodapé compartilhado -->
     <?php include __DIR__ . '/templates/footer.php'; ?>
-    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
-
+    
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

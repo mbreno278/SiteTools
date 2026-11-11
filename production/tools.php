@@ -94,7 +94,6 @@ try {
     $stmt->execute($params);
     $tools = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-    // Feature flags: remove downloads de vídeo do catálogo
     if (function_exists('module_allows_handler')) {
         $tools = array_values(array_filter(
             $tools,
@@ -210,7 +209,7 @@ $pageHeading = $selectedCategoryName !== ''
     </main>
 
     <?php require __DIR__ . '/templates/footer.php'; ?>
-    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 
 </body>
 </html>

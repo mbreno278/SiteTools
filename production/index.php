@@ -39,28 +39,28 @@ $sections = [
                 'title' => 'Cortar imagem',
                 'description' => 'Corte imagens, personalize o tamanho de suas imagens.',
                 'url' => 'page.php?slug=image-cropper',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/editor-imagem.png',
             ],
             [
                 'title' => 'Redimensionar imagem',
                 'description' => 'Ajuste a largura e a altura das suas imagens de acordo com sua necessidade.',
                 'url' => 'page.php?slug=redimensionar-imagem',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/redimencionar-imagem.png',
             ],
             [
                 'title' => 'Comprimir imagem',
                 'description' => 'Reduza o tamanho dos arquivos de imagem para facilitar o armazenamento e o envio.',
                 'url' => 'page.php?slug=image-compressor',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-compress.png',
             ],
             [
                 'title' => 'Converter imagem',
                 'description' => 'Converta imagens entre formatos compatíveis, conforme suas necessidades.',
                 'url' => 'page.php?slug=image-converter',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/converter-imagem.png',
             ],
         ],
@@ -78,28 +78,28 @@ $sections = [
                 'title' => 'PDF para Word',
                 'description' => 'Transforme documentos PDF em arquivos editáveis do Word, quando compatíveis.',
                 'url' => 'page.php?slug=pdf-to-word',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/icon-pdf.png',
             ],
             [
                 'title' => 'Word para PDF',
                 'description' => 'Converta documentos compatíveis para o formato PDF.',
                 'url' => 'page.php?slug=word-to-pdf',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/icon-word.png',
             ],
             [
                 'title' => 'JPG para PNG',
                 'description' => 'Converta suas imagens JPG para o formato PNG.',
                 'url' => 'page.php?slug=jpg-to-png',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-jpg.png',
             ],
             [
                 'title' => 'PNG para JPG',
                 'description' => 'Converta imagens PNG para JPG.',
                 'url' => 'page.php?slug=png-to-jpg',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-png.png',
             ],
         ],
@@ -117,28 +117,28 @@ $sections = [
                 'title' => 'Compactar PDF',
                 'description' => 'Reduza o tamanho de documentos PDF, conforme os recursos disponíveis.',
                 'url' => 'page.php?slug=compactar-pdf',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/icon-download.png',
             ],
             [
                 'title' => 'Unir PDF',
                 'description' => 'Combine vários documentos PDF em um único arquivo.',
                 'url' => 'page.php?slug=unir-pdf',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/logo.png',
             ],
             [
                 'title' => 'Proteger PDF',
                 'description' => 'Adicione proteção aos documentos utilizando os recursos de segurança disponíveis.',
                 'url' => 'page.php?slug=proteger-pdf',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/icon-close.png',
             ],
             [
                 'title' => 'Desbloquear PDF',
                 'description' => 'Trabalhe com documentos que você tem autorização para modificar.',
                 'url' => 'page.php?slug=desbloquear-pdf',
-                /*'access_type' => 'free',*/
+                'access_type' => 'login',
                 'image' => './assets/img/icon-open.png',
             ],
         ],
@@ -156,28 +156,28 @@ $sections = [
                 'title' => 'Contador de palavras',
                 'description' => 'Conte palavras, caracteres e outros elementos do seu texto.',
                 'url' => 'page.php?slug=contador-de-palavras',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-t.png',
             ],
             [
                 'title' => 'Formatar Texto',
                 'description' => 'Converta seu texto para maiúsculas, minúsculas e outros formatos.',
                 'url' => 'page.php?slug=formatar-texto',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-text.png',
             ],
             [
                 'title' => 'Remover espaços',
                 'description' => 'Remova espaços desnecessários e organize seu texto.',
                 'url' => 'page.php?slug=remover-espacos',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/icon-remove-space.png',
             ],
             [
                 'title' => 'Gerador de texto',
                 'description' => 'Gere textos de exemplo para testes, demonstrações e protótipos.',
                 'url' => 'page.php?slug=gerador-texto',
-                /*'access_type' => 'free',*/
+                'access_type' => 'free',
                 'image' => './assets/img/logo.png',
             ],
         ],
@@ -401,6 +401,7 @@ $benefits = [
 
                                 <?php if (!empty($tool['access_type']) && function_exists('tool_access_badge_html')): ?>
                                     <div class="card__badge" style="margin: 6px 0 8px;">
+                                        <?= tool_access_badge_html((string)$tool['access_type']) ?>
                                     </div>
                                 <?php endif; ?>
 
@@ -460,7 +461,7 @@ $benefits = [
 
     <!-- Rodapé -->
     <?php require __DIR__ . '/templates/footer.php'; ?>
-    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
 
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

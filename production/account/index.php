@@ -1,13 +1,4 @@
 <?php
-// Feature flag
-require_once dirname(__DIR__) . '/config/modules-helper.php';
-if (!module_enabled('account')) {
-    http_response_code(503);
-    header('Content-Type: text/plain; charset=utf-8');
-    echo 'Módulo "account" desativado em config/modules.php';
-    exit;
-}
-
 declare(strict_types=1);
 require __DIR__ . '/_bootstrap.php';
 
