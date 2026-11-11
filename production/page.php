@@ -70,7 +70,7 @@
      * Fallback para ferramentas registradas no código
      * (útil quando o banco ainda não tem o registro).
      */
-    $fallbackTools = [
+    /*$fallbackTools = [
         'download-video-youtube' => [
             'name' => 'Download de Vídeo do YouTube',
             'slug' => 'download-video-youtube',
@@ -90,7 +90,7 @@
         'meta_title' => 'Formatar Texto | SiteTools',
         'meta_description' => 'Transforme texto em maiúsculas, minúsculas e outros formatos.',
     ],
-    ];
+    ];*/
 
     if (!$tool && isset($fallbackTools[$slug])) {
         $tool = $fallbackTools[$slug];
@@ -126,10 +126,10 @@
         'image-converter' => 'image-converter',
         'image-cropper' => 'image-cropper',
         'pdf-to-word' => 'pdf-to-word',
-        'download-video-youtube' => 'download-video-youtube',
+        /*'download-video-youtube' => 'download-video-youtube',
         'download-audio-youtube' => 'download-audio-youtube',
         'download-video-instagram' => 'download-video-instagram',
-        'download-video-tiktok' => 'download-video-tiktok',
+        'download-video-tiktok' => 'download-video-tiktok',*/
         'compactar-pdf' => 'compactar-pdf',
         'unir-pdf' => 'unir-pdf',
         'separar-pdf' => 'separar-pdf',
