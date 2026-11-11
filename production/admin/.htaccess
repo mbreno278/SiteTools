@@ -1,1 +1,4 @@
 Options -Indexes
+
+# Bloqueia todo o acesso ao diretório e arquivos
+Require all denied
