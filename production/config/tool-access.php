@@ -19,6 +19,7 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/modules-helper.php';
 
 function tool_access_labels(): array
 {
@@ -225,7 +226,21 @@ function tool_access_check(PDO $pdo, array $tool): array
     }
 
     // ---------- login ----------
+    // ---------- login ----------
     if ($mode === 'login') {
+        // Módulo authentication desligado: trata como free
+        if (!module_enabled('authentication')) {
+            return [
+                'allowed' => true,
+                'mode' => 'free',
+                'status' => $status,
+                'reason' => 'auth_module_disabled',
+                'label' => $labels['free'],
+                'tool_slug' => $slug,
+                'logged_in' => $loggedIn,
+            ];
+        }
+
         if ($loggedIn) {
             return [
                 'allowed' => true,
@@ -250,9 +265,23 @@ function tool_access_check(PDO $pdo, array $tool): array
     }
 
     // ---------- paid | temporary ----------
-    // Sempre trata como premium na UI (payment_required),
-    // inclusive para visitante — não força só a tela de login.
     if ($mode === 'paid' || $mode === 'temporary') {
+        // Beta unlimited OU premium desligado: libera sem grant
+        if (beta_unlimited_usage() || !module_enabled('premium')) {
+            return [
+                'allowed' => true,
+                'mode' => $mode,
+                'status' => $status,
+                'reason' => beta_unlimited_usage() ? 'beta_unlimited' : 'premium_module_disabled',
+                'label' => $labels[$mode] ?? $labels['paid'],
+                'tool_slug' => $slug,
+                'logged_in' => $loggedIn,
+            ];
+        }
+
+        // Payments off but premium on: ainda exige grant manual (não mostra fluxo de compra)
+        $paymentsOn = module_enabled('payments');
+
         if ($loggedIn) {
             $toolId = (int) ($tool['id'] ?? 0);
             if (tool_user_has_grant($pdo, $userId, $toolId)) {
@@ -272,7 +301,7 @@ function tool_access_check(PDO $pdo, array $tool): array
             'allowed' => false,
             'mode' => $mode,
             'status' => $status,
-            'reason' => 'payment_required',
+            'reason' => $paymentsOn ? 'payment_required' : 'login_required',
             'label' => $labels[$mode] ?? $labels['paid'],
             'tool_slug' => $slug,
             'logged_in' => $loggedIn,
@@ -308,7 +337,10 @@ function tool_access_block_html(array $check): string
     $action = '';
     $loggedIn = !empty($check['logged_in']);
 
-    if ($reason === 'development') {
+    if ($reason === 'module_disabled') {
+        $title = 'Módulo desativado';
+        $message = 'Esta ferramenta está desligada nas configurações do site (feature flag).';
+    } elseif ($reason === 'development') {
         $title = 'Em desenvolvimento';
         $message = 'Estamos trabalhando nesta ferramenta. Em breve estará disponível.';
     } elseif ($reason === 'unavailable') {

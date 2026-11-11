@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/_csrf_guard.php';
 
+require __DIR__ . '/_module_guard.php';
+module_guard_require('video_downloads', 'Downloads de vídeo estão desativados neste ambiente.');
+
 require __DIR__ . '/_tool_access_guard.php';
 tool_access_guard_for('download-video-tiktok');
 

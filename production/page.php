@@ -4,6 +4,7 @@
     require_once __DIR__ . '/config/csrf.php';
     require_once __DIR__ . '/config/auth.php';
     require_once __DIR__ . '/config/tool-access.php';
+    //include_once __DIR__ . '/config/functions-user.php';
 
     try {
         require __DIR__ . '/config/database.php';
@@ -150,6 +151,21 @@
         $toolRegistry = [];
     }
     $toolAssets = $toolRegistry[$handler] ?? null;
+
+    // Feature flags: handlers de download de vídeo
+    if ($handler !== 'not-found' && function_exists('module_allows_handler') && !module_allows_handler($handler)) {
+        $handler = 'not-found';
+        $toolAssets = null;
+        $toolAccessAllowed = false;
+        $toolAccess = [
+            'allowed' => false,
+            'mode' => 'unavailable',
+            'status' => 'unavailable',
+            'reason' => 'module_disabled',
+            'label' => 'Indisponível',
+            'tool_slug' => (string) ($tool['slug'] ?? ''),
+        ];
+    }
 
     $metaTitle = $tool['meta_title']
         ?: $tool['name'] . ' | SiteTools';
@@ -525,5 +541,7 @@
 
     <!-- Rodapé compartilhado -->
     <?php include __DIR__ . '/templates/footer.php'; ?>
+    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
+
 </body>
 </html>

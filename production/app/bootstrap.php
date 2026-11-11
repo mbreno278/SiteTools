@@ -34,6 +34,9 @@ if (is_file($configDir . '/auth.php')) {
 if (is_file($configDir . '/tool-access.php')) {
     require_once $configDir . '/tool-access.php';
 }
+if (is_file($configDir . '/modules-helper.php')) {
+    require_once $configDir . '/modules-helper.php';
+}
 if (is_file($configDir . '/upload-security.php')) {
     require_once $configDir . '/upload-security.php';
 }

@@ -53,6 +53,7 @@
     </div>
 
     <div class="header__column header__column--auth">
+
         <button
             class="button button-mode-light"
             id="theme-toggle"
