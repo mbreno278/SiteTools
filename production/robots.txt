@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /account/
+Disallow: /config/
+Disallow: /storage/
+Disallow: /tools/
+Disallow: /api/
+Disallow: /.env
+Sitemap: https://www.seudominio.com/sitemap.xml

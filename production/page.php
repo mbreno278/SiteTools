@@ -70,27 +70,27 @@
      * Fallback para ferramentas registradas no código
      * (útil quando o banco ainda não tem o registro).
      */
-    $fallbackTools = [
-        'download-video-youtube' => [
-            'name' => 'Download de Vídeo do YouTube',
-            'slug' => 'download-video-youtube',
-            'description' => 'Baixe vídeos do YouTube em diferentes qualidades e formatos, de forma rápida e simples.',
-            'category' => 'downloads',
-            'icon' => 'smart_display',
-            'handler' => 'download-video-youtube',
-            'meta_title' => 'Download de Vídeo do YouTube | SiteTools',
-            'meta_description' => 'Baixe vídeos do YouTube em MP4 e outros formatos. Escolha a qualidade desejada e faça o download facilmente.',
-        ],'formatar-texto' => [
-        'name' => 'Formatar Texto',
-        'slug' => 'formatar-texto',
-        'description' => 'Converta texto em maiúsculas, minúsculas e outros formatos.',
-        'category' => 'texto',
-        'icon' => 'text_fields',
-        'handler' => 'formatar-texto',
-        'meta_title' => 'Formatar Texto | SiteTools',
-        'meta_description' => 'Transforme texto em maiúsculas, minúsculas e outros formatos.',
-    ],
-    ];
+    // $fallbackTools = [
+    //     'download-video-youtube' => [
+    //         'name' => 'Download de Vídeo do YouTube',
+    //         'slug' => 'download-video-youtube',
+    //         'description' => 'Baixe vídeos do YouTube em diferentes qualidades e formatos, de forma rápida e simples.',
+    //         'category' => 'downloads',
+    //         'icon' => 'smart_display',
+    //         'handler' => 'download-video-youtube',
+    //         'meta_title' => 'Download de Vídeo do YouTube | SiteTools',
+    //         'meta_description' => 'Baixe vídeos do YouTube em MP4 e outros formatos. Escolha a qualidade desejada e faça o download facilmente.',
+    //     ],'formatar-texto' => [
+    //         'name' => 'Formatar Texto',
+    //         'slug' => 'formatar-texto',
+    //         'description' => 'Converta texto em maiúsculas, minúsculas e outros formatos.',
+    //         'category' => 'texto',
+    //         'icon' => 'text_fields',
+    //         'handler' => 'formatar-texto',
+    //         'meta_title' => 'Formatar Texto | SiteTools',
+    //         'meta_description' => 'Transforme texto em maiúsculas, minúsculas e outros formatos.',
+    //     ],
+    // ];
 
     if (!$tool && isset($fallbackTools[$slug])) {
         $tool = $fallbackTools[$slug];
@@ -151,6 +151,20 @@
         $toolRegistry = [];
     }
     $toolAssets = $toolRegistry[$handler] ?? null;
+
+    if ($handler !== 'not-found' && function_exists('module_allows_handler') && !module_allows_handler($handler)) {
+        $handler = 'not-found';
+        $toolAssets = null;
+        $toolAccessAllowed = false;
+        $toolAccess = [
+            'allowed' => false,
+            'mode' => 'unavailable',
+            'status' => 'unavailable',
+            'reason' => 'module_disabled',
+            'label' => 'Indisponível',
+            'tool_slug' => (string) ($tool['slug'] ?? ''),
+        ];
+    }
 
     $metaTitle = $tool['meta_title']
         ?: $tool['name'] . ' | SiteTools';
@@ -527,6 +541,6 @@
     <!-- Rodapé compartilhado -->
     <?php include __DIR__ . '/templates/footer.php'; ?>
     
-    <?php include __DIR__ . '/content/content-login.php'; ?>
+    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
 </body>
 </html>

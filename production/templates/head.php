@@ -22,9 +22,7 @@
     <link rel="stylesheet" href="./assets/css/components.css">
     <link rel="stylesheet" href="./assets/css/modo.css">
     <link rel="stylesheet" href="./assets/css/tools-page.css">
-
-    <link rel="stylesheet" href="./assets/css/auth.css">
-    <link rel="stylesheet" href="./assets/css/auth-extra.css">
+    <link rel="stylesheet" href="./assets/css/tool-access.css">
     
     <script src="./assets/js/csrf.js" defer></script>
     <script src="./assets/js/auth.js" defer></script>
@@ -39,6 +37,4 @@
             document.documentElement.dataset.theme = "light";
         }
     </script>
-
-    <link rel="stylesheet" href="./assets/css/tool-access.css">
 </head>
