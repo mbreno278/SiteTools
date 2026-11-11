@@ -11,6 +11,9 @@
     handle_redirects();
     // ========================================
 
+    // Se no .env você tiver: BASE_URL=/projetos/SiteTools/local
+    $baseUrl = rtrim((string)(getenv('BASE_URL') ?: '/projetos/SiteTools/local'), '/');
+
     try {
         require __DIR__ . '/config/database.php';
     } catch (Throwable $e) {
@@ -282,7 +285,7 @@
 
     <meta name="theme-color" content="#F8FAFC">
 
-    <link rel="icon" href="./assets/img/logo.png" type="image/png">
+    <link rel="icon" href="<?=e($baseUrl)?>/assets/img/logo.png" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -292,21 +295,21 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/variables.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/style.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/layout.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/components.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/modo.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/page.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/tool-access.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/layout.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/components.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/modo.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/page.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/tool-access.css">
 
-    <script src="<?=__DIR__?>/assets/js/csrf.js" defer></script>
-    <script src="<?=__DIR__?>/assets/js/tool-page.js" defer></script>
+    <script src="<?=e($baseUrl)?>/assets/js/csrf.js" defer></script>
+    <script src="<?=e($baseUrl)?>/assets/js/tool-page.js" defer></script>
 
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/auth.css">
-    <link rel="stylesheet" href="<?=__DIR__?>/assets/css/auth-extra.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/auth.css">
+    <link rel="stylesheet" href="<?=e($baseUrl)?>/assets/css/auth-extra.css">
     
-    <script src="<?=__DIR__?>/assets/js/auth.js" defer></script>
+    <script src="<?=e($baseUrl)?>/assets/js/auth.js" defer></script>
 
     <?php
     // CSS/JS da ferramenta via registry (evita dezenas de if/elseif)
@@ -315,19 +318,19 @@
         foreach (($toolAssets['shared_css'] ?? []) as $cssFile):
             if (isset($emittedCss[$cssFile])) continue;
             $emittedCss[$cssFile] = true;
-            $href = './assets/css/' . rawurlencode(basename((string) $cssFile));
+            $href = e($baseUrl) . '/assets/css/' . rawurlencode(basename((string) $cssFile));
             echo '    <link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">' . "
 ";
         endforeach;
         foreach (($toolAssets['css'] ?? []) as $cssFile):
             if (isset($emittedCss[$cssFile])) continue;
             $emittedCss[$cssFile] = true;
-            $href = './assets/css/' . rawurlencode(basename((string) $cssFile));
+            $href = e($baseUrl) . '/assets/css/' . rawurlencode(basename((string) $cssFile));
             echo '    <link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">' . "
 ";
         endforeach;
         foreach (($toolAssets['js'] ?? []) as $jsFile):
-            $src = './assets/js/' . rawurlencode(basename((string) $jsFile));
+            $src = e($baseUrl) . '/assets/js/' . rawurlencode(basename((string) $jsFile));
             echo '    <script src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" defer></script>' . "
 ";
         endforeach;

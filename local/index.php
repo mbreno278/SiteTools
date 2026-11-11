@@ -1,9 +1,5 @@
 
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 //declare(strict_types=1);
 
 require_once __DIR__ . '/config/auth.php';
@@ -14,8 +10,8 @@ require_once __DIR__ . '/config/redirects.php';
 handle_redirects();
 // ========================================
 
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
+// Se no .env você tiver: BASE_URL=/projetos/SiteTools/local
+$baseUrl = rtrim((string)(getenv('BASE_URL') ?: '/projetos/SiteTools/local'), '/');
 
 /* ========================================
    FUNÇÕES AUXILIARES
