@@ -1,7 +1,6 @@
 
 <!-- Sidebar: navegação lateral -->
 <aside class="sidebar" aria-label="Navegação lateral">
-
     <!-- Navegação principal -->
     <nav class="group__menu" aria-label="Categorias de ferramentas">
         <ul>
@@ -36,16 +35,6 @@
                         aria-hidden="true"
                     >swap_horiz</span>
                     <span>Conversores</span>
-                </a>
-            </li>
-
-            <li>
-                <a class="menu__item" href="index.php#downloads">
-                    <span
-                        class="menu__icon material-symbols-outlined"
-                        aria-hidden="true"
-                    >download</span>
-                    <span>Downloads</span>
                 </a>
             </li>
 

@@ -89,6 +89,7 @@ $hasJavaScriptHandler = is_array($handler)
 
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/tool-page.css">
+    <link rel="stylesheet" href="./assets/css/tool-access.css">
 </head>
 
 <body>

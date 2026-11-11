@@ -106,45 +106,6 @@ $sections = [
     ],
 
     [
-        'id' => 'downloads',
-        'title' => 'Downloads',
-        'icon' => [
-            'type' => 'material',
-            'name' => 'download',
-        ],
-        'tools' => [
-            [
-                'title' => 'Vídeos do YouTube',
-                'description' => 'Acesse informações e recursos disponíveis para vídeos da plataforma.',
-                'url' => 'page.php?slug=download-video-youtube',
-                'access_type' => 'paid',
-                'image' => './assets/img/icon-youtube.png',
-            ],
-            [
-                'title' => 'Áudio do YouTube',
-                'description' => 'Explore recursos para trabalhar com conteúdo de áudio autorizado.',
-                'url' => 'page.php?slug=download-audio-youtube',
-                'access_type' => 'paid',
-                'image' => './assets/img/icon-music.png',
-            ],
-            [
-                'title' => 'Vídeo do Instagram',
-                'description' => 'Consulte recursos compatíveis com conteúdo que você tem autorização para utilizar.',
-                'url' => 'page.php?slug=download-video-instagram',
-                'access_type' => 'paid',
-                'image' => './assets/img/icon-instagram.png',
-            ],
-            [
-                'title' => 'Vídeo do TikTok',
-                'description' => 'Explore recursos compatíveis com a plataforma e suas permissões de uso.',
-                'url' => 'page.php?slug=download-video-tiktok',
-                'access_type' => 'paid',
-                'image' => './assets/img/icon-tiktok.png',
-            ],
-        ],
-    ],
-
-    [
         'id' => 'pdf',
         'title' => 'Ferramentas PDF',
         'icon' => [
@@ -256,10 +217,8 @@ $benefits = [
 <html lang="pt-BR">
 
 <?php require __DIR__ . '/templates/head.php'; ?>
-    <link rel="stylesheet" href="./assets/css/tool-access.css">
 
 <body>
-
     <!-- Cabeçalho -->
     <?php require __DIR__ . '/templates/header.php'; ?>
 

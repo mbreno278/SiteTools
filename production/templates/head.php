@@ -39,4 +39,6 @@
             document.documentElement.dataset.theme = "light";
         }
     </script>
+
+    <link rel="stylesheet" href="./assets/css/tool-access.css">
 </head>
