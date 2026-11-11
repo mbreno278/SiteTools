@@ -193,7 +193,7 @@
         'mode' => 'free',
         'status' => 'active',
         'reason' => 'public',
-        'label' => 'Gratuito',
+        /*'label' => 'Gratuito',*/
     ];
     $toolAccessAllowed = true;
 
@@ -435,11 +435,11 @@
                             <?php endif; ?>
 
                             <h1><?= e($tool['name']) ?></h1>
-                            <?php if (!empty($toolAccess['mode'])): ?>
+                            <?php /*if (!empty($toolAccess['mode'])):
                                 <div class="tool-heading__badges" style="margin-top:8px;">
                                     <?= function_exists('tool_access_badge_html') ? tool_access_badge_html((string)($toolAccess['mode'] ?? 'free')) : '' ?>
                                 </div>
-                            <?php endif; ?>
+                            endif; */?>
 
                             <p class="tool-heading__description">
                                 <?= e($tool['description']) ?>
