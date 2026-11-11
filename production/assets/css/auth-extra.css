@@ -1,0 +1,14 @@
+.auth-modal__forgot {
+    margin: -6px 0 0;
+    text-align: right;
+    font-size: 0.8125rem;
+}
+
+.auth-modal__success {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #ECFDF5;
+    color: #047857;
+    font-size: 0.875rem;
+}

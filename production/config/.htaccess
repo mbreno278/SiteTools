@@ -1,0 +1,2 @@
+# Nega acesso HTTP a todo o diretório config/
+Require all denied

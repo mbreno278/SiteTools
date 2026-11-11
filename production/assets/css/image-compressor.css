@@ -1,0 +1,362 @@
+
+.image-compressor {
+    width: 100%;
+    min-width: 0;
+}
+
+.image-compressor [hidden] {
+    display: none !important;
+}
+
+.image-compressor__dropzone {
+    position: relative;
+    min-height: 250px;
+    padding: 32px 20px;
+    border: 2px dashed var(--border-color, #CBD5E1);
+    border-radius: 16px;
+    background: var(--surface-color, #F8FAFC);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+}
+
+.image-compressor__dropzone:hover,
+.image-compressor__dropzone.is-dragging {
+    border-color: var(--primary-color, #6366F1);
+    background: var(--surface-hover, #F1F5F9);
+}
+
+.image-compressor__dropzone strong {
+    color: var(--text-color, #0F172A);
+    font-size: 1rem;
+}
+
+.image-compressor__dropzone > span:not(.material-symbols-outlined) {
+    color: var(--text-secondary, #64748B);
+    font-size: .9rem;
+}
+
+.image-compressor__dropzone small {
+    color: var(--text-secondary, #64748B);
+    font-size: .8rem;
+}
+
+.image-compressor__upload-icon {
+    color: var(--primary-color, #6366F1);
+    font-size: 42px;
+}
+
+.image-compressor__loading {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.image-compressor__loading strong {
+    color: var(--text-color, #0F172A);
+}
+
+.image-compressor__loading > span:last-child {
+    color: var(--text-secondary, #64748B);
+    font-size: .875rem;
+}
+
+.image-compressor__spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid var(--border-color, #E2E8F0);
+    border-top-color: var(--primary-color, #6366F1);
+    border-radius: 50%;
+    animation: image-compressor-spin .75s linear infinite;
+}
+
+@keyframes image-compressor-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.image-compressor__workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.image-compressor__preview-panel,
+.image-compressor__settings {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 14px;
+    background: var(--card-color, #FFFFFF);
+}
+
+.image-compressor__panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.image-compressor__panel-heading h2,
+.image-compressor__settings h2 {
+    margin: 0;
+    color: var(--text-color, #0F172A);
+    font-size: 1.05rem;
+}
+
+.image-compressor__panel-heading p,
+.image-compressor__description {
+    margin: 6px 0 0;
+    color: var(--text-secondary, #64748B);
+    font-size: .85rem;
+    overflow-wrap: anywhere;
+}
+
+.image-compressor__preview {
+    min-height: 220px;
+    max-height: 420px;
+    padding: 16px;
+    border-radius: 10px;
+    background-color: var(--surface-color, #F8FAFC);
+    background-image:
+        linear-gradient(45deg, #E2E8F0 25%, transparent 25%),
+        linear-gradient(-45deg, #E2E8F0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #E2E8F0 75%),
+        linear-gradient(-45deg, transparent 75%, #E2E8F0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.image-compressor__preview img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 380px;
+    object-fit: contain;
+}
+
+.image-compressor__stats {
+    display: grid;
+    gap: 0;
+    margin-top: 14px;
+}
+
+.image-compressor__stats > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color, #E2E8F0);
+    font-size: .85rem;
+}
+
+.image-compressor__stats > div:last-child {
+    border-bottom: 0;
+}
+
+.image-compressor__stats span {
+    color: var(--text-secondary, #64748B);
+}
+
+.image-compressor__stats strong {
+    color: var(--text-color, #0F172A);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.image-compressor__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.image-compressor__field label,
+.image-compressor__quality-heading label {
+    color: var(--text-color, #0F172A);
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+.image-compressor__field select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #CBD5E1);
+    border-radius: 8px;
+    background: var(--input-background, #FFFFFF);
+    color: var(--text-color, #0F172A);
+    font: inherit;
+}
+
+.image-compressor__field select:focus-visible,
+.image-compressor__quality-heading + input:focus-visible {
+    outline: 2px solid var(--primary-color, #6366F1);
+    outline-offset: 2px;
+}
+
+.image-compressor__quality-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.image-compressor__quality-heading strong {
+    color: var(--primary-color, #6366F1);
+    font-size: .875rem;
+}
+
+#compress-quality {
+    width: 100%;
+    margin: 18px 0 8px;
+    accent-color: var(--primary-color, #6366F1);
+    cursor: pointer;
+}
+
+#compress-quality:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.image-compressor__range-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-secondary, #64748B);
+    font-size: .75rem;
+}
+
+.image-compressor__hint {
+    margin: 18px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--surface-color, #F8FAFC);
+    color: var(--text-secondary, #64748B);
+    font-size: .8rem;
+    line-height: 1.5;
+}
+
+.image-compressor__action,
+.image-compressor__secondary-action {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.image-compressor__action:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.image-compressor__result {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 10px;
+    background: var(--surface-color, #F8FAFC);
+}
+
+.image-compressor__result > .material-symbols-outlined {
+    color: var(--primary-color, #6366F1);
+}
+
+.image-compressor__result strong {
+    color: var(--text-color, #0F172A);
+    font-size: .9rem;
+}
+
+.image-compressor__result p {
+    margin: 5px 0 0;
+    color: var(--text-secondary, #64748B);
+    font-size: .85rem;
+    line-height: 1.5;
+}
+
+.image-compressor__icon-button {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color, #0F172A);
+    cursor: pointer;
+}
+
+.image-compressor__icon-button:hover {
+    background: var(--surface-color, #F8FAFC);
+}
+
+.image-compressor__privacy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0 0;
+    color: var(--text-secondary, #64748B);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.image-compressor__privacy .material-symbols-outlined {
+    font-size: 17px;
+}
+
+.image-compressor__error {
+    margin: 14px 0;
+    padding: 12px;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    background: #FEF2F2;
+    color: #991B1B;
+    font-size: .875rem;
+}
+
+@media (max-width: 760px) {
+    .image-compressor__workspace {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .image-compressor__preview-panel,
+    .image-compressor__settings {
+        padding: 16px;
+    }
+
+    .image-compressor__dropzone {
+        min-height: 220px;
+        padding: 24px 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .image-compressor__spinner {
+        animation-duration: 1.5s;
+    }
+}

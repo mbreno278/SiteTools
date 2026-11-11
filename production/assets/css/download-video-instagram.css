@@ -1,0 +1,411 @@
+/* =========================================================
+   S I T E T O O L S
+   Download de Vídeo / Reels do Instagram
+   ========================================================= */
+
+.ig-downloader {
+    width: 100%;
+    min-width: 0;
+}
+
+.ig-downloader [hidden] {
+    display: none !important;
+}
+
+/* ---------- Formulário ---------- */
+
+.ig-downloader__form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 640px;
+}
+
+.ig-downloader__label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.ig-downloader__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ig-downloader__input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--tool-text-muted, #64748B);
+    font-size: 22px;
+    pointer-events: none;
+}
+
+.ig-downloader__input {
+    width: 100%;
+    padding: 14px 52px 14px 48px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    color: var(--tool-text, #0F172A);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ig-downloader__input:focus {
+    outline: none;
+    border-color: #E1306C;
+    box-shadow: 0 0 0 3px rgb(225 48 108 / 15%);
+}
+
+.ig-downloader__input::placeholder {
+    color: var(--tool-text-muted, #94A3B8);
+}
+
+.ig-downloader__paste-btn {
+    position: absolute;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--tool-text-muted, #64748B);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ig-downloader__paste-btn:hover {
+    background: var(--tool-surface-muted, #F1F5F9);
+    color: #E1306C;
+}
+
+.ig-downloader__hint {
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.ig-downloader__submit {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 22px;
+}
+
+.ig-downloader__error {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #FEF2F2;
+    color: #B91C1C;
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+/* ---------- Loading ---------- */
+
+.ig-downloader__loading,
+.ig-downloader__downloading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 220px;
+    text-align: center;
+}
+
+.ig-downloader__loading strong,
+.ig-downloader__downloading strong {
+    color: var(--tool-text, #0F172A);
+    font-size: 1rem;
+}
+
+.ig-downloader__loading > span:last-child,
+.ig-downloader__downloading > span:last-child {
+    color: var(--tool-text-muted, #64748B);
+    font-size: 0.875rem;
+}
+
+.ig-downloader__spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid var(--tool-border, #E2E8F0);
+    border-top-color: #E1306C;
+    border-radius: 50%;
+    animation: ig-spin 0.75s linear infinite;
+}
+
+@keyframes ig-spin {
+    to { transform: rotate(360deg); }
+}
+
+.ig-downloader__progress-bar {
+    width: 100%;
+    max-width: 280px;
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: var(--tool-border, #E2E8F0);
+    overflow: hidden;
+}
+
+.ig-downloader__progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #F56040, #E1306C, #C13584);
+    transition: width 0.3s ease;
+}
+
+/* ---------- Resultado ---------- */
+
+.ig-downloader__result {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.ig-downloader__video-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    padding: 20px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 16px;
+    background: var(--tool-surface, #FFFFFF);
+    box-shadow: var(--tool-shadow, 0 8px 28px rgb(15 23 42 / 4%));
+}
+
+.ig-downloader__thumbnail-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #0F172A;
+    aspect-ratio: 9 / 16;
+    max-height: 320px;
+}
+
+.ig-downloader__thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ig-downloader__duration {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 80%);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.ig-downloader__badge {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: linear-gradient(45deg, #F56040, #E1306C, #C13584, #833AB4);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    z-index: 2;
+}
+
+.ig-downloader__video-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ig-downloader__title {
+    margin: 0 0 6px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--tool-text, #0F172A);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ig-downloader__channel {
+    margin: 0 0 14px;
+    font-size: 0.875rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.ig-downloader__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ig-downloader__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.ig-downloader__meta-item .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.ig-downloader__change-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding: 8px 14px;
+    font-size: 0.8125rem;
+}
+
+/* ---------- Formatos ---------- */
+
+.ig-downloader__formats-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.ig-downloader__formats-title .material-symbols-outlined {
+    color: #E1306C;
+    font-size: 22px;
+}
+
+.ig-downloader__format-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ig-downloader__format-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ig-downloader__format-item:hover {
+    border-color: #E1306C;
+    box-shadow: 0 0 0 1px #E1306C;
+}
+
+.ig-downloader__format-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ig-downloader__format-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.ig-downloader__format-meta {
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.ig-downloader__format-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgb(225 48 108 / 12%);
+    color: #E1306C;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.ig-downloader__format-badge--audio {
+    background: rgb(16 185 129 / 12%);
+    color: #059669;
+}
+
+.ig-downloader__download-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.875rem;
+}
+
+.ig-downloader__privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+    line-height: 1.45;
+}
+
+.ig-downloader__privacy .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 18px;
+    margin-top: 1px;
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 720px) {
+    .ig-downloader__video-card {
+        grid-template-columns: 1fr;
+    }
+
+    .ig-downloader__thumbnail-wrap {
+        max-width: 200px;
+        margin: 0 auto;
+        aspect-ratio: 9 / 16;
+    }
+
+    .ig-downloader__format-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .ig-downloader__download-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

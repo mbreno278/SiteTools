@@ -1,0 +1,204 @@
+/**
+ * SiteTools — UX: toast, loading, foco, skip-link, mobile helpers
+ * Não altera o design system principal; apenas complementa.
+ */
+
+/* Skip link */
+.st-skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 10000;
+  background: var(--color-primary, #6945e4);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.st-skip-link:focus {
+  top: 12px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Foco visível reforçado quando usuário navega com teclado */
+.st-using-keyboard *:focus {
+  outline: 2px solid var(--color-primary, #6945e4);
+  outline-offset: 2px;
+}
+.st-using-keyboard *:focus:not(:focus-visible) {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-primary, #6945e4);
+  outline-offset: 2px;
+}
+
+/* Spinner */
+.st-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.125em;
+  animation: st-spin 0.7s linear infinite;
+}
+.st-spinner--lg {
+  width: 28px;
+  height: 28px;
+  border-width: 3px;
+}
+@keyframes st-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button.is-loading,
+.button.is-loading {
+  opacity: 0.85;
+  cursor: wait;
+}
+
+/* Overlay de processamento */
+.st-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.st-loading-overlay[hidden] {
+  display: none !important;
+}
+.st-loading-overlay__box {
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0f172a);
+  border-radius: 14px;
+  padding: 22px 26px;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+}
+.st-loading-overlay__text {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+body.st-loading-active {
+  overflow: hidden;
+}
+
+/* Toasts */
+.st-toast-region {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.st-toast {
+  pointer-events: auto;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+.st-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.st-toast--success {
+  background: #065f46;
+}
+.st-toast--error {
+  background: #9f1239;
+}
+.st-toast--info {
+  background: #1e3a8a;
+}
+
+/* Mensagens inline de formulário */
+.st-field-error {
+  color: #9f1239;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.st-alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+.st-alert--error {
+  background: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+.st-alert--success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.st-alert--info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* Utilitários responsivos leves */
+.st-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 640px) {
+  .st-toast-region {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+  .st-loading-overlay__box {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+/* Preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  .st-spinner {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.6;
+  }
+  .st-toast {
+    transition: none;
+  }
+}

@@ -1,0 +1,135 @@
+/* =========================================================
+   S I T E T O O L S — Formatar Texto
+   ========================================================= */
+
+.text-format {
+    width: 100%;
+    min-width: 0;
+}
+
+.text-format [hidden] {
+    display: none !important;
+}
+
+.text-format__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.text-format__header h2 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.text-format__header p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.text-format__textarea {
+    width: 100%;
+    min-height: 220px;
+    padding: 16px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    color: var(--tool-text, #0F172A);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.text-format__textarea:focus {
+    outline: none;
+    border-color: var(--tool-primary, #5938FF);
+    box-shadow: 0 0 0 3px rgb(89 56 255 / 15%);
+}
+
+.text-format__textarea::placeholder {
+    color: var(--tool-text-muted, #94A3B8);
+}
+
+.text-format__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.text-format__btn {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 999px;
+    background: var(--tool-surface, #FFFFFF);
+    color: var(--tool-text, #0F172A);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.text-format__btn:hover {
+    border-color: var(--tool-primary, #5938FF);
+    color: var(--tool-primary, #5938FF);
+    background: rgb(89 56 255 / 6%);
+}
+
+.text-format__btn:active {
+    background: rgb(89 56 255 / 12%);
+}
+
+.text-format__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.text-format__privacy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.text-format__privacy .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.text-format__footer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.text-format__feedback {
+    margin: 12px 0 0;
+    font-size: 0.875rem;
+    color: #059669;
+}
+
+@media (max-width: 640px) {
+    .text-format__header {
+        flex-direction: column;
+    }
+
+    .text-format__footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .text-format__footer-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}

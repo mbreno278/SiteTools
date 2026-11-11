@@ -1,0 +1,333 @@
+
+/* =========================================================
+   S I T E T O O L S
+   Sistema de cores e temas
+   ========================================================= */
+
+
+/* =========================================================
+   1. TEMA CLARO — PADRÃO
+   ========================================================= */
+
+:root,
+:root[data-theme="light"] {
+    color-scheme: light;
+
+    /* Cores globais */
+    --color-bg: #F8FAFC;
+
+    --color-surface: #FFFFFF;
+    --surface: var(--color-surface);
+    --surface-secondary: #F1F5F9;
+
+    --color-text: #0F172A;
+    --color-text-secondary: #64748B;
+    --color-text-muted: #94A3B8;
+
+    --color-border: #E2E8F0;
+    --color-border-strong: #CBD5E1;
+
+    /* Cor principal */
+    --color-primary: #6945E4;
+    --color-primary-hover: #5634CD;
+    --color-primary-soft: #F0EBFF;
+
+    /* Compatibilidade com ferramentas */
+    --tool-bg: var(--color-bg);
+    --tool-surface: var(--color-surface);
+    --tool-surface-muted: var(--surface-secondary);
+    --tool-border: var(--color-border);
+    --tool-text: var(--color-text);
+    --tool-text-muted: var(--color-text-secondary);
+    --tool-primary: var(--color-primary);
+
+    /* Hero */
+    --hero-bg-start: #F8FBFF;
+    --hero-bg-end: #F5F3FF;
+    --hero-text: var(--color-text);
+    --hero-description: #475569;
+    --hero-muted: var(--color-text-secondary);
+    --hero-border: #E8EAF3;
+    --hero-search-bg: var(--color-surface);
+    --hero-search-border: var(--color-border);
+    --hero-accent: #6045F5;
+    --hero-button-bg: #5938FF;
+    --hero-button-hover: #4625E8;
+
+    /* Benefícios */
+    --benefits-bg: var(--color-surface);
+    --benefits-title: var(--color-text);
+    --benefits-text: var(--color-text-secondary);
+    --benefits-border: var(--color-border);
+    --benefits-icon-bg: #F5F3FF;
+    --benefits-icon: #6547FF;
+
+    /* Footer */
+    --footer-bg: var(--color-surface);
+    --footer-text: var(--color-text-secondary);
+    --footer-link: #475569;
+    --footer-link-hover: var(--color-primary);
+    --footer-border: var(--color-border);
+}
+
+
+/* =========================================================
+   2. TEMA ESCURO
+   ========================================================= */
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Cores globais */
+    --color-bg: #0F172A;
+
+    --color-surface: #1E293B;
+    --surface: var(--color-surface);
+    --surface-secondary: #263449;
+
+    --color-text: #F8FAFC;
+    --color-text-secondary: #CBD5E1;
+    --color-text-muted: #94A3B8;
+
+    --color-border: #334155;
+    --color-border-strong: #475569;
+
+    /* Cor principal */
+    --color-primary: #A78BFA;
+    --color-primary-hover: #C4B5FD;
+    --color-primary-soft: #312E55;
+
+    /* Compatibilidade com ferramentas */
+    --tool-bg: var(--color-bg);
+    --tool-surface: var(--color-surface);
+    --tool-surface-muted: var(--surface-secondary);
+    --tool-border: var(--color-border);
+    --tool-text: var(--color-text);
+    --tool-text-muted: var(--color-text-secondary);
+    --tool-primary: var(--color-primary);
+
+    /* Hero */
+    --hero-bg-start: #172033;
+    --hero-bg-end: #211B3B;
+    --hero-text: var(--color-text);
+    --hero-description: #CBD5E1;
+    --hero-muted: #A3B1C6;
+    --hero-border: var(--color-border);
+    --hero-search-bg: var(--color-bg);
+    --hero-search-border: #475569;
+    --hero-accent: #B4A3FF;
+    --hero-button-bg: #7053FF;
+    --hero-button-hover: #846BFF;
+
+    /* Benefícios */
+    --benefits-bg: var(--color-surface);
+    --benefits-title: var(--color-text);
+    --benefits-text: var(--color-text-secondary);
+    --benefits-border: var(--color-border);
+    --benefits-icon-bg: #312E55;
+    --benefits-icon: #B4A3FF;
+
+    /* Footer */
+    --footer-bg: var(--color-bg);
+    --footer-text: var(--color-text-secondary);
+    --footer-link: #CBD5E1;
+    --footer-link-hover: #B4A3FF;
+    --footer-border: var(--color-border);
+}
+
+
+/* =========================================================
+   3. APLICAÇÃO GLOBAL
+   ========================================================= */
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+.header,
+.main__content,
+.sidebar,
+.card {
+    color: var(--color-text);
+}
+
+.header,
+.sidebar,
+.card {
+    background-color: var(--color-surface);
+}
+
+input,
+textarea,
+select {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-text-muted);
+}
+
+button {
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+/* =========================================================
+   4. BOTÃO DE TEMA
+   ========================================================= */
+
+#theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px;
+
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+#theme-toggle:hover {
+    background-color: var(--surface-secondary);
+}
+
+#theme-toggle:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+
+/* =========================================================
+   5. HERO
+   ========================================================= */
+
+.hero {
+    background:
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(112, 83, 255, 0.16),
+            transparent 38%
+        ),
+        linear-gradient(
+            115deg,
+            var(--hero-bg-start),
+            var(--hero-bg-end)
+        );
+
+    border-color: var(--hero-border);
+}
+
+.hero__eyebrow {
+    color: var(--hero-accent);
+}
+
+.hero__title {
+    color: var(--hero-text);
+}
+
+.hero__description {
+    color: var(--hero-description);
+}
+
+.hero__search {
+    background-color: var(--hero-search-bg);
+    border-color: var(--hero-search-border);
+}
+
+.hero__search input {
+    color: var(--hero-text);
+    background-color: transparent;
+}
+
+.hero__search input::placeholder {
+    color: var(--hero-muted);
+}
+
+.hero__search button {
+    color: #FFFFFF;
+    background-color: var(--hero-button-bg);
+}
+
+.hero__search button:hover {
+    background-color: var(--hero-button-hover);
+}
+
+.hero__features > span {
+    color: var(--hero-muted);
+}
+
+.hero__features .material-symbols-outlined {
+    color: var(--hero-accent);
+}
+
+
+/* =========================================================
+   6. BENEFÍCIOS
+   ========================================================= */
+
+.boxinfo {
+    color: var(--benefits-title);
+    background-color: var(--benefits-bg);
+    border-color: var(--benefits-border);
+}
+
+.boxinfo .flx-col > span {
+    color: var(--benefits-title);
+}
+
+.boxinfo .flx-col > span + span {
+    color: var(--benefits-text);
+}
+
+.boxinfo .material-symbols-outlined {
+    color: var(--benefits-icon);
+    background-color: var(--benefits-icon-bg);
+}
+
+
+/* =========================================================
+   7. FOOTER
+   ========================================================= */
+
+.footer {
+    color: var(--footer-text);
+    background-color: var(--footer-bg);
+    border-color: var(--footer-border);
+}
+
+.footer p {
+    color: var(--footer-text);
+}
+
+.footer a {
+    color: var(--footer-link);
+
+    transition:
+        color 0.18s ease;
+}
+
+.footer a:hover {
+    color: var(--footer-link-hover);
+}
+
+.footer a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+    border-radius: 4px;
+}

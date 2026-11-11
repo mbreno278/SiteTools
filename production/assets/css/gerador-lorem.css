@@ -1,0 +1,167 @@
+/* =========================================================
+   S I T E T O O L S — Gerador Lorem Ipsum
+   ========================================================= */
+
+.lorem-gen {
+    width: 100%;
+    min-width: 0;
+    max-width: 720px;
+}
+
+.lorem-gen [hidden] {
+    display: none !important;
+}
+
+.lorem-gen__controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 16px;
+    margin-bottom: 24px;
+    padding: 20px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 16px;
+    background: var(--tool-surface, #FFFFFF);
+}
+
+.lorem-gen__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lorem-gen__field label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--tool-text, #0F172A);
+}
+
+.lorem-gen__select,
+.lorem-gen__input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--tool-text, #0F172A);
+    font-size: 0.9375rem;
+}
+
+.lorem-gen__select:focus,
+.lorem-gen__input:focus {
+    outline: none;
+    border-color: var(--tool-primary, #5938FF);
+    box-shadow: 0 0 0 3px rgb(89 56 255 / 15%);
+}
+
+.lorem-gen__field--check {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+.lorem-gen__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tool-text, #0F172A);
+    cursor: pointer;
+}
+
+.lorem-gen__submit {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+}
+
+.lorem-gen__result-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lorem-gen__result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.lorem-gen__result-header strong {
+    font-size: 0.9375rem;
+    color: var(--tool-text, #0F172A);
+}
+
+.lorem-gen__result-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.lorem-gen__output {
+    width: 100%;
+    min-height: 260px;
+    padding: 16px;
+    border: 1px solid var(--tool-border, #E2E8F0);
+    border-radius: 12px;
+    background: var(--tool-surface, #FFFFFF);
+    color: var(--tool-text, #0F172A);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.lorem-gen__output:focus {
+    outline: none;
+    border-color: var(--tool-primary, #5938FF);
+}
+
+.lorem-gen__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.lorem-gen__stats strong {
+    color: var(--tool-text, #0F172A);
+}
+
+.lorem-gen__privacy {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 0.8125rem;
+    color: var(--tool-text-muted, #64748B);
+}
+
+.lorem-gen__privacy .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.lorem-gen__feedback {
+    margin: 12px 0 0;
+    font-size: 0.875rem;
+    color: #059669;
+}
+
+@media (max-width: 640px) {
+    .lorem-gen__controls {
+        grid-template-columns: 1fr;
+    }
+
+    .lorem-gen__result-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lorem-gen__result-actions .button {
+        flex: 1;
+        justify-content: center;
+    }
+}
