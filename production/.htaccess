@@ -1,6 +1,25 @@
 Options -Indexes
 ServerSignature Off
 
+# ============================================
+# URLs AMIGÁVEIS + REDIRECTS
+# ============================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /projetos/SiteTools/local/
+
+    # Não reescreve arquivos e pastas reais
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # /admin/redirects → painel de redirecionamentos
+    RewriteRule ^admin/redirects/?$ admin/redirects.php [L,QSA]
+
+    # /curl  ou  /ferramentas/curl  → page.php?slug=curl
+    RewriteRule ^(ferramentas/)?([a-z0-9\-]+)/?$ page.php?slug=$2 [L,QSA]
+</IfModule>
+
+
 # Bloquear acesso a arquivos sensíveis na raiz e subpastas (quando aplicável)
 <FilesMatch "(?i)\.(sql|env|log|bak|ini|pem|key)$">
     Require all denied

@@ -1,10 +1,17 @@
 
 <?php
-
 //declare(strict_types=1);
 
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/tool-access.php';
+
+// ===== Sistema de Redirecionamentos =====
+require_once __DIR__ . '/config/redirects.php';
+handle_redirects();
+// ========================================
+
+// Se no .env você tiver: BASE_URL=/projetos/SiteTools/local
+$baseUrl = rtrim((string)(getenv('BASE_URL') ?: '/projetos/SiteTools/local'), '/');
 
 /* ========================================
    FUNÇÕES AUXILIARES
@@ -28,7 +35,7 @@ if (!function_exists('e')) {
 $sections = [
     [
         'id' => 'editor-imagem',
-        'title' => 'Ferramentas de imagem',
+        'title' => 'Remover fundo da Imagem',
         'icon' => [
             'type' => 'image',
             'src' => './assets/img/logo-section-edit-image.png',
@@ -78,14 +85,14 @@ $sections = [
                 'title' => 'PDF para Word',
                 'description' => 'Transforme documentos PDF em arquivos editáveis do Word, quando compatíveis.',
                 'url' => 'page.php?slug=pdf-to-word',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/icon-pdf.png',
             ],
             [
                 'title' => 'Word para PDF',
                 'description' => 'Converta documentos compatíveis para o formato PDF.',
                 'url' => 'page.php?slug=word-to-pdf',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/icon-word.png',
             ],
             [
@@ -106,6 +113,45 @@ $sections = [
     ],
 
     [
+        'id' => 'downloads',
+        'title' => 'Downloads',
+        'icon' => [
+            'type' => 'material',
+            'name' => 'download',
+        ],
+        'tools' => [
+            [
+                'title' => 'Vídeos do YouTube',
+                'description' => 'Acesse informações e recursos disponíveis para vídeos da plataforma.',
+                'url' => 'page.php?slug=download-video-youtube',
+                'access_type' => 'paid',
+                'image' => './assets/img/icon-youtube.png',
+            ],
+            [
+                'title' => 'Áudio do YouTube',
+                'description' => 'Explore recursos para trabalhar com conteúdo de áudio autorizado.',
+                'url' => 'page.php?slug=download-audio-youtube',
+                'access_type' => 'paid',
+                'image' => './assets/img/icon-music.png',
+            ],
+            [
+                'title' => 'Vídeo do Instagram',
+                'description' => 'Consulte recursos compatíveis com conteúdo que você tem autorização para utilizar.',
+                'url' => 'page.php?slug=download-video-instagram',
+                'access_type' => 'paid',
+                'image' => './assets/img/icon-instagram.png',
+            ],
+            [
+                'title' => 'Vídeo do TikTok',
+                'description' => 'Explore recursos compatíveis com a plataforma e suas permissões de uso.',
+                'url' => 'page.php?slug=download-video-tiktok',
+                'access_type' => 'paid',
+                'image' => './assets/img/icon-tiktok.png',
+            ],
+        ],
+    ],
+
+    [
         'id' => 'pdf',
         'title' => 'Ferramentas PDF',
         'icon' => [
@@ -117,28 +163,28 @@ $sections = [
                 'title' => 'Compactar PDF',
                 'description' => 'Reduza o tamanho de documentos PDF, conforme os recursos disponíveis.',
                 'url' => 'page.php?slug=compactar-pdf',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/icon-download.png',
             ],
             [
                 'title' => 'Unir PDF',
                 'description' => 'Combine vários documentos PDF em um único arquivo.',
                 'url' => 'page.php?slug=unir-pdf',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/logo.png',
             ],
             [
                 'title' => 'Proteger PDF',
                 'description' => 'Adicione proteção aos documentos utilizando os recursos de segurança disponíveis.',
                 'url' => 'page.php?slug=proteger-pdf',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/icon-close.png',
             ],
             [
                 'title' => 'Desbloquear PDF',
                 'description' => 'Trabalhe com documentos que você tem autorização para modificar.',
                 'url' => 'page.php?slug=desbloquear-pdf',
-                'access_type' => 'free',
+                'access_type' => 'login',
                 'image' => './assets/img/icon-open.png',
             ],
         ],
@@ -217,8 +263,10 @@ $benefits = [
 <html lang="pt-BR">
 
 <?php require __DIR__ . '/templates/head.php'; ?>
+    <link rel="stylesheet" href="./assets/css/tool-access.css">
 
 <body>
+
     <!-- Cabeçalho -->
     <?php require __DIR__ . '/templates/header.php'; ?>
 
@@ -462,6 +510,6 @@ $benefits = [
     <!-- Rodapé -->
     <?php require __DIR__ . '/templates/footer.php'; ?>
 
-    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
+    <?php include __DIR__ . '/content/content-login.php'; ?>
 </body>
 </html>

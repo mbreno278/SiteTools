@@ -25,12 +25,7 @@ $slugMap = [
 
 // Mantém o comportamento legado: ação ausente ou desconhecida usa resize.
 if (!isset($slugMap[$action])) {
-    Response::error(
-        'Ação não reconhecida.',
-        400,
-        null,
-        'invalid_action'
-    );
+    $action = 'resize';
 }
 
 $slug = $slugMap[$action];
