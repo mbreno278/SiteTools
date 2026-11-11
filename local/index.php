@@ -6,6 +6,11 @@
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/tool-access.php';
 
+// ===== Sistema de Redirecionamentos =====
+require_once __DIR__ . '/config/redirects.php';
+handle_redirects();
+// ========================================
+
 /* ========================================
    FUNÇÕES AUXILIARES
 ======================================== */
