@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/tool-access.php';
+require_once __DIR__ . '/config/app.php';
+
+$baseUrl = defined('BASE_URL') ? BASE_URL : rtrim((string) env('BASE_URL', ''), '/');
 
 if (!function_exists('e')) {
     function e(string $value): string

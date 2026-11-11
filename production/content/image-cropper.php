@@ -14,7 +14,7 @@
     class="image-cropper"
     id="image-cropper"
     data-tool-id="<?= $tools_id ?>"
-    data-history-url="http://localhost/projetos/SiteTools/api/save-tool-usage.php">
+    data-history-url="<?= htmlspecialchars((defined('BASE_URL') ? BASE_URL : '') . '/api/save-tool-usage.php', ENT_QUOTES, 'UTF-8') ?>">
 
     <div class="image-cropper__dropzone" id="crop-dropzone">
         <input

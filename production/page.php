@@ -11,8 +11,9 @@
     handle_redirects();
     // ========================================
 
-    // Se no .env você tiver: BASE_URL=/projetos/SiteTools/local
-    $baseUrl = rtrim((string)(getenv('BASE_URL') ?: '/projetos/SiteTools/local'), '/');
+    // BASE_URL via .env (vazio = domínio na raiz). Em produção: BASE_URL=
+    require_once __DIR__ . '/config/app.php';
+    $baseUrl = defined('BASE_URL') ? BASE_URL : rtrim((string) env('BASE_URL', ''), '/');
 
     try {
         require __DIR__ . '/config/database.php';

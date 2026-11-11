@@ -7,4 +7,5 @@ Disallow: /storage/
 Disallow: /tools/
 Disallow: /api/
 Disallow: /.env
-Sitemap: https://www.exemplo.com/sitemap.xml
+# Ajuste o domínio real após o deploy:
+# Sitemap: https://seudominio.com/sitemap.xml
