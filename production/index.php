@@ -28,7 +28,7 @@ if (!function_exists('e')) {
 $sections = [
     [
         'id' => 'editor-imagem',
-        'title' => 'Remover fundo da Imagem',
+        'title' => 'Ferramentas de imagem',
         'icon' => [
             'type' => 'image',
             'src' => './assets/img/logo-section-edit-image.png',
@@ -78,14 +78,14 @@ $sections = [
                 'title' => 'PDF para Word',
                 'description' => 'Transforme documentos PDF em arquivos editáveis do Word, quando compatíveis.',
                 'url' => 'page.php?slug=pdf-to-word',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/icon-pdf.png',
             ],
             [
                 'title' => 'Word para PDF',
                 'description' => 'Converta documentos compatíveis para o formato PDF.',
                 'url' => 'page.php?slug=word-to-pdf',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/icon-word.png',
             ],
             [
@@ -117,28 +117,28 @@ $sections = [
                 'title' => 'Compactar PDF',
                 'description' => 'Reduza o tamanho de documentos PDF, conforme os recursos disponíveis.',
                 'url' => 'page.php?slug=compactar-pdf',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/icon-download.png',
             ],
             [
                 'title' => 'Unir PDF',
                 'description' => 'Combine vários documentos PDF em um único arquivo.',
                 'url' => 'page.php?slug=unir-pdf',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/logo.png',
             ],
             [
                 'title' => 'Proteger PDF',
                 'description' => 'Adicione proteção aos documentos utilizando os recursos de segurança disponíveis.',
                 'url' => 'page.php?slug=proteger-pdf',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/icon-close.png',
             ],
             [
                 'title' => 'Desbloquear PDF',
                 'description' => 'Trabalhe com documentos que você tem autorização para modificar.',
                 'url' => 'page.php?slug=desbloquear-pdf',
-                'access_type' => 'login',
+                'access_type' => 'free',
                 'image' => './assets/img/icon-open.png',
             ],
         ],
@@ -462,6 +462,6 @@ $benefits = [
     <!-- Rodapé -->
     <?php require __DIR__ . '/templates/footer.php'; ?>
 
-    <?php include __DIR__ . '/content/content-login.php'; ?>
+    <?php /*include __DIR__ . '/content/content-login.php';*/ ?>
 </body>
 </html>

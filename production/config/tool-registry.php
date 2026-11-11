@@ -84,7 +84,7 @@ return [
         'content' => 'word-to-pdf.php',
         'css' => ['word-to-pdf.css'],
         'js' => ['word-to-pdf.js'],
-    ],
+    ],/*
     'download-video-youtube' => [
         'content' => 'download-video-youtube.php',
         'css' => ['download-video-youtube.css'],
@@ -104,7 +104,7 @@ return [
         'content' => 'download-video-tiktok.php',
         'css' => ['download-video-tiktok.css'],
         'js' => ['download-video-tiktok.js'],
-    ],
+    ],*/
     'formatar-texto' => [
         'content' => 'formatar-texto.php',
         'css' => ['formatar-texto.css'],
