@@ -4,7 +4,9 @@ Disallow: /admin/
 Disallow: /account/
 Disallow: /config/
 Disallow: /storage/
-Disallow: /tools/
 Disallow: /api/
 Disallow: /.env
-Sitemap: https://www.seudominio.com/sitemap.xml
+Disallow: /page.php
+
+# Sitemap (ajuste o domínio no APP_URL / host real)
+Sitemap: /sitemap.xml

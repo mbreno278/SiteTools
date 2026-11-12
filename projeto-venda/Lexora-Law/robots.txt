@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+# Replace with your real production sitemap URL.
+Sitemap: https://www.example.com/sitemap.xml

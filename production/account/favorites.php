@@ -33,7 +33,7 @@ account_header('Favoritos', 'Acesse rapidamente as ferramentas que você salvou.
                     <strong><?= user_area_e((string) $r['name']) ?></strong>
                     <small><?= user_area_e((string) ($r['description'] ?? '')) ?></small>
                 </div>
-                <a class="ua-button ua-button--light" href="../page.php?slug=<?= rawurlencode((string) $r['slug']) ?>">Open</a>
+                <a class="ua-button ua-button--light" href="<?= e(tool_url((string) ($r['slug'] ?? ''))) ?>">Open</a>
                 <button class="ua-button ua-button--danger" type="button" data-favorite-toggle="<?= (int) $r['id'] ?>" data-active="1">Delete</button>
             </div>
         <?php endforeach; endif; ?>

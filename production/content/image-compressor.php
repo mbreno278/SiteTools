@@ -13,7 +13,7 @@ if (is_file($functionsUser)) {
 }
 
 // Não force cookie em produção — use só se realmente precisar de fallback de dev
-// // removed for production
+// $_COOKIE['user_id'] = 1;
 
 $user_id = isset($_COOKIE['user_id']) ? (int) $_COOKIE['user_id'] : null;
 $tools_id = isset($tool['name']) ? (string) $tool['name'] : 'image-compressor';

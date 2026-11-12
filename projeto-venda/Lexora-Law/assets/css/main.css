@@ -1,0 +1,1292 @@
+/* ==========================================================================
+   Lexora Law — Main Stylesheet
+   Version: 1.2.0
+   ==========================================================================
+   Clean, well-organized CSS for the Lexora Law firm template.
+   Customize colors via the CSS custom properties in :root and [data-theme="dark"].
+   ========================================================================== */
+
+/* Google Fonts — replace with local @font-face if self-hosting is required */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. Design Tokens (Light theme defaults)
+   -------------------------------------------------------------------------- */
+:root {
+  --ink: #17232d;
+  --muted: #66747e;
+  --paper: #f7f7f4;
+  --surface: #fff;
+  --line: #e3e6e3;
+  --accent: #a77b4b;
+  --accent-dark: #805a32;
+  --navy: #172b39;
+  --soft: #edf0ed;
+  --success: #286747;
+  --danger: #a33131;
+  --radius: 5px;
+  --container: 1160px;
+  --shadow: 0 18px 50px rgba(23, 35, 45, 0.08);
+  --serif: "Playfair Display", Georgia, serif;
+  --sans: "DM Sans", Arial, sans-serif;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --ink: #edf1ef;
+  --muted: #aab5b2;
+  --paper: #111b21;
+  --surface: #19262e;
+  --line: #30404a;
+  --accent: #d0a16c;
+  --accent-dark: #e1b985;
+  --navy: #0d171d;
+  --soft: #22313a;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   2. Base / Reset
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px / 1.7 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  outline-offset: 4px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   3. Layout helpers
+   -------------------------------------------------------------------------- */
+.container {
+  width: min(var(--container), calc(100% - 44px));
+  margin-inline: auto;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 10px;
+  background: var(--surface);
+  padding: 12px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  left: 12px;
+}
+
+.section {
+  padding: 94px 0;
+}
+
+.section-sm {
+  padding: 62px 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 38px;
+}
+
+.section-head p {
+  max-width: 440px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Typography
+   -------------------------------------------------------------------------- */
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.serif {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+h1, h2, h3, h4, p {
+  margin-top: 0;
+}
+
+h1 {
+  font: 500 clamp(2.7rem, 6vw, 5.4rem) / 1.05 var(--serif);
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font: 500 clamp(2rem, 4vw, 3.25rem) / 1.12 var(--serif);
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font: 500 1.45rem / 1.25 var(--serif);
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--muted);
+  max-width: 650px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. Buttons & Links
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 21px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-outline:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.text-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  border-bottom: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.text-link:hover {
+  border-bottom-color: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   6. Header & Navigation
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-top {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--accent);
+  display: grid;
+  place-items: center;
+  font: 500 1.1rem var(--serif);
+  color: var(--accent);
+}
+
+.brand-name {
+  font: 600 0.95rem / 1.1 var(--sans);
+  letter-spacing: 0.12em;
+}
+
+.brand-name small {
+  display: block;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--ink);
+  transition: 0.2s;
+}
+
+.icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.main-nav {
+  border-top: 1px solid transparent;
+}
+
+.nav-inner {
+  display: flex;
+  gap: 28px;
+  padding: 0 0 14px;
+}
+
+.nav-inner a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: 0.2s;
+}
+
+.nav-inner a:hover,
+.nav-inner a[aria-current="page"] {
+  color: var(--ink);
+}
+
+.top-note {
+  background: var(--navy);
+  color: #c2cbc9;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+}
+
+/* --------------------------------------------------------------------------
+   7. Search Panel
+   -------------------------------------------------------------------------- */
+.search-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 16, 20, 0.55);
+  z-index: 200;
+  display: none;
+  place-items: start center;
+  padding: 80px 20px 40px;
+}
+
+.search-panel.open {
+  display: grid;
+}
+
+.search-dialog {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.search-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.search-head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.search-results {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.search-results a {
+  display: block;
+  padding: 12px 14px;
+  background: var(--soft);
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  transition: 0.15s;
+}
+
+.search-results a:hover {
+  background: var(--line);
+}
+
+/* --------------------------------------------------------------------------
+   8. Hero
+   -------------------------------------------------------------------------- */
+.hero {
+  background: var(--navy);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  min-height: 620px;
+  align-items: center;
+  gap: 70px;
+  padding-block: 76px;
+}
+
+.hero h1 {
+  max-width: 760px;
+  margin: 18px 0 24px;
+}
+
+.hero .lead {
+  color: #c2cbc9;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.hero .btn-outline {
+  color: #fff;
+  border-color: #64747c;
+}
+
+.hero-art {
+  min-height: 420px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.hero-frame {
+  width: min(100%, 390px);
+  aspect-ratio: 4 / 5;
+  border: 1px solid rgba(208, 161, 108, 0.55);
+  padding: 16px;
+  position: relative;
+}
+
+.hero-frame::before {
+  content: "";
+  position: absolute;
+  inset: 34px -24px -24px 34px;
+  border: 1px solid rgba(208, 161, 108, 0.35);
+}
+
+.hero-monogram {
+  height: 100%;
+  background: linear-gradient(145deg, #304652, #1c303b);
+  display: grid;
+  place-items: center;
+  font: 500 clamp(7rem, 12vw, 11rem) / 1 var(--serif);
+  color: #d0a16c;
+}
+
+.hero-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #aab6b4;
+}
+
+/* --------------------------------------------------------------------------
+   9. Trust strip
+   -------------------------------------------------------------------------- */
+.trust-strip {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 27px 0;
+}
+
+.trust-item {
+  padding: 0 28px;
+  border-right: 1px solid var(--line);
+}
+
+.trust-item:first-child {
+  padding-left: 0;
+}
+
+.trust-item:last-child {
+  border: 0;
+}
+
+.trust-item strong {
+  display: block;
+  font: 500 1.45rem var(--serif);
+}
+
+.trust-item span {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   10. Content sections
+   -------------------------------------------------------------------------- */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 90px;
+  align-items: center;
+}
+
+.editorial-panel {
+  background: var(--soft);
+  min-height: 440px;
+  padding: 54px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.editorial-panel::after {
+  content: "L";
+  font: 500 18rem / 0.8 var(--serif);
+  color: color-mix(in srgb, var(--accent) 18%, transparent);
+  align-self: end;
+}
+
+.quote-mark {
+  font: 5rem / 0.7 var(--serif);
+  color: var(--accent);
+}
+
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.practice-card {
+  background: var(--surface);
+  padding: 34px 30px;
+  min-height: 230px;
+  transition: 0.2s;
+}
+
+.practice-card:hover {
+  background: var(--soft);
+}
+
+.practice-number {
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+}
+
+.practice-card h3 {
+  margin: 26px 0 12px;
+}
+
+.practice-card p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.card-arrow {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.person-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.portrait {
+  aspect-ratio: 4 / 4.5;
+  background: linear-gradient(145deg, #d7d8d1, #aab6b4);
+  display: grid;
+  place-items: center;
+  color: #33434b;
+  font: 500 5rem var(--serif);
+}
+
+.person-info {
+  padding: 22px;
+}
+
+.person-info p {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 5px 0 12px;
+}
+
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.article-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  min-width: 0; /* prevent grid blowout / horizontal scroll */
+  display: flex;
+  flex-direction: column;
+}
+
+.article-art {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #263f4c, #8b9a95);
+  display: grid;
+  place-items: center;
+  color: #e3c49f;
+  font: 500 clamp(2.4rem, 5vw, 3.4rem) / 1 var(--serif);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.article-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-info {
+  padding: 23px;
+  min-width: 0;
+}
+
+.article-meta {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.article-info h3 {
+  margin: 13px 0;
+  overflow-wrap: anywhere; /* long titles won't force horizontal scroll */
+  word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+   11. CTA Band
+   -------------------------------------------------------------------------- */
+.cta-band {
+  background: var(--navy);
+  color: #fff;
+  padding: 64px 0;
+}
+
+.cta-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 35px;
+}
+
+.cta-inner h2 {
+  max-width: 640px;
+  margin: 0;
+}
+
+.cta-inner p {
+  color: #c2cbc9;
+  margin: 10px 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. Page Hero (inner pages)
+   -------------------------------------------------------------------------- */
+.page-hero {
+  background: var(--navy);
+  color: #fff;
+  padding: 85px 0 70px;
+}
+
+.page-hero .lead {
+  color: #c2cbc9;
+}
+
+.page-hero .eyebrow {
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   13. Forms
+   -------------------------------------------------------------------------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field span,
+.field > label,
+.field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius);
+  transition: 0.15s;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.form-message {
+  display: none;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+}
+
+.form-message.show {
+  display: block;
+}
+
+.form-message.success {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+}
+
+.form-message.error {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   14. FAQ
+   -------------------------------------------------------------------------- */
+.faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-item {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.faq-item button {
+  width: 100%;
+  text-align: left;
+  padding: 18px 22px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: 500 1.05rem var(--serif);
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.faq-item button::after {
+  content: "+";
+  font-size: 1.4rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.faq-item.open button::after {
+  content: "−";
+}
+
+.faq-body {
+  display: none;
+  padding: 0 22px 20px;
+  color: var(--muted);
+}
+
+.faq-item.open .faq-body {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   15. Article layout
+   -------------------------------------------------------------------------- */
+.content-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 50px;
+  align-items: start;
+}
+
+.article-body {
+  max-width: 720px;
+}
+
+.article-body h2 {
+  margin-top: 2.2em;
+  margin-bottom: 0.6em;
+}
+
+.article-body p {
+  margin-bottom: 1.25em;
+}
+
+.article-body ul,
+.article-body ol {
+  margin-bottom: 1.25em;
+  padding-left: 1.4em;
+  color: var(--muted);
+}
+
+.sidebar {
+  position: sticky;
+  top: 110px;
+  border-left: 1px solid var(--line);
+  padding-left: 28px;
+}
+
+.toc {
+  display: grid;
+  gap: 8px;
+}
+
+.toc a {
+  font-size: 0.88rem;
+  color: var(--muted);
+  transition: 0.15s;
+}
+
+.toc a:hover {
+  color: var(--accent);
+}
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  width: 0%;
+  z-index: 300;
+  transition: width 0.05s linear;
+}
+
+/* --------------------------------------------------------------------------
+   16. Attorney profile
+   -------------------------------------------------------------------------- */
+.team-profile {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.profile-art {
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(145deg, #d7d8d1, #aab6b4);
+  display: grid;
+  place-items: center;
+  font: 7rem var(--serif);
+  color: #33434b;
+}
+
+/* --------------------------------------------------------------------------
+   17. Stats
+   -------------------------------------------------------------------------- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.stat {
+  border-top: 2px solid var(--accent);
+  padding-top: 18px;
+}
+
+.stat strong {
+  font: 500 2.8rem var(--serif);
+  display: block;
+}
+
+.stat span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   18. Footer
+   -------------------------------------------------------------------------- */
+.site-footer {
+  background: var(--navy);
+  color: #c2cbc9;
+  padding: 70px 0 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.footer-brand .brand-name {
+  color: #fff;
+}
+
+.footer-brand p {
+  margin-top: 16px;
+  font-size: 0.92rem;
+  max-width: 280px;
+}
+
+.footer-col h4 {
+  color: #fff;
+  font: 600 0.78rem / 1.2 var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: #aab6b4;
+  transition: 0.15s;
+}
+
+.footer-col a:hover {
+  color: var(--accent);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: #7a8a8c;
+}
+
+/* --------------------------------------------------------------------------
+   19. Utility & Misc
+   -------------------------------------------------------------------------- */
+.back-top {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s;
+  z-index: 90;
+  font-size: 1.2rem;
+}
+
+.back-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 65px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Style guide specific */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.swatch {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.swatch-color {
+  height: 80px;
+}
+
+.swatch-info {
+  padding: 10px 12px;
+  font-size: 0.78rem;
+}
+
+/* --------------------------------------------------------------------------
+   20. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr 0.7fr;
+    gap: 30px;
+  }
+
+  .split {
+    gap: 40px;
+  }
+
+  .practice-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .article-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content-layout {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .sidebar {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 25px 0 0;
+    position: static;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .team-profile {
+    grid-template-columns: 250px 1fr;
+    gap: 35px;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    width: min(var(--container), calc(100% - 34px));
+  }
+
+  .header-top {
+    height: 72px;
+  }
+
+  .menu-toggle {
+    display: grid;
+  }
+
+  .header-actions .header-consult {
+    display: none;
+  }
+
+  .main-nav {
+    display: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .main-nav.open {
+    display: block;
+  }
+
+  .nav-inner {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px 0;
+  }
+
+  .nav-inner a {
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    padding-block: 65px;
+    min-height: auto;
+  }
+
+  .hero-art {
+    min-height: 270px;
+  }
+
+  .hero-frame {
+    width: 220px;
+  }
+
+  .hero-monogram {
+    font-size: 8rem;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .trust-item {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 15px !important;
+  }
+
+  .trust-item:last-child {
+    border: 0;
+    padding-bottom: 0;
+  }
+
+  .section {
+    padding: 65px 0;
+  }
+
+  .section-sm {
+    padding: 48px 0;
+  }
+
+  .section-head,
+  .cta-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .editorial-panel {
+    min-height: 300px;
+    padding: 30px;
+  }
+
+  .editorial-panel::after {
+    font-size: 12rem;
+  }
+
+  .practice-grid,
+  .team-grid,
+  .article-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .practice-card {
+    min-height: auto;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+  }
+
+  .page-hero {
+    padding: 60px 0;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: auto;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-art {
+    max-width: 280px;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   21. Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

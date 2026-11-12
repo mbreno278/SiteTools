@@ -122,7 +122,7 @@ account_header('Minhas Assinaturas', 'Acessos individuais por ferramenta — nã
                                 · Origem: <?= user_area_e((string) ($a['source'] ?? '—')) ?>
                             </small>
                         </div>
-                        <a class="ua-button" href="../page.php?slug=<?= rawurlencode((string) $a['slug']) ?>">Abrir</a>
+                        <a class="ua-button" href="<?= e(tool_url((string) ($a['slug'] ?? ''))) ?>">Abrir</a>
                     </div>
                 <?php endforeach; ?>
             </div>

@@ -1,0 +1,21 @@
+THIRD-PARTY LICENSE AND ASSET NOTICE
+Lexora Law v1.2.0
+
+No third-party JavaScript library, icon library, or photographic asset is bundled in this package.
+
+Fonts
+-----
+DM Sans and Playfair Display are requested from Google Fonts through a CSS @import and are not bundled.
+Before redistributing local copies of these fonts, verify the current license terms of each typeface and the rules of the marketplace on which you are selling.
+
+Icons & Graphics
+----------------
+The brand mark (assets/icons/lexora-mark.svg) is original.
+All other icons used in the interface are inline SVG created for this template.
+No external icon font is used.
+
+Photography
+-----------
+No photographic or illustration assets are included.
+All portrait and article placeholders are pure CSS.
+Replace them with images for which you hold full commercial rights before publishing any live website or including them in a commercial template package.

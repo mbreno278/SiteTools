@@ -1,10 +1,17 @@
 
 <?php
-
 //declare(strict_types=1);
 
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/tool-access.php';
+
+// ===== Sistema de Redirecionamentos =====
+require_once __DIR__ . '/config/redirects.php';
+handle_redirects();
+// ========================================
+
+// Se no .env você tiver: BASE_URL=/projetos/SiteTools/local
+$baseUrl = rtrim((string)(getenv('BASE_URL') ?: '/projetos/SiteTools/local'), '/');
 
 /* ========================================
    FUNÇÕES AUXILIARES

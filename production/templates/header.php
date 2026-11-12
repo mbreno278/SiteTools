@@ -1,11 +1,11 @@
 <header class="header">
 
     <div class="header__column">
-        <a class="header__logo" href="index.php" aria-label="SiteTools — Página inicial">
+        <a class="header__logo" href="<?=e($baseUrl)?>" aria-label="SiteTools — Página inicial">
 
             <img
                 class="page__logo"
-                src="./assets/img/logo.png"
+                src="<?=e($baseUrl)?>/assets/img/logo.png"
                 alt=""
                 width="48"
                 height="48"

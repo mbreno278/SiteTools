@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example only: replace https://www.example.com with your production domain and verify every public URL. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.example.com/</loc></url>
+  <url><loc>https://www.example.com/pages/about.html</loc></url>
+  <url><loc>https://www.example.com/pages/practice-areas.html</loc></url>
+  <url><loc>https://www.example.com/pages/attorneys.html</loc></url>
+  <url><loc>https://www.example.com/pages/attorney-alexandra-morgan.html</loc></url>
+  <url><loc>https://www.example.com/pages/attorney-james-whitaker.html</loc></url>
+  <url><loc>https://www.example.com/pages/attorney-sophia-chen.html</loc></url>
+  <url><loc>https://www.example.com/pages/insights.html</loc></url>
+  <url><loc>https://www.example.com/pages/article-business-law.html</loc></url>
+  <url><loc>https://www.example.com/pages/article-commercial-lease.html</loc></url>
+  <url><loc>https://www.example.com/pages/article-estate-planning.html</loc></url>
+  <url><loc>https://www.example.com/pages/article-intellectual-property.html</loc></url>
+  <url><loc>https://www.example.com/pages/article-employment-agreements.html</loc></url>
+  <url><loc>https://www.example.com/pages/contact.html</loc></url>
+  <url><loc>https://www.example.com/pages/consultation.html</loc></url>
+  <url><loc>https://www.example.com/pages/faq.html</loc></url>
+  <url><loc>https://www.example.com/pages/privacy-policy.html</loc></url>
+  <url><loc>https://www.example.com/pages/terms.html</loc></url>
+  <url><loc>https://www.example.com/pages/legal-disclaimer.html</loc></url>
+</urlset>

@@ -106,7 +106,7 @@ account_header('Minhas ferramentas', 'Ferramentas do catálogo, uso e favoritos.
                     data-favorite-toggle="<?= (int) $r['id'] ?>"
                     data-active="<?= (int) $r['is_fav'] > 0 ? '1' : '0' ?>"
                 ><?= (int) $r['is_fav'] > 0 ? '★ Favorito' : '☆ Favorito' ?></button>
-                <a class="ua-button" href="../page.php?slug=<?= rawurlencode((string) $r['slug']) ?>">Abrir</a>
+                <a class="ua-button" href="<?= e(tool_url((string) ($r['slug'] ?? ''))) ?>">Abrir</a>
             </div>
         <?php endforeach; endif; ?>
     </div>

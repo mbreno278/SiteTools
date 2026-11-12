@@ -41,4 +41,4 @@
     </div>
 </footer>
 
-<script src="./assets/js/theme.js"></script>
+<script src="<?=e($baseUrl)?>/assets/js/theme.js"></script>

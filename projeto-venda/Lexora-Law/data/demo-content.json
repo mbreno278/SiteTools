@@ -1,0 +1,84 @@
+{
+  "brand": "Lexora Law",
+  "version": "1.2.0",
+  "notice": "All firm, attorney, contact, and editorial identities are fictional demonstration content.",
+  "practiceAreas": [
+    {
+      "id": "business",
+      "name": "Business & Corporate Law",
+      "description": "Support for the decisions that shape your company, from formation and ownership arrangements to commercial contracts and strategic transactions."
+    },
+    {
+      "id": "real-estate",
+      "name": "Real Estate Law",
+      "description": "Guidance for property owners, investors, landlords, tenants, and businesses navigating real estate transactions and disputes."
+    },
+    {
+      "id": "estate",
+      "name": "Estate Planning",
+      "description": "Personalized planning to help individuals and families document their wishes, organize assets, and plan for transitions."
+    },
+    {
+      "id": "employment",
+      "name": "Employment Law",
+      "description": "Practical counsel for employers and professionals on workplace relationships, policies, and employment agreements."
+    },
+    {
+      "id": "litigation",
+      "name": "Dispute Resolution",
+      "description": "A focused approach to assessing risk, protecting interests, and pursuing efficient resolutions to legal disputes."
+    },
+    {
+      "id": "ip",
+      "name": "Intellectual Property",
+      "description": "Legal support to help creators and businesses identify, protect, and make strategic use of intangible assets."
+    }
+  ],
+  "attorneys": [
+    {
+      "name": "Alexandra Morgan",
+      "role": "Managing Partner",
+      "practice": "Business & Corporate Law",
+      "initials": "AM"
+    },
+    {
+      "name": "James Whitaker",
+      "role": "Partner",
+      "practice": "Real Estate & Dispute Resolution",
+      "initials": "JW"
+    },
+    {
+      "name": "Sophia Chen",
+      "role": "Senior Counsel",
+      "practice": "Estate Planning",
+      "initials": "SC"
+    }
+  ],
+  "articles": [
+    {
+      "title": "Understanding Business Law: A Practical Overview",
+      "category": "Business Law",
+      "url": "pages/article-business-law.html"
+    },
+    {
+      "title": "What to Know Before Signing a Commercial Lease",
+      "category": "Real Estate Law",
+      "url": "pages/article-commercial-lease.html"
+    },
+    {
+      "title": "A Guide to Estate Planning for Modern Families",
+      "category": "Estate Planning",
+      "url": "pages/article-estate-planning.html"
+    },
+    {
+      "title": "Protecting Your Intellectual Property",
+      "category": "Intellectual Property",
+      "url": "pages/article-intellectual-property.html"
+    },
+    {
+      "title": "Employment Agreements: Key Considerations",
+      "category": "Employment Law",
+      "url": "pages/article-employment-agreements.html"
+    }
+  ]
+}

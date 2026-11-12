@@ -1,0 +1,64 @@
+LEXORA LAW — COMMERCIAL TEMPLATE LICENSE
+Version 1.2.0
+
+Copyright (c) 2026 [Matheus Breno / https://onexbayte.com/]. All rights reserved.
+
+This license governs the use of the Lexora Law website template (the "Template").
+By purchasing, downloading, or using the Template you agree to the terms below.
+
+1. GRANT OF LICENSE
+   Subject to payment of the applicable fee and compliance with this license,
+   you are granted a non-exclusive, non-transferable license to use the Template
+   as follows:
+
+   a) Regular License
+      - Use the Template to create one (1) End Product for yourself or one client.
+      - The End Product may be distributed or made available to end users free of charge.
+      - You may modify the Template as needed for the End Product.
+      - You may not sell, redistribute, or sublicense the Template source files
+        (or modified versions of the source) as a template, theme, or starter kit.
+
+   b) Extended License
+      - Same rights as the Regular License, plus the right to use the Template
+        in an End Product that is sold (or for which users pay a fee).
+      - Still limited to one (1) End Product.
+
+2. RESTRICTIONS
+   - You may not redistribute, resell, lease, license, sub-license, or offer the
+     Template (or any derivative of the source files) as a template, theme,
+     plugin, or competing product.
+   - You may not claim the Template as your original work without substantial
+     modification and proper attribution where required by the marketplace.
+   - The Template is provided for website design and development only.
+     It does not constitute legal advice, legal services, or an attorney-client
+     relationship.
+
+3. ATTRIBUTION
+   Attribution is not required in the final End Product, but is appreciated
+   in development documentation.
+
+4. SUPPORT
+   Support for installation and defect correction is provided according to the
+   support policy published with the product listing (typically 6 months from
+   the date of purchase). Support does not include custom development,
+   content writing, legal advice, or hosting configuration.
+
+5. WARRANTY DISCLAIMER
+   THE TEMPLATE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL
+   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY ARISING FROM THE USE OF THE TEMPLATE.
+
+6. THIRD-PARTY ASSETS
+   Google Fonts (DM Sans and Playfair Display) are loaded remotely and are
+   subject to their own licenses. No third-party JavaScript libraries or
+   photographic assets are bundled. Replace all placeholder content and
+   monograms with assets for which you hold commercial rights.
+
+7. GOVERNING LAW
+   This license shall be governed by the laws of the jurisdiction in which
+   the copyright holder resides, without regard to conflict of law principles.
+
+For questions regarding licensing, contact the author through the marketplace
+support system or the contact details provided in the product documentation.

@@ -76,7 +76,7 @@ $originalName = basename((string) ($file['name'] ?? 'document.docx'));
 $startedAt = hrtime(true);
 
 try {
-    $controller = new \App\Controllers\DocumentController();
+    $controller = new \\App\\Controllers\\DocumentController();
     $result = $controller->wordToPdf(
         $temporaryFile,
         $originalName,
@@ -107,9 +107,9 @@ try {
         $toolId,
         $processingMs
     );
-} catch (\App\Exceptions\ValidationException $e) {
+} catch (\\App\\Exceptions\\ValidationException $e) {
     word_to_pdf_respond_error($e->getMessage(), 422);
-} catch (\App\Exceptions\AppException $e) {
+} catch (\\App\\Exceptions\\AppException $e) {
     word_to_pdf_respond_error($e->getMessage(), $e->getStatusCode());
 } catch (Throwable $e) {
     error_log('[word-to-pdf] ' . $e->getMessage());
