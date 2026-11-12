@@ -1,0 +1,10 @@
+Product: Lexora Law
+Version: 1.2.0
+Package: Static HTML template
+Language: English
+Runtime dependencies: None
+Optional remote fonts: Google Fonts (DM Sans, Playfair Display)
+Build process: None
+Backend: Not included
+License: Commercial (Regular + Extended) — see LICENSE.txt
+Support: 6 months installation & defect support
